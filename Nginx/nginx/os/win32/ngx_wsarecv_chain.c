@@ -40,25 +40,33 @@ ngx_wsarecv_chain(ngx_connection_t *c, ngx_chain_t *chain, off_t limit)
 
     /* coalesce the neighbouring bufs */
 
-    while (chain) {
+    while (chain)
+    {
         n = chain->buf->end - chain->buf->last;
 
-        if (limit) {
-            if (size >= (size_t) limit) {
+        if (limit)
+        {
+            if (size >= (size_t) limit)
+            {
                 break;
             }
 
-            if (size + n > (size_t) limit) {
+            if (size + n > (size_t) limit)
+            {
                 n = (size_t) limit - size;
             }
         }
 
-        if (prev == chain->buf->last) {
+        if (prev == chain->buf->last)
+        {
             wsabuf->len += n;
 
-        } else {
+        }
+        else
+        {
             wsabuf = ngx_array_push(&vec);
-            if (wsabuf == NULL) {
+            if (wsabuf == NULL)
+            {
                 return NGX_ERROR;
             }
 
@@ -79,11 +87,13 @@ ngx_wsarecv_chain(ngx_connection_t *c, ngx_chain_t *chain, off_t limit)
 
     rev = c->read;
 
-    if (rc == -1) {
+    if (rc == -1)
+    {
         rev->ready = 0;
         err = ngx_socket_errno;
 
-        if (err == WSAEWOULDBLOCK) {
+        if (err == WSAEWOULDBLOCK)
+        {
             ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err,
                            "WSARecv() not ready");
             return NGX_AGAIN;
@@ -94,11 +104,13 @@ ngx_wsarecv_chain(ngx_connection_t *c, ngx_chain_t *chain, off_t limit)
         return NGX_ERROR;
     }
 
-    if (bytes < size) {
+    if (bytes < size)
+    {
         rev->ready = 0;
     }
 
-    if (bytes == 0) {
+    if (bytes == 0)
+    {
         rev->eof = 1;
     }
 

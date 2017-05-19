@@ -14,7 +14,8 @@
 #include <ngx_mail.h>
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t    capability;
     ngx_str_t    starttls_capability;
     ngx_str_t    starttls_only_capability;

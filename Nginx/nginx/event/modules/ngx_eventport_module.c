@@ -18,7 +18,7 @@
 #ifndef CLOCK_REALTIME
 #define CLOCK_REALTIME          0
 typedef int     clockid_t;
-typedef void *  timer_t;
+typedef void   *timer_t;
 #endif
 
 /* Solaris declarations */
@@ -36,7 +36,8 @@ typedef void *  timer_t;
 
 #define SIGEV_PORT              4
 
-typedef struct {
+typedef struct
+{
     int         portev_events;  /* event data is source specific */
     ushort_t    portev_source;  /* event source */
     ushort_t    portev_pad;     /* port internal use */
@@ -44,14 +45,16 @@ typedef struct {
     void       *portev_user;    /* user cookie */
 } port_event_t;
 
-typedef struct  port_notify {
+typedef struct  port_notify
+{
     int         portnfy_port;   /* bind request(s) to port */
     void       *portnfy_user;   /* user defined */
 } port_notify_t;
 
 #if (__FreeBSD__ && __FreeBSD_version < 700005) || (NGX_DARWIN)
 
-typedef struct itimerspec {     /* definition per POSIX.4 */
+typedef struct itimerspec       /* definition per POSIX.4 */
+{
     struct timespec it_interval;/* timer period */
     struct timespec it_value;   /* timer expiration */
 } itimerspec_t;
@@ -67,10 +70,10 @@ int port_create(void)
 
 
 int port_associate(int port, int source, uintptr_t object, int events,
-    void *user);
+                   void *user);
 
 int port_associate(int port, int source, uintptr_t object, int events,
-    void *user)
+                   void *user)
 {
     return -1;
 }
@@ -85,10 +88,10 @@ int port_dissociate(int port, int source, uintptr_t object)
 
 
 int port_getn(int port, port_event_t list[], uint_t max, uint_t *nget,
-    struct timespec *timeout);
+              struct timespec *timeout);
 
 int port_getn(int port, port_event_t list[], uint_t max, uint_t *nget,
-    struct timespec *timeout)
+              struct timespec *timeout)
 {
     return -1;
 }
@@ -110,10 +113,10 @@ int timer_create(clockid_t clock_id, struct sigevent *evp, timer_t *timerid)
 
 
 int timer_settime(timer_t timerid, int flags, const struct itimerspec *value,
-    struct itimerspec *ovalue);
+                  struct itimerspec *ovalue);
 
 int timer_settime(timer_t timerid, int flags, const struct itimerspec *value,
-    struct itimerspec *ovalue)
+                  struct itimerspec *ovalue)
 {
     return -1;
 }
@@ -129,7 +132,8 @@ int timer_delete(timer_t timerid)
 #endif
 
 
-typedef struct {
+typedef struct
+{
     ngx_uint_t  events;
 } ngx_eventport_conf_t;
 
@@ -137,12 +141,12 @@ typedef struct {
 static ngx_int_t ngx_eventport_init(ngx_cycle_t *cycle, ngx_msec_t timer);
 static void ngx_eventport_done(ngx_cycle_t *cycle);
 static ngx_int_t ngx_eventport_add_event(ngx_event_t *ev, ngx_int_t event,
-    ngx_uint_t flags);
+        ngx_uint_t flags);
 static ngx_int_t ngx_eventport_del_event(ngx_event_t *ev, ngx_int_t event,
-    ngx_uint_t flags);
+        ngx_uint_t flags);
 static ngx_int_t ngx_eventport_notify(ngx_event_handler_pt handler);
 static ngx_int_t ngx_eventport_process_events(ngx_cycle_t *cycle,
-    ngx_msec_t timer, ngx_uint_t flags);
+        ngx_msec_t timer, ngx_uint_t flags);
 
 static void *ngx_eventport_create_conf(ngx_cycle_t *cycle);
 static char *ngx_eventport_init_conf(ngx_cycle_t *cycle, void *conf);
@@ -150,26 +154,30 @@ static char *ngx_eventport_init_conf(ngx_cycle_t *cycle, void *conf);
 static int            ep = -1;
 static port_event_t  *event_list;
 static ngx_uint_t     nevents;
-static timer_t        event_timer = (timer_t) -1;
+static timer_t        event_timer = (timer_t) - 1;
 static ngx_event_t    notify_event;
 
 static ngx_str_t      eventport_name = ngx_string("eventport");
 
 
-static ngx_command_t  ngx_eventport_commands[] = {
+static ngx_command_t  ngx_eventport_commands[] =
+{
 
-    { ngx_string("eventport_events"),
-      NGX_EVENT_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_num_slot,
-      0,
-      offsetof(ngx_eventport_conf_t, events),
-      NULL },
+    {
+        ngx_string("eventport_events"),
+        NGX_EVENT_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_num_slot,
+        0,
+        offsetof(ngx_eventport_conf_t, events),
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-ngx_event_module_t  ngx_eventport_module_ctx = {
+ngx_event_module_t  ngx_eventport_module_ctx =
+{
     &eventport_name,
     ngx_eventport_create_conf,             /* create configuration */
     ngx_eventport_init_conf,               /* init configuration */
@@ -189,7 +197,8 @@ ngx_event_module_t  ngx_eventport_module_ctx = {
 
 };
 
-ngx_module_t  ngx_eventport_module = {
+ngx_module_t  ngx_eventport_module =
+{
     NGX_MODULE_V1,
     &ngx_eventport_module_ctx,             /* module context */
     ngx_eventport_commands,                /* module directives */
@@ -215,10 +224,12 @@ ngx_eventport_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 
     epcf = ngx_event_get_conf(cycle->conf_ctx, ngx_eventport_module);
 
-    if (ep == -1) {
+    if (ep == -1)
+    {
         ep = port_create();
 
-        if (ep == -1) {
+        if (ep == -1)
+        {
             ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
                           "port_create() failed");
             return NGX_ERROR;
@@ -228,21 +239,25 @@ ngx_eventport_init(ngx_cycle_t *cycle, ngx_msec_t timer)
         notify_event.log = cycle->log;
     }
 
-    if (nevents < epcf->events) {
-        if (event_list) {
+    if (nevents < epcf->events)
+    {
+        if (event_list)
+        {
             ngx_free(event_list);
         }
 
         event_list = ngx_alloc(sizeof(port_event_t) * epcf->events,
                                cycle->log);
-        if (event_list == NULL) {
+        if (event_list == NULL)
+        {
             return NGX_ERROR;
         }
     }
 
     ngx_event_flags = NGX_USE_EVENTPORT_EVENT;
 
-    if (timer) {
+    if (timer)
+    {
         ngx_memzero(&pn, sizeof(port_notify_t));
         pn.portnfy_port = ep;
 
@@ -252,7 +267,8 @@ ngx_eventport_init(ngx_cycle_t *cycle, ngx_msec_t timer)
         sev.sigev_value.sival_ptr = &pn;
 #endif
 
-        if (timer_create(CLOCK_REALTIME, &sev, &event_timer) == -1) {
+        if (timer_create(CLOCK_REALTIME, &sev, &event_timer) == -1)
+        {
             ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
                           "timer_create() failed");
             return NGX_ERROR;
@@ -263,7 +279,8 @@ ngx_eventport_init(ngx_cycle_t *cycle, ngx_msec_t timer)
         its.it_value.tv_sec = timer / 1000;
         its.it_value.tv_nsec = (timer % 1000) * 1000000;
 
-        if (timer_settime(event_timer, 0, &its, NULL) == -1) {
+        if (timer_settime(event_timer, 0, &its, NULL) == -1)
+        {
             ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
                           "timer_settime() failed");
             return NGX_ERROR;
@@ -285,16 +302,19 @@ ngx_eventport_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 static void
 ngx_eventport_done(ngx_cycle_t *cycle)
 {
-    if (event_timer != (timer_t) -1) {
-        if (timer_delete(event_timer) == -1) {
+    if (event_timer != (timer_t) - 1)
+    {
+        if (timer_delete(event_timer) == -1)
+        {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "timer_delete() failed");
         }
 
-        event_timer = (timer_t) -1;
+        event_timer = (timer_t) - 1;
     }
 
-    if (close(ep) == -1) {
+    if (close(ep) == -1)
+    {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "close() event port failed");
     }
@@ -319,14 +339,17 @@ ngx_eventport_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 
     events = event;
 
-    if (event == NGX_READ_EVENT) {
+    if (event == NGX_READ_EVENT)
+    {
         e = c->write;
         prev = POLLOUT;
 #if (NGX_READ_EVENT != POLLIN)
         events = POLLIN;
 #endif
 
-    } else {
+    }
+    else
+    {
         e = c->read;
         prev = POLLIN;
 #if (NGX_WRITE_EVENT != POLLOUT)
@@ -334,7 +357,8 @@ ngx_eventport_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 #endif
     }
 
-    if (e->oneshot) {
+    if (e->oneshot)
+    {
         events |= prev;
     }
 
@@ -343,7 +367,7 @@ ngx_eventport_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 
     if (port_associate(ep, PORT_SOURCE_FD, c->fd, events,
                        (void *) ((uintptr_t) ev | ev->instance))
-        == -1)
+            == -1)
     {
         ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_errno,
                       "port_associate() failed");
@@ -369,7 +393,8 @@ ngx_eventport_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
      * the event before the closing the file descriptor
      */
 
-    if (flags & NGX_CLOSE_EVENT) {
+    if (flags & NGX_CLOSE_EVENT)
+    {
         ev->active = 0;
         ev->oneshot = 0;
         return NGX_OK;
@@ -377,33 +402,40 @@ ngx_eventport_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 
     c = ev->data;
 
-    if (event == NGX_READ_EVENT) {
+    if (event == NGX_READ_EVENT)
+    {
         e = c->write;
         event = POLLOUT;
 
-    } else {
+    }
+    else
+    {
         e = c->read;
         event = POLLIN;
     }
 
-    if (e->oneshot) {
+    if (e->oneshot)
+    {
         ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
                        "eventport change event: fd:%d ev:%04Xi", c->fd, event);
 
         if (port_associate(ep, PORT_SOURCE_FD, c->fd, event,
                            (void *) ((uintptr_t) ev | ev->instance))
-            == -1)
+                == -1)
         {
             ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_errno,
                           "port_associate() failed");
             return NGX_ERROR;
         }
 
-    } else {
+    }
+    else
+    {
         ngx_log_debug1(NGX_LOG_DEBUG_EVENT, ev->log, 0,
                        "eventport del event: fd:%d", c->fd);
 
-        if (port_dissociate(ep, PORT_SOURCE_FD, c->fd) == -1) {
+        if (port_dissociate(ep, PORT_SOURCE_FD, c->fd) == -1)
+        {
             ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_errno,
                           "port_dissociate() failed");
             return NGX_ERROR;
@@ -422,7 +454,8 @@ ngx_eventport_notify(ngx_event_handler_pt handler)
 {
     notify_event.handler = handler;
 
-    if (port_send(ep, 0, &notify_event) != 0) {
+    if (port_send(ep, 0, &notify_event) != 0)
+    {
         ngx_log_error(NGX_LOG_ALERT, notify_event.log, ngx_errno,
                       "port_send() failed");
         return NGX_ERROR;
@@ -434,7 +467,7 @@ ngx_eventport_notify(ngx_event_handler_pt handler)
 
 ngx_int_t
 ngx_eventport_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
-    ngx_uint_t flags)
+                             ngx_uint_t flags)
 {
     int                 n, revents;
     u_int               events;
@@ -446,10 +479,13 @@ ngx_eventport_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
     ngx_connection_t   *c;
     struct timespec     ts, *tp;
 
-    if (timer == NGX_TIMER_INFINITE) {
+    if (timer == NGX_TIMER_INFINITE)
+    {
         tp = NULL;
 
-    } else {
+    }
+    else
+    {
         ts.tv_sec = timer / 1000;
         ts.tv_nsec = (timer % 1000) * 1000000;
         tp = &ts;
@@ -464,13 +500,17 @@ ngx_eventport_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
 
     err = ngx_errno;
 
-    if (flags & NGX_UPDATE_TIME) {
+    if (flags & NGX_UPDATE_TIME)
+    {
         ngx_time_update();
     }
 
-    if (n == -1) {
-        if (err == ETIME) {
-            if (timer != NGX_TIMER_INFINITE) {
+    if (n == -1)
+    {
+        if (err == ETIME)
+        {
+            if (timer != NGX_TIMER_INFINITE)
+            {
                 return NGX_OK;
             }
 
@@ -484,8 +524,10 @@ ngx_eventport_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
         return NGX_ERROR;
     }
 
-    if (events == 0) {
-        if (timer != NGX_TIMER_INFINITE) {
+    if (events == 0)
+    {
+        if (timer != NGX_TIMER_INFINITE)
+        {
             return NGX_OK;
         }
 
@@ -494,23 +536,27 @@ ngx_eventport_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
         return NGX_ERROR;
     }
 
-    for (i = 0; i < events; i++) {
+    for (i = 0; i < events; i++)
+    {
 
-        if (event_list[i].portev_source == PORT_SOURCE_TIMER) {
+        if (event_list[i].portev_source == PORT_SOURCE_TIMER)
+        {
             ngx_time_update();
             continue;
         }
 
         ev = event_list[i].portev_user;
 
-        switch (event_list[i].portev_source) {
+        switch (event_list[i].portev_source)
+        {
 
         case PORT_SOURCE_FD:
 
             instance = (uintptr_t) ev & 1;
             ev = (ngx_event_t *) ((uintptr_t) ev & (uintptr_t) ~1);
 
-            if (ev->closed || ev->instance != instance) {
+            if (ev->closed || ev->instance != instance)
+            {
 
                 /*
                  * the stale event from a file descriptor
@@ -528,20 +574,22 @@ ngx_eventport_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
                            "eventport: fd:%d, ev:%04Xd",
                            (int) event_list[i].portev_object, revents);
 
-            if (revents & (POLLERR|POLLHUP|POLLNVAL)) {
+            if (revents & (POLLERR | POLLHUP | POLLNVAL))
+            {
                 ngx_log_debug2(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                                "port_getn() error fd:%d ev:%04Xd",
                                (int) event_list[i].portev_object, revents);
             }
 
-            if (revents & ~(POLLIN|POLLOUT|POLLERR|POLLHUP|POLLNVAL)) {
+            if (revents & ~(POLLIN | POLLOUT | POLLERR | POLLHUP | POLLNVAL))
+            {
                 ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
                               "strange port_getn() events fd:%d ev:%04Xd",
                               (int) event_list[i].portev_object, revents);
             }
 
-            if ((revents & (POLLERR|POLLHUP|POLLNVAL))
-                 && (revents & (POLLIN|POLLOUT)) == 0)
+            if ((revents & (POLLERR | POLLHUP | POLLNVAL))
+                    && (revents & (POLLIN | POLLOUT)) == 0)
             {
                 /*
                  * if the error events were returned without POLLIN or POLLOUT,
@@ -549,7 +597,7 @@ ngx_eventport_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
                  * active handler
                  */
 
-                revents |= POLLIN|POLLOUT;
+                revents |= POLLIN | POLLOUT;
             }
 
             c = ev->data;
@@ -559,32 +607,39 @@ ngx_eventport_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
             rev->active = 0;
             wev->active = 0;
 
-            if (revents & POLLIN) {
+            if (revents & POLLIN)
+            {
                 rev->ready = 1;
 
-                if (flags & NGX_POST_EVENTS) {
+                if (flags & NGX_POST_EVENTS)
+                {
                     queue = rev->accept ? &ngx_posted_accept_events
-                                        : &ngx_posted_events;
+                            : &ngx_posted_events;
 
                     ngx_post_event(rev, queue);
 
-                } else {
+                }
+                else
+                {
                     rev->handler(rev);
 
-                    if (ev->closed || ev->instance != instance) {
+                    if (ev->closed || ev->instance != instance)
+                    {
                         continue;
                     }
                 }
 
-                if (rev->accept) {
-                    if (ngx_use_accept_mutex) {
+                if (rev->accept)
+                {
+                    if (ngx_use_accept_mutex)
+                    {
                         ngx_accept_events = 1;
                         continue;
                     }
 
                     if (port_associate(ep, PORT_SOURCE_FD, c->fd, POLLIN,
                                        (void *) ((uintptr_t) ev | ev->instance))
-                        == -1)
+                            == -1)
                     {
                         ngx_log_error(NGX_LOG_ALERT, ev->log, ngx_errno,
                                       "port_associate() failed");
@@ -593,13 +648,17 @@ ngx_eventport_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
                 }
             }
 
-            if (revents & POLLOUT) {
+            if (revents & POLLOUT)
+            {
                 wev->ready = 1;
 
-                if (flags & NGX_POST_EVENTS) {
+                if (flags & NGX_POST_EVENTS)
+                {
                     ngx_post_event(wev, &ngx_posted_events);
 
-                } else {
+                }
+                else
+                {
                     wev->handler(wev);
                 }
             }
@@ -630,7 +689,8 @@ ngx_eventport_create_conf(ngx_cycle_t *cycle)
     ngx_eventport_conf_t  *epcf;
 
     epcf = ngx_palloc(cycle->pool, sizeof(ngx_eventport_conf_t));
-    if (epcf == NULL) {
+    if (epcf == NULL)
+    {
         return NULL;
     }
 

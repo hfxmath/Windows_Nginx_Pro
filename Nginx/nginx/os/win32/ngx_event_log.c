@@ -33,11 +33,13 @@ ngx_event_log(ngx_err_t err, const char *fmt, ...)
     p = ngx_vslprintf(p, last, fmt, args);
     va_end(args);
 
-    if (err) {
+    if (err)
+    {
         p = ngx_log_errno(p, last, err);
     }
 
-    if (p > last - NGX_LINEFEED_SIZE - 1) {
+    if (p > last - NGX_LINEFEED_SIZE - 1)
+    {
         p = last - NGX_LINEFEED_SIZE - 1;
     }
 
@@ -51,16 +53,16 @@ ngx_event_log(ngx_err_t err, const char *fmt, ...)
      */
 
     if (RegCreateKeyEx(HKEY_LOCAL_MACHINE,
-           "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\nginx",
-           0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &key, NULL)
-        != 0)
+                       "SYSTEM\\CurrentControlSet\\Services\\EventLog\\Application\\nginx",
+                       0, NULL, REG_OPTION_NON_VOLATILE, KEY_SET_VALUE, NULL, &key, NULL)
+            != 0)
     {
         return;
     }
 
     if (RegSetValueEx(key, "EventMessageFile", 0, REG_EXPAND_SZ,
                       netmsg, sizeof(netmsg) - 1)
-        != 0)
+            != 0)
     {
         return;
     }
@@ -69,7 +71,7 @@ ngx_event_log(ngx_err_t err, const char *fmt, ...)
 
     if (RegSetValueEx(key, "TypesSupported", 0, REG_DWORD,
                       (u_char *) &types, sizeof(long))
-        != 0)
+            != 0)
     {
         return;
     }

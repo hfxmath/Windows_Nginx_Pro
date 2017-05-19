@@ -15,14 +15,16 @@
 
 typedef struct ngx_list_part_s  ngx_list_part_t;
 
-struct ngx_list_part_s {
+struct ngx_list_part_s
+{
     void             *elts;
     ngx_uint_t        nelts;
     ngx_list_part_t  *next;
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_list_part_t  *last;
     ngx_list_part_t   part;
     size_t            size;
@@ -37,7 +39,8 @@ static ngx_inline ngx_int_t
 ngx_list_init(ngx_list_t *list, ngx_pool_t *pool, ngx_uint_t n, size_t size)
 {
     list->part.elts = ngx_palloc(pool, n * size);
-    if (list->part.elts == NULL) {
+    if (list->part.elts == NULL)
+    {
         return NGX_ERROR;
     }
 

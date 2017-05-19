@@ -72,7 +72,8 @@ extern "C" {
 # define MDC2_BLOCK              8
 # define MDC2_DIGEST_LENGTH      16
 
-typedef struct mdc2_ctx_st {
+typedef struct mdc2_ctx_st
+{
     unsigned int num;
     unsigned char data[MDC2_BLOCK];
     DES_cblock h, hh;

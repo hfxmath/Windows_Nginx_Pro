@@ -145,7 +145,8 @@ extern "C" {
 # define ERR_FLAG_MARK           0x01
 
 # define ERR_NUM_ERRORS  16
-typedef struct err_state_st {
+typedef struct err_state_st
+{
     CRYPTO_THREADID tid;
     int err_flags[ERR_NUM_ERRORS];
     unsigned long err_buffer[ERR_NUM_ERRORS];
@@ -310,7 +311,8 @@ typedef struct err_state_st {
  * the individual libraries
  */
 
-typedef struct ERR_string_data_st {
+typedef struct ERR_string_data_st
+{
     unsigned long error;
     const char *string;
 } ERR_STRING_DATA;
@@ -329,7 +331,7 @@ unsigned long ERR_peek_error_line_data(const char **file, int *line,
 unsigned long ERR_peek_last_error(void);
 unsigned long ERR_peek_last_error_line(const char **file, int *line);
 unsigned long ERR_peek_last_error_line_data(const char **file, int *line,
-                                            const char **data, int *flags);
+        const char **data, int *flags);
 void ERR_clear_error(void);
 char *ERR_error_string(unsigned long e, char *buf);
 void ERR_error_string_n(unsigned long e, char *buf, size_t len);

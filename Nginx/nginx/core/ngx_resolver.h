@@ -40,7 +40,8 @@
 typedef struct ngx_resolver_s  ngx_resolver_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_connection_t         *udp;
     ngx_connection_t         *tcp;
     struct sockaddr          *sockaddr;
@@ -58,7 +59,8 @@ typedef struct ngx_resolver_ctx_s  ngx_resolver_ctx_t;
 typedef void (*ngx_resolver_handler_pt)(ngx_resolver_ctx_t *ctx);
 
 
-typedef struct {
+typedef struct
+{
     struct sockaddr          *sockaddr;
     socklen_t                 socklen;
     ngx_str_t                 name;
@@ -67,7 +69,8 @@ typedef struct {
 } ngx_resolver_addr_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                 name;
     u_short                   priority;
     u_short                   weight;
@@ -75,7 +78,8 @@ typedef struct {
 } ngx_resolver_srv_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                 name;
     u_short                   priority;
     u_short                   weight;
@@ -88,7 +92,8 @@ typedef struct {
 } ngx_resolver_srv_name_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_rbtree_node_t         node;
     ngx_queue_t               queue;
 
@@ -108,7 +113,8 @@ typedef struct {
     u_char                   *query6;
 #endif
 
-    union {
+    union
+    {
         in_addr_t             addr;
         in_addr_t            *addrs;
         u_char               *cname;
@@ -121,7 +127,8 @@ typedef struct {
     u_short                   cnlen;
 
 #if (NGX_HAVE_INET6)
-    union {
+    union
+    {
         struct in6_addr       addr6;
         struct in6_addr      *addrs6;
     } u6;
@@ -133,9 +140,9 @@ typedef struct {
     time_t                    valid;
     uint32_t                  ttl;
 
-    unsigned                  tcp:1;
+    unsigned                  tcp: 1;
 #if (NGX_HAVE_INET6)
-    unsigned                  tcp6:1;
+    unsigned                  tcp6: 1;
 #endif
 
     ngx_uint_t                last_connection;
@@ -144,7 +151,8 @@ typedef struct {
 } ngx_resolver_node_t;
 
 
-struct ngx_resolver_s {
+struct ngx_resolver_s
+{
     /* has to be pointer because of "incomplete type" */
     ngx_event_t              *event;
     void                     *dummy;
@@ -191,7 +199,8 @@ struct ngx_resolver_s {
 };
 
 
-struct ngx_resolver_ctx_s {
+struct ngx_resolver_ctx_s
+{
     ngx_resolver_ctx_t       *next;
     ngx_resolver_t           *resolver;
     ngx_resolver_node_t      *node;
@@ -224,9 +233,9 @@ struct ngx_resolver_ctx_s {
 
 
 ngx_resolver_t *ngx_resolver_create(ngx_conf_t *cf, ngx_str_t *names,
-    ngx_uint_t n);
+                                    ngx_uint_t n);
 ngx_resolver_ctx_t *ngx_resolve_start(ngx_resolver_t *r,
-    ngx_resolver_ctx_t *temp);
+                                      ngx_resolver_ctx_t *temp);
 ngx_int_t ngx_resolve_name(ngx_resolver_ctx_t *ctx);
 void ngx_resolve_name_done(ngx_resolver_ctx_t *ctx);
 ngx_int_t ngx_resolve_addr(ngx_resolver_ctx_t *ctx);

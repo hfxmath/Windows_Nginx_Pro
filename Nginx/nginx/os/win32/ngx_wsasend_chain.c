@@ -28,13 +28,15 @@ ngx_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
     wev = c->write;
 
-    if (!wev->ready) {
+    if (!wev->ready)
+    {
         return in;
     }
 
     /* the maximum limit size is the maximum u_long value - the page size */
 
-    if (limit == 0 || limit > (off_t) (NGX_MAX_UINT32_VALUE - ngx_pagesize)) {
+    if (limit == 0 || limit > (off_t) (NGX_MAX_UINT32_VALUE - ngx_pagesize))
+    {
         limit = NGX_MAX_UINT32_VALUE - ngx_pagesize;
     }
 
@@ -50,7 +52,8 @@ ngx_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
     vec.nalloc = NGX_WSABUFS;
     vec.pool = c->pool;
 
-    for ( ;; ) {
+    for ( ;; )
+    {
         prev = NULL;
         wsabuf = NULL;
         prev_send = send;
@@ -60,25 +63,31 @@ ngx_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
         /* create the WSABUF and coalesce the neighbouring bufs */
 
         for (cl = in;
-             cl && vec.nelts < ngx_max_wsabufs && send < limit;
-             cl = cl->next)
+                cl && vec.nelts < ngx_max_wsabufs && send < limit;
+                cl = cl->next)
         {
-            if (ngx_buf_special(cl->buf)) {
+            if (ngx_buf_special(cl->buf))
+            {
                 continue;
             }
 
             size = cl->buf->last - cl->buf->pos;
 
-            if (send + size > limit) {
+            if (send + size > limit)
+            {
                 size = (u_long) (limit - send);
             }
 
-            if (prev == cl->buf->pos) {
+            if (prev == cl->buf->pos)
+            {
                 wsabuf->len += cl->buf->last - cl->buf->pos;
 
-            } else {
+            }
+            else
+            {
                 wsabuf = ngx_array_push(&vec);
-                if (wsabuf == NULL) {
+                if (wsabuf == NULL)
+                {
                     return NGX_CHAIN_ERROR;
                 }
 
@@ -94,14 +103,18 @@ ngx_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
         rc = WSASend(c->fd, vec.elts, vec.nelts, &sent, 0, NULL, NULL);
 
-        if (rc == -1) {
+        if (rc == -1)
+        {
             err = ngx_errno;
 
-            if (err == WSAEWOULDBLOCK) {
+            if (err == WSAEWOULDBLOCK)
+            {
                 ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err,
                                "WSASend() not ready");
 
-            } else {
+            }
+            else
+            {
                 wev->error = 1;
                 ngx_connection_error(c, err, "WSASend() failed");
                 return NGX_CHAIN_ERROR;
@@ -115,12 +128,14 @@ ngx_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
         in = ngx_chain_update_sent(in, sent);
 
-        if (send - prev_send != sent) {
+        if (send - prev_send != sent)
+        {
             wev->ready = 0;
             return in;
         }
 
-        if (send >= limit || in == NULL) {
+        if (send >= limit || in == NULL)
+        {
             return in;
         }
     }
@@ -143,14 +158,16 @@ ngx_overlapped_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
     wev = c->write;
 
-    if (!wev->ready) {
+    if (!wev->ready)
+    {
         return in;
     }
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, c->log, 0,
                    "wev->complete: %d", wev->complete);
 
-    if (!wev->complete) {
+    if (!wev->complete)
+    {
 
         /* post the overlapped WSASend() */
 
@@ -179,25 +196,31 @@ ngx_overlapped_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
         /* create the WSABUF and coalesce the neighbouring bufs */
 
         for (cl = in;
-             cl && vec.nelts < ngx_max_wsabufs && send < limit;
-             cl = cl->next)
+                cl && vec.nelts < ngx_max_wsabufs && send < limit;
+                cl = cl->next)
         {
-            if (ngx_buf_special(cl->buf)) {
+            if (ngx_buf_special(cl->buf))
+            {
                 continue;
             }
 
             size = cl->buf->last - cl->buf->pos;
 
-            if (send + size > limit) {
+            if (send + size > limit)
+            {
                 size = (u_long) (limit - send);
             }
 
-            if (prev == cl->buf->pos) {
+            if (prev == cl->buf->pos)
+            {
                 wsabuf->len += cl->buf->last - cl->buf->pos;
 
-            } else {
+            }
+            else
+            {
                 wsabuf = ngx_array_push(&vec);
-                if (wsabuf == NULL) {
+                if (wsabuf == NULL)
+                {
                     return NGX_CHAIN_ERROR;
                 }
 
@@ -216,22 +239,28 @@ ngx_overlapped_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
         wev->complete = 0;
 
-        if (rc == -1) {
+        if (rc == -1)
+        {
             err = ngx_errno;
 
-            if (err == WSA_IO_PENDING) {
+            if (err == WSA_IO_PENDING)
+            {
                 ngx_log_debug0(NGX_LOG_DEBUG_EVENT, c->log, err,
                                "WSASend() posted");
                 wev->active = 1;
                 return in;
 
-            } else {
+            }
+            else
+            {
                 wev->error = 1;
                 ngx_connection_error(c, err, "WSASend() failed");
                 return NGX_CHAIN_ERROR;
             }
 
-        } else if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+        }
+        else if (ngx_event_flags & NGX_USE_IOCP_EVENT)
+        {
 
             /*
              * if a socket was bound with I/O completion port then
@@ -246,28 +275,34 @@ ngx_overlapped_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
         ngx_log_debug2(NGX_LOG_DEBUG_EVENT, c->log, 0,
                        "WSASend: fd:%d, s:%ul", c->fd, sent);
 
-    } else {
+    }
+    else
+    {
 
         /* the overlapped WSASend() complete */
 
         wev->complete = 0;
         wev->active = 0;
 
-        if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
-            if (wev->ovlp.error) {
+        if (ngx_event_flags & NGX_USE_IOCP_EVENT)
+        {
+            if (wev->ovlp.error)
+            {
                 ngx_connection_error(c, wev->ovlp.error, "WSASend() failed");
                 return NGX_CHAIN_ERROR;
             }
 
             sent = wev->available;
 
-        } else {
+        }
+        else
+        {
             if (WSAGetOverlappedResult(c->fd, (LPWSAOVERLAPPED) &wev->ovlp,
                                        &sent, 0, NULL)
-                == 0)
+                    == 0)
             {
                 ngx_connection_error(c, ngx_socket_errno,
-                               "WSASend() or WSAGetOverlappedResult() failed");
+                                     "WSASend() or WSAGetOverlappedResult() failed");
 
                 return NGX_CHAIN_ERROR;
             }
@@ -281,10 +316,13 @@ ngx_overlapped_wsasend_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
     in = ngx_chain_update_sent(in, sent);
 
-    if (in) {
+    if (in)
+    {
         wev->ready = 0;
 
-    } else {
+    }
+    else
+    {
         wev->ready = 1;
     }
 

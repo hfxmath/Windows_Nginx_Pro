@@ -46,15 +46,17 @@ ngx_darwin_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
     wev = c->write;
 
-    if (!wev->ready) {
+    if (!wev->ready)
+    {
         return in;
     }
 
 #if (NGX_HAVE_KQUEUE)
 
-    if ((ngx_event_flags & NGX_USE_KQUEUE_EVENT) && wev->pending_eof) {
+    if ((ngx_event_flags & NGX_USE_KQUEUE_EVENT) && wev->pending_eof)
+    {
         (void) ngx_connection_error(c, wev->kq_errno,
-                               "kevent() reported about an closed connection");
+                                    "kevent() reported about an closed connection");
         wev->error = 1;
         return NGX_CHAIN_ERROR;
     }
@@ -63,7 +65,8 @@ ngx_darwin_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
     /* the maximum limit size is the maximum size_t value - the page size */
 
-    if (limit == 0 || limit > (off_t) (NGX_MAX_SIZE_T_VALUE - ngx_pagesize)) {
+    if (limit == 0 || limit > (off_t) (NGX_MAX_SIZE_T_VALUE - ngx_pagesize))
+    {
         limit = NGX_MAX_SIZE_T_VALUE - ngx_pagesize;
     }
 
@@ -75,7 +78,8 @@ ngx_darwin_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
     trailer.iovs = trailers;
     trailer.nalloc = NGX_IOVS_PREALLOCATE;
 
-    for ( ;; ) {
+    for ( ;; )
+    {
         eintr = 0;
         prev_send = send;
 
@@ -83,13 +87,15 @@ ngx_darwin_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
         cl = ngx_output_chain_to_iovec(&header, in, limit - send, c->log);
 
-        if (cl == NGX_CHAIN_ERROR) {
+        if (cl == NGX_CHAIN_ERROR)
+        {
             return NGX_CHAIN_ERROR;
         }
 
         send += header.size;
 
-        if (cl && cl->buf->in_file && send < limit) {
+        if (cl && cl->buf->in_file && send < limit)
+        {
             file = cl->buf;
 
             /* coalesce the neighbouring file bufs */
@@ -98,7 +104,8 @@ ngx_darwin_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
             send += file_size;
 
-            if (header.count == 0) {
+            if (header.count == 0)
+            {
 
                 /*
                  * create the trailer iovec and coalesce the neighbouring bufs
@@ -106,13 +113,16 @@ ngx_darwin_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
                 cl = ngx_output_chain_to_iovec(&trailer, cl, limit - send,
                                                c->log);
-                if (cl == NGX_CHAIN_ERROR) {
+                if (cl == NGX_CHAIN_ERROR)
+                {
                     return NGX_CHAIN_ERROR;
                 }
 
                 send += trailer.size;
 
-            } else {
+            }
+            else
+            {
                 trailer.count = 0;
             }
 
@@ -135,10 +145,12 @@ ngx_darwin_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
             rc = sendfile(file->file->fd, c->fd, file->file_pos,
                           &sent, &hdtr, 0);
 
-            if (rc == -1) {
+            if (rc == -1)
+            {
                 err = ngx_errno;
 
-                switch (err) {
+                switch (err)
+                {
                 case NGX_EAGAIN:
                     break;
 
@@ -156,7 +168,8 @@ ngx_darwin_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
                                "sendfile() sent only %O bytes", sent);
             }
 
-            if (rc == 0 && sent == 0) {
+            if (rc == 0 && sent == 0)
+            {
 
                 /*
                  * if rc and sent equal to zero, then someone
@@ -175,10 +188,13 @@ ngx_darwin_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
                            "sendfile: %d, @%O %O:%O",
                            rc, file->file_pos, sent, file_size + header.size);
 
-        } else {
+        }
+        else
+        {
             n = ngx_writev(c, &header);
 
-            if (n == NGX_ERROR) {
+            if (n == NGX_ERROR)
+            {
                 return NGX_CHAIN_ERROR;
             }
 
@@ -189,17 +205,20 @@ ngx_darwin_sendfile_chain(ngx_connection_t *c, ngx_chain_t *in, off_t limit)
 
         in = ngx_chain_update_sent(in, sent);
 
-        if (eintr) {
+        if (eintr)
+        {
             send = prev_send + sent;
             continue;
         }
 
-        if (send - prev_send != sent) {
+        if (send - prev_send != sent)
+        {
             wev->ready = 0;
             return in;
         }
 
-        if (send >= limit || in == NULL) {
+        if (send >= limit || in == NULL)
+        {
             return in;
         }
     }

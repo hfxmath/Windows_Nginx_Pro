@@ -10,7 +10,8 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t     before_body;
     ngx_str_t     after_body;
 
@@ -19,45 +20,54 @@ typedef struct {
 } ngx_http_addition_conf_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_uint_t    before_body_sent;
 } ngx_http_addition_ctx_t;
 
 
 static void *ngx_http_addition_create_conf(ngx_conf_t *cf);
 static char *ngx_http_addition_merge_conf(ngx_conf_t *cf, void *parent,
-    void *child);
+        void *child);
 static ngx_int_t ngx_http_addition_filter_init(ngx_conf_t *cf);
 
 
-static ngx_command_t  ngx_http_addition_commands[] = {
+static ngx_command_t  ngx_http_addition_commands[] =
+{
 
-    { ngx_string("add_before_body"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_str_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_addition_conf_t, before_body),
-      NULL },
+    {
+        ngx_string("add_before_body"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_str_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_addition_conf_t, before_body),
+        NULL
+    },
 
-    { ngx_string("add_after_body"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_str_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_addition_conf_t, after_body),
-      NULL },
+    {
+        ngx_string("add_after_body"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_str_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_addition_conf_t, after_body),
+        NULL
+    },
 
-    { ngx_string("addition_types"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
-      ngx_http_types_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_addition_conf_t, types_keys),
-      &ngx_http_html_default_types[0] },
+    {
+        ngx_string("addition_types"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
+        ngx_http_types_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_addition_conf_t, types_keys),
+        &ngx_http_html_default_types[0]
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_http_module_t  ngx_http_addition_filter_module_ctx = {
+static ngx_http_module_t  ngx_http_addition_filter_module_ctx =
+{
     NULL,                                  /* preconfiguration */
     ngx_http_addition_filter_init,         /* postconfiguration */
 
@@ -72,7 +82,8 @@ static ngx_http_module_t  ngx_http_addition_filter_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_addition_filter_module = {
+ngx_module_t  ngx_http_addition_filter_module =
+{
     NGX_MODULE_V1,
     &ngx_http_addition_filter_module_ctx,  /* module context */
     ngx_http_addition_commands,            /* module directives */
@@ -98,22 +109,26 @@ ngx_http_addition_header_filter(ngx_http_request_t *r)
     ngx_http_addition_ctx_t   *ctx;
     ngx_http_addition_conf_t  *conf;
 
-    if (r->headers_out.status != NGX_HTTP_OK || r != r->main) {
+    if (r->headers_out.status != NGX_HTTP_OK || r != r->main)
+    {
         return ngx_http_next_header_filter(r);
     }
 
     conf = ngx_http_get_module_loc_conf(r, ngx_http_addition_filter_module);
 
-    if (conf->before_body.len == 0 && conf->after_body.len == 0) {
+    if (conf->before_body.len == 0 && conf->after_body.len == 0)
+    {
         return ngx_http_next_header_filter(r);
     }
 
-    if (ngx_http_test_content_type(r, &conf->types) == NULL) {
+    if (ngx_http_test_content_type(r, &conf->types) == NULL)
+    {
         return ngx_http_next_header_filter(r);
     }
 
     ctx = ngx_pcalloc(r->pool, sizeof(ngx_http_addition_ctx_t));
-    if (ctx == NULL) {
+    if (ctx == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -137,39 +152,46 @@ ngx_http_addition_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     ngx_http_addition_ctx_t   *ctx;
     ngx_http_addition_conf_t  *conf;
 
-    if (in == NULL || r->header_only) {
+    if (in == NULL || r->header_only)
+    {
         return ngx_http_next_body_filter(r, in);
     }
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_addition_filter_module);
 
-    if (ctx == NULL) {
+    if (ctx == NULL)
+    {
         return ngx_http_next_body_filter(r, in);
     }
 
     conf = ngx_http_get_module_loc_conf(r, ngx_http_addition_filter_module);
 
-    if (!ctx->before_body_sent) {
+    if (!ctx->before_body_sent)
+    {
         ctx->before_body_sent = 1;
 
-        if (conf->before_body.len) {
+        if (conf->before_body.len)
+        {
             if (ngx_http_subrequest(r, &conf->before_body, NULL, &sr, NULL, 0)
-                != NGX_OK)
+                    != NGX_OK)
             {
                 return NGX_ERROR;
             }
         }
     }
 
-    if (conf->after_body.len == 0) {
+    if (conf->after_body.len == 0)
+    {
         ngx_http_set_ctx(r, NULL, ngx_http_addition_filter_module);
         return ngx_http_next_body_filter(r, in);
     }
 
     last = 0;
 
-    for (cl = in; cl; cl = cl->next) {
-        if (cl->buf->last_buf) {
+    for (cl = in; cl; cl = cl->next)
+    {
+        if (cl->buf->last_buf)
+        {
             cl->buf->last_buf = 0;
             cl->buf->sync = 1;
             last = 1;
@@ -178,12 +200,13 @@ ngx_http_addition_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
     rc = ngx_http_next_body_filter(r, in);
 
-    if (rc == NGX_ERROR || !last || conf->after_body.len == 0) {
+    if (rc == NGX_ERROR || !last || conf->after_body.len == 0)
+    {
         return rc;
     }
 
     if (ngx_http_subrequest(r, &conf->after_body, NULL, &sr, NULL, 0)
-        != NGX_OK)
+            != NGX_OK)
     {
         return NGX_ERROR;
     }
@@ -213,7 +236,8 @@ ngx_http_addition_create_conf(ngx_conf_t *cf)
     ngx_http_addition_conf_t  *conf;
 
     conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_addition_conf_t));
-    if (conf == NULL) {
+    if (conf == NULL)
+    {
         return NULL;
     }
 
@@ -242,7 +266,7 @@ ngx_http_addition_merge_conf(ngx_conf_t *cf, void *parent, void *child)
     if (ngx_http_merge_types(cf, &conf->types_keys, &conf->types,
                              &prev->types_keys, &prev->types,
                              ngx_http_html_default_types)
-        != NGX_OK)
+            != NGX_OK)
     {
         return NGX_CONF_ERROR;
     }

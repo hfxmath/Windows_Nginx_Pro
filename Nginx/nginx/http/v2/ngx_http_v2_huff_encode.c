@@ -11,7 +11,8 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     uint32_t  code;
     uint32_t  len;
 } ngx_http_v2_huff_encode_code_t;
@@ -197,26 +198,29 @@ ngx_http_v2_huff_encode(u_char *src, size_t len, u_char *dst, ngx_uint_t lower)
     ngx_http_v2_huff_encode_code_t  *table, *next;
 
     table = lower ? ngx_http_v2_huff_encode_table_lc
-                  : ngx_http_v2_huff_encode_table;
+            : ngx_http_v2_huff_encode_table;
     hlen = 0;
     buf = 0;
     pending = 0;
 
     end = src + len;
 
-    while (src != end) {
+    while (src != end)
+    {
         next = &table[*src++];
 
         code = next->code;
         pending += next->len;
 
         /* accumulate bits */
-        if (pending < sizeof(buf) * 8) {
+        if (pending < sizeof(buf) * 8)
+        {
             buf |= code << (sizeof(buf) * 8 - pending);
             continue;
         }
 
-        if (hlen + sizeof(buf) >= len) {
+        if (hlen + sizeof(buf) >= len)
+        {
             return 0;
         }
 
@@ -231,24 +235,28 @@ ngx_http_v2_huff_encode(u_char *src, size_t len, u_char *dst, ngx_uint_t lower)
         buf = pending ? code << (sizeof(buf) * 8 - pending) : 0;
     }
 
-    if (pending == 0) {
+    if (pending == 0)
+    {
         return hlen;
     }
 
-    buf |= (ngx_uint_t) -1 >> pending;
+    buf |= (ngx_uint_t) - 1 >> pending;
 
     pending = ngx_align(pending, 8);
 
-    if (hlen + pending / 8 >= len) {
+    if (hlen + pending / 8 >= len)
+    {
         return 0;
     }
 
     buf >>= sizeof(buf) * 8 - pending;
 
-    do {
+    do
+    {
         pending -= 8;
         dst[hlen++] = (u_char) (buf >> pending);
-    } while (pending);
+    }
+    while (pending);
 
     return hlen;
 }

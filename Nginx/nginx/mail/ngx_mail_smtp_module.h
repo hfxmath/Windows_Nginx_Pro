@@ -15,7 +15,8 @@
 #include <ngx_mail_smtp_module.h>
 
 
-typedef struct {
+typedef struct
+{
     ngx_msec_t   greeting_delay;
 
     size_t       client_buffer_size;

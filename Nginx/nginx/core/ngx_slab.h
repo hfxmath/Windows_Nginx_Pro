@@ -15,14 +15,16 @@
 
 typedef struct ngx_slab_page_s  ngx_slab_page_t;
 
-struct ngx_slab_page_s {
+struct ngx_slab_page_s
+{
     uintptr_t         slab;
     ngx_slab_page_t  *next;
     uintptr_t         prev;
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_shmtx_sh_t    lock;
 
     size_t            min_size;
@@ -40,7 +42,7 @@ typedef struct {
     u_char           *log_ctx;
     u_char            zero;
 
-    unsigned          log_nomem:1;
+    unsigned          log_nomem: 1;
 
     void             *data;
     void             *addr;

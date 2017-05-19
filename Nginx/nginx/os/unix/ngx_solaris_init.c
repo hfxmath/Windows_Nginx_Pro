@@ -14,7 +14,8 @@ char ngx_solaris_release[10];
 char ngx_solaris_version[50];
 
 
-static ngx_os_io_t ngx_solaris_io = {
+static ngx_os_io_t ngx_solaris_io =
+{
     ngx_unix_recv,
     ngx_readv_chain,
     ngx_udp_unix_recv,
@@ -34,7 +35,7 @@ ngx_int_t
 ngx_os_specific_init(ngx_log_t *log)
 {
     if (sysinfo(SI_SYSNAME, ngx_solaris_sysname, sizeof(ngx_solaris_sysname))
-        == -1)
+            == -1)
     {
         ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
                       "sysinfo(SI_SYSNAME) failed");
@@ -42,7 +43,7 @@ ngx_os_specific_init(ngx_log_t *log)
     }
 
     if (sysinfo(SI_RELEASE, ngx_solaris_release, sizeof(ngx_solaris_release))
-        == -1)
+            == -1)
     {
         ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
                       "sysinfo(SI_RELEASE) failed");
@@ -50,7 +51,7 @@ ngx_os_specific_init(ngx_log_t *log)
     }
 
     if (sysinfo(SI_VERSION, ngx_solaris_version, sizeof(ngx_solaris_version))
-        == -1)
+            == -1)
     {
         ngx_log_error(NGX_LOG_ALERT, log, ngx_errno,
                       "sysinfo(SI_SYSNAME) failed");

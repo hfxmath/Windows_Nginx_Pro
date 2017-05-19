@@ -83,7 +83,8 @@ extern "C" {
 # define RIPEMD160_LBLOCK        (RIPEMD160_CBLOCK/4)
 # define RIPEMD160_DIGEST_LENGTH 20
 
-typedef struct RIPEMD160state_st {
+typedef struct RIPEMD160state_st
+{
     RIPEMD160_LONG A, B, C, D, E;
     RIPEMD160_LONG Nl, Nh;
     RIPEMD160_LONG data[RIPEMD160_LBLOCK];

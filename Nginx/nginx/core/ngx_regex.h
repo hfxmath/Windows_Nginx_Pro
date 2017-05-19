@@ -20,13 +20,15 @@
 #define NGX_REGEX_CASELESS    PCRE_CASELESS
 
 
-typedef struct {
+typedef struct
+{
     pcre        *code;
     pcre_extra  *extra;
 } ngx_regex_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t     pattern;
     ngx_pool_t   *pool;
     ngx_int_t     options;
@@ -40,7 +42,8 @@ typedef struct {
 } ngx_regex_compile_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_regex_t  *regex;
     u_char       *name;
 } ngx_regex_elt_t;

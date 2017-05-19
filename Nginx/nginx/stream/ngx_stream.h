@@ -24,14 +24,17 @@ typedef struct ngx_stream_session_s  ngx_stream_session_t;
 #include <ngx_stream_upstream_round_robin.h>
 
 
-typedef struct {
+typedef struct
+{
     void                  **main_conf;
     void                  **srv_conf;
 } ngx_stream_conf_ctx_t;
 
 
-typedef struct {
-    union {
+typedef struct
+{
+    union
+    {
         struct sockaddr     sockaddr;
         struct sockaddr_in  sockaddr_in;
 #if (NGX_HAVE_INET6)
@@ -48,18 +51,18 @@ typedef struct {
     /* server ctx */
     ngx_stream_conf_ctx_t  *ctx;
 
-    unsigned                bind:1;
-    unsigned                wildcard:1;
+    unsigned                bind: 1;
+    unsigned                wildcard: 1;
 #if (NGX_STREAM_SSL)
-    unsigned                ssl:1;
+    unsigned                ssl: 1;
 #endif
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
-    unsigned                ipv6only:1;
+    unsigned                ipv6only: 1;
 #endif
 #if (NGX_HAVE_REUSEPORT)
-    unsigned                reuseport:1;
+    unsigned                reuseport: 1;
 #endif
-    unsigned                so_keepalive:2;
+    unsigned                so_keepalive: 2;
 #if (NGX_HAVE_KEEPALIVE_TUNABLE)
     int                     tcp_keepidle;
     int                     tcp_keepintvl;
@@ -70,7 +73,8 @@ typedef struct {
 } ngx_stream_listen_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_stream_conf_ctx_t  *ctx;
     ngx_str_t               addr_text;
 #if (NGX_STREAM_SSL)
@@ -78,7 +82,8 @@ typedef struct {
 #endif
 } ngx_stream_addr_conf_t;
 
-typedef struct {
+typedef struct
+{
     in_addr_t               addr;
     ngx_stream_addr_conf_t  conf;
 } ngx_stream_in_addr_t;
@@ -86,7 +91,8 @@ typedef struct {
 
 #if (NGX_HAVE_INET6)
 
-typedef struct {
+typedef struct
+{
     struct in6_addr         addr6;
     ngx_stream_addr_conf_t  conf;
 } ngx_stream_in6_addr_t;
@@ -94,14 +100,16 @@ typedef struct {
 #endif
 
 
-typedef struct {
+typedef struct
+{
     /* ngx_stream_in_addr_t or ngx_stream_in6_addr_t */
     void                   *addrs;
     ngx_uint_t              naddrs;
 } ngx_stream_port_t;
 
 
-typedef struct {
+typedef struct
+{
     int                     family;
     int                     type;
     in_port_t               port;
@@ -109,7 +117,8 @@ typedef struct {
 } ngx_stream_conf_port_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_stream_listen_t     opt;
 } ngx_stream_conf_addr_t;
 
@@ -117,7 +126,8 @@ typedef struct {
 typedef ngx_int_t (*ngx_stream_access_pt)(ngx_stream_session_t *s);
 
 
-typedef struct {
+typedef struct
+{
     ngx_array_t             servers;     /* ngx_stream_core_srv_conf_t */
     ngx_array_t             listen;      /* ngx_stream_listen_t */
     ngx_stream_access_pt    limit_conn_handler;
@@ -128,7 +138,8 @@ typedef struct {
 typedef void (*ngx_stream_handler_pt)(ngx_stream_session_t *s);
 
 
-typedef struct {
+typedef struct
+{
     ngx_stream_handler_pt   handler;
     ngx_stream_conf_ctx_t  *ctx;
     u_char                 *file_name;
@@ -138,7 +149,8 @@ typedef struct {
 } ngx_stream_core_srv_conf_t;
 
 
-struct ngx_stream_session_s {
+struct ngx_stream_session_s
+{
     uint32_t                signature;         /* "STRM" */
 
     ngx_connection_t       *connection;
@@ -155,7 +167,8 @@ struct ngx_stream_session_s {
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_int_t             (*postconfiguration)(ngx_conf_t *cf);
 
     void                 *(*create_main_conf)(ngx_conf_t *cf);

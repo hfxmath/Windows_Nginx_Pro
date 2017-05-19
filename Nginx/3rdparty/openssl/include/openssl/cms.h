@@ -159,8 +159,8 @@ int CMS_EncryptedData_decrypt(CMS_ContentInfo *cms,
                               BIO *dcont, BIO *out, unsigned int flags);
 
 CMS_ContentInfo *CMS_EncryptedData_encrypt(BIO *in, const EVP_CIPHER *cipher,
-                                           const unsigned char *key,
-                                           size_t keylen, unsigned int flags);
+        const unsigned char *key,
+        size_t keylen, unsigned int flags);
 
 int CMS_EncryptedData_set1_key(CMS_ContentInfo *cms, const EVP_CIPHER *ciph,
                                const unsigned char *key, size_t keylen);
@@ -191,23 +191,23 @@ STACK_OF(CMS_RecipientInfo) *CMS_get0_RecipientInfos(CMS_ContentInfo *cms);
 int CMS_RecipientInfo_type(CMS_RecipientInfo *ri);
 CMS_ContentInfo *CMS_EnvelopedData_create(const EVP_CIPHER *cipher);
 CMS_RecipientInfo *CMS_add1_recipient_cert(CMS_ContentInfo *cms,
-                                           X509 *recip, unsigned int flags);
+        X509 *recip, unsigned int flags);
 int CMS_RecipientInfo_set0_pkey(CMS_RecipientInfo *ri, EVP_PKEY *pkey);
 int CMS_RecipientInfo_ktri_cert_cmp(CMS_RecipientInfo *ri, X509 *cert);
 int CMS_RecipientInfo_ktri_get0_algs(CMS_RecipientInfo *ri,
                                      EVP_PKEY **pk, X509 **recip,
                                      X509_ALGOR **palg);
 int CMS_RecipientInfo_ktri_get0_signer_id(CMS_RecipientInfo *ri,
-                                          ASN1_OCTET_STRING **keyid,
-                                          X509_NAME **issuer,
-                                          ASN1_INTEGER **sno);
+        ASN1_OCTET_STRING **keyid,
+        X509_NAME **issuer,
+        ASN1_INTEGER **sno);
 
 CMS_RecipientInfo *CMS_add0_recipient_key(CMS_ContentInfo *cms, int nid,
-                                          unsigned char *key, size_t keylen,
-                                          unsigned char *id, size_t idlen,
-                                          ASN1_GENERALIZEDTIME *date,
-                                          ASN1_OBJECT *otherTypeId,
-                                          ASN1_TYPE *otherType);
+        unsigned char *key, size_t keylen,
+        unsigned char *id, size_t idlen,
+        ASN1_GENERALIZEDTIME *date,
+        ASN1_OBJECT *otherTypeId,
+        ASN1_TYPE *otherType);
 
 int CMS_RecipientInfo_kekri_get0_id(CMS_RecipientInfo *ri,
                                     X509_ALGOR **palg,
@@ -227,11 +227,11 @@ int CMS_RecipientInfo_set0_password(CMS_RecipientInfo *ri,
                                     ossl_ssize_t passlen);
 
 CMS_RecipientInfo *CMS_add0_recipient_password(CMS_ContentInfo *cms,
-                                               int iter, int wrap_nid,
-                                               int pbe_nid,
-                                               unsigned char *pass,
-                                               ossl_ssize_t passlen,
-                                               const EVP_CIPHER *kekciph);
+        int iter, int wrap_nid,
+        int pbe_nid,
+        unsigned char *pass,
+        ossl_ssize_t passlen,
+        const EVP_CIPHER *kekciph);
 
 int CMS_RecipientInfo_decrypt(CMS_ContentInfo *cms, CMS_RecipientInfo *ri);
 
@@ -321,10 +321,10 @@ void *CMS_unsigned_get0_data_by_OBJ(CMS_SignerInfo *si, ASN1_OBJECT *oid,
 
 int CMS_get1_ReceiptRequest(CMS_SignerInfo *si, CMS_ReceiptRequest **prr);
 CMS_ReceiptRequest *CMS_ReceiptRequest_create0(unsigned char *id, int idlen,
-                                               int allorfirst,
-                                               STACK_OF(GENERAL_NAMES)
-                                               *receiptList, STACK_OF(GENERAL_NAMES)
-                                               *receiptsTo);
+        int allorfirst,
+        STACK_OF(GENERAL_NAMES)
+        *receiptList, STACK_OF(GENERAL_NAMES)
+        *receiptsTo);
 int CMS_add1_ReceiptRequest(CMS_SignerInfo *si, CMS_ReceiptRequest *rr);
 void CMS_ReceiptRequest_get0_values(CMS_ReceiptRequest *rr,
                                     ASN1_STRING **pcid,

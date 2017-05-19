@@ -80,7 +80,8 @@ extern "C" {
  *              cipher[2]                     OCTET STRING -- ciphertext
  *      }
  */
-typedef struct krb5_encdata_st {
+typedef struct krb5_encdata_st
+{
     ASN1_INTEGER *etype;
     ASN1_INTEGER *kvno;
     ASN1_OCTET_STRING *cipher;
@@ -93,7 +94,8 @@ DECLARE_STACK_OF(KRB5_ENCDATA)
  *              name-string[1]                SEQUENCE OF GeneralString
  *      }
  */
-typedef struct krb5_princname_st {
+typedef struct krb5_princname_st
+{
     ASN1_INTEGER *nametype;
     STACK_OF(ASN1_GENERALSTRING) *namestring;
 } KRB5_PRINCNAME;
@@ -107,7 +109,8 @@ DECLARE_STACK_OF(KRB5_PRINCNAME)
  *              enc-part[3]                   EncryptedData
  *      }
  */
-typedef struct krb5_tktbody_st {
+typedef struct krb5_tktbody_st
+{
     ASN1_INTEGER *tktvno;
     ASN1_GENERALSTRING *realm;
     KRB5_PRINCNAME *sname;
@@ -128,7 +131,8 @@ DECLARE_STACK_OF(KRB5_TKTBODY)
  *      APOptions ::=   BIT STRING {
  *              reserved(0), use-session-key(1), mutual-required(2) }
  */
-typedef struct krb5_ap_req_st {
+typedef struct krb5_ap_req_st
+{
     ASN1_INTEGER *pvno;
     ASN1_INTEGER *msgtype;
     ASN1_BIT_STRING *apoptions;
@@ -146,7 +150,8 @@ DECLARE_STACK_OF(KRB5_APREQBODY)
  *              checksum[1]                   OCTET STRING
  *      }
  */
-typedef struct krb5_checksum_st {
+typedef struct krb5_checksum_st
+{
     ASN1_INTEGER *ctype;
     ASN1_OCTET_STRING *checksum;
 } KRB5_CHECKSUM;
@@ -158,7 +163,8 @@ DECLARE_STACK_OF(KRB5_CHECKSUM)
  *              keyvalue[1]                   OCTET STRING
  *      }
  */
-typedef struct krb5_encryptionkey_st {
+typedef struct krb5_encryptionkey_st
+{
     ASN1_INTEGER *ktype;
     ASN1_OCTET_STRING *keyvalue;
 } KRB5_ENCKEY;
@@ -170,7 +176,8 @@ DECLARE_STACK_OF(KRB5_ENCKEY)
  *              ad-data[1]                    OCTET STRING
  *      }
  */
-typedef struct krb5_authorization_st {
+typedef struct krb5_authorization_st
+{
     ASN1_INTEGER *adtype;
     ASN1_OCTET_STRING *addata;
 } KRB5_AUTHDATA;
@@ -190,7 +197,8 @@ DECLARE_STACK_OF(KRB5_AUTHDATA)
  *              authorization-data[8]         AuthorizationData OPTIONAL
  *      }
  */
-typedef struct krb5_authenticator_st {
+typedef struct krb5_authenticator_st
+{
     ASN1_INTEGER *avno;
     ASN1_GENERALSTRING *crealm;
     KRB5_PRINCNAME *cname;

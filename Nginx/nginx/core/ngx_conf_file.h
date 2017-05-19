@@ -75,7 +75,8 @@
 #define NGX_MAX_CONF_ERRSTR  1024
 
 
-struct ngx_command_s {
+struct ngx_command_s
+{
     ngx_str_t             name;
     ngx_uint_t            type;
     char               *(*set)(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
@@ -87,7 +88,8 @@ struct ngx_command_s {
 #define ngx_null_command  { ngx_null_string, 0, NULL, 0, 0, NULL }
 
 
-struct ngx_open_file_s {
+struct ngx_open_file_s
+{
     ngx_fd_t              fd;
     ngx_str_t             name;
 
@@ -96,7 +98,8 @@ struct ngx_open_file_s {
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_file_t            file;
     ngx_buf_t            *buffer;
     ngx_buf_t            *dump;
@@ -104,17 +107,19 @@ typedef struct {
 } ngx_conf_file_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t             name;
     ngx_buf_t            *buffer;
 } ngx_conf_dump_t;
 
 
 typedef char *(*ngx_conf_handler_pt)(ngx_conf_t *cf,
-    ngx_command_t *dummy, void *conf);
+                                     ngx_command_t *dummy, void *conf);
 
 
-struct ngx_conf_s {
+struct ngx_conf_s
+{
     char                 *name;
     ngx_array_t          *args;
 
@@ -134,28 +139,32 @@ struct ngx_conf_s {
 
 
 typedef char *(*ngx_conf_post_handler_pt) (ngx_conf_t *cf,
-    void *data, void *conf);
+        void *data, void *conf);
 
-typedef struct {
+typedef struct
+{
     ngx_conf_post_handler_pt  post_handler;
 } ngx_conf_post_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_conf_post_handler_pt  post_handler;
     char                     *old_name;
     char                     *new_name;
 } ngx_conf_deprecated_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_conf_post_handler_pt  post_handler;
     ngx_int_t                 low;
     ngx_int_t                 high;
 } ngx_conf_num_bounds_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                 name;
     ngx_uint_t                value;
 } ngx_conf_enum_t;
@@ -163,14 +172,15 @@ typedef struct {
 
 #define NGX_CONF_BITMASK_SET  1
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                 name;
     ngx_uint_t                mask;
 } ngx_conf_bitmask_t;
 
 
 
-char * ngx_conf_deprecated(ngx_conf_t *cf, void *post, void *data);
+char *ngx_conf_deprecated(ngx_conf_t *cf, void *post, void *data);
 char *ngx_conf_check_num_bounds(ngx_conf_t *cf, void *post, void *data);
 
 
@@ -272,16 +282,16 @@ char *ngx_conf_include(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 
 
 ngx_int_t ngx_conf_full_name(ngx_cycle_t *cycle, ngx_str_t *name,
-    ngx_uint_t conf_prefix);
+                             ngx_uint_t conf_prefix);
 ngx_open_file_t *ngx_conf_open_file(ngx_cycle_t *cycle, ngx_str_t *name);
 void ngx_cdecl ngx_conf_log_error(ngx_uint_t level, ngx_conf_t *cf,
-    ngx_err_t err, const char *fmt, ...);
+                                  ngx_err_t err, const char *fmt, ...);
 
 
 char *ngx_conf_set_flag_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 char *ngx_conf_set_str_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 char *ngx_conf_set_str_array_slot(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                  void *conf);
 char *ngx_conf_set_keyval_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 char *ngx_conf_set_num_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 char *ngx_conf_set_size_slot(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);

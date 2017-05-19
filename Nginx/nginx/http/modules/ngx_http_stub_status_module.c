@@ -12,26 +12,30 @@
 
 static ngx_int_t ngx_http_stub_status_handler(ngx_http_request_t *r);
 static ngx_int_t ngx_http_stub_status_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data);
+        ngx_http_variable_value_t *v, uintptr_t data);
 static ngx_int_t ngx_http_stub_status_add_variables(ngx_conf_t *cf);
 static char *ngx_http_set_stub_status(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                      void *conf);
 
 
-static ngx_command_t  ngx_http_status_commands[] = {
+static ngx_command_t  ngx_http_status_commands[] =
+{
 
-    { ngx_string("stub_status"),
-      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_NOARGS|NGX_CONF_TAKE1,
-      ngx_http_set_stub_status,
-      0,
-      0,
-      NULL },
+    {
+        ngx_string("stub_status"),
+        NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_NOARGS | NGX_CONF_TAKE1,
+        ngx_http_set_stub_status,
+        0,
+        0,
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_http_module_t  ngx_http_stub_status_module_ctx = {
+static ngx_http_module_t  ngx_http_stub_status_module_ctx =
+{
     ngx_http_stub_status_add_variables,    /* preconfiguration */
     NULL,                                  /* postconfiguration */
 
@@ -46,7 +50,8 @@ static ngx_http_module_t  ngx_http_stub_status_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_stub_status_module = {
+ngx_module_t  ngx_http_stub_status_module =
+{
     NGX_MODULE_V1,
     &ngx_http_stub_status_module_ctx,      /* module context */
     ngx_http_status_commands,              /* module directives */
@@ -62,19 +67,28 @@ ngx_module_t  ngx_http_stub_status_module = {
 };
 
 
-static ngx_http_variable_t  ngx_http_stub_status_vars[] = {
+static ngx_http_variable_t  ngx_http_stub_status_vars[] =
+{
 
-    { ngx_string("connections_active"), NULL, ngx_http_stub_status_variable,
-      0, NGX_HTTP_VAR_NOCACHEABLE, 0 },
+    {
+        ngx_string("connections_active"), NULL, ngx_http_stub_status_variable,
+        0, NGX_HTTP_VAR_NOCACHEABLE, 0
+    },
 
-    { ngx_string("connections_reading"), NULL, ngx_http_stub_status_variable,
-      1, NGX_HTTP_VAR_NOCACHEABLE, 0 },
+    {
+        ngx_string("connections_reading"), NULL, ngx_http_stub_status_variable,
+        1, NGX_HTTP_VAR_NOCACHEABLE, 0
+    },
 
-    { ngx_string("connections_writing"), NULL, ngx_http_stub_status_variable,
-      2, NGX_HTTP_VAR_NOCACHEABLE, 0 },
+    {
+        ngx_string("connections_writing"), NULL, ngx_http_stub_status_variable,
+        2, NGX_HTTP_VAR_NOCACHEABLE, 0
+    },
 
-    { ngx_string("connections_waiting"), NULL, ngx_http_stub_status_variable,
-      3, NGX_HTTP_VAR_NOCACHEABLE, 0 },
+    {
+        ngx_string("connections_waiting"), NULL, ngx_http_stub_status_variable,
+        3, NGX_HTTP_VAR_NOCACHEABLE, 0
+    },
 
     { ngx_null_string, NULL, NULL, 0, 0, 0 }
 };
@@ -89,13 +103,15 @@ ngx_http_stub_status_handler(ngx_http_request_t *r)
     ngx_chain_t        out;
     ngx_atomic_int_t   ap, hn, ac, rq, rd, wr, wa;
 
-    if (!(r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD))) {
+    if (!(r->method & (NGX_HTTP_GET | NGX_HTTP_HEAD)))
+    {
         return NGX_HTTP_NOT_ALLOWED;
     }
 
     rc = ngx_http_discard_request_body(r);
 
-    if (rc != NGX_OK) {
+    if (rc != NGX_OK)
+    {
         return rc;
     }
 
@@ -103,12 +119,14 @@ ngx_http_stub_status_handler(ngx_http_request_t *r)
     ngx_str_set(&r->headers_out.content_type, "text/plain");
     r->headers_out.content_type_lowcase = NULL;
 
-    if (r->method == NGX_HTTP_HEAD) {
+    if (r->method == NGX_HTTP_HEAD)
+    {
         r->headers_out.status = NGX_HTTP_OK;
 
         rc = ngx_http_send_header(r);
 
-        if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
+        if (rc == NGX_ERROR || rc > NGX_OK || r->header_only)
+        {
             return rc;
         }
     }
@@ -119,7 +137,8 @@ ngx_http_stub_status_handler(ngx_http_request_t *r)
            + sizeof("Reading:  Writing:  Waiting:  \n") + 3 * NGX_ATOMIC_T_LEN;
 
     b = ngx_create_temp_buf(r->pool, size);
-    if (b == NULL) {
+    if (b == NULL)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -152,7 +171,8 @@ ngx_http_stub_status_handler(ngx_http_request_t *r)
 
     rc = ngx_http_send_header(r);
 
-    if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
+    if (rc == NGX_ERROR || rc > NGX_OK || r->header_only)
+    {
         return rc;
     }
 
@@ -162,17 +182,19 @@ ngx_http_stub_status_handler(ngx_http_request_t *r)
 
 static ngx_int_t
 ngx_http_stub_status_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data)
+                              ngx_http_variable_value_t *v, uintptr_t data)
 {
     u_char            *p;
     ngx_atomic_int_t   value;
 
     p = ngx_pnalloc(r->pool, NGX_ATOMIC_T_LEN);
-    if (p == NULL) {
+    if (p == NULL)
+    {
         return NGX_ERROR;
     }
 
-    switch (data) {
+    switch (data)
+    {
     case 0:
         value = *ngx_stat_active;
         break;
@@ -210,9 +232,11 @@ ngx_http_stub_status_add_variables(ngx_conf_t *cf)
 {
     ngx_http_variable_t  *var, *v;
 
-    for (v = ngx_http_stub_status_vars; v->name.len; v++) {
+    for (v = ngx_http_stub_status_vars; v->name.len; v++)
+    {
         var = ngx_http_add_variable(cf, &v->name, v->flags);
-        if (var == NULL) {
+        if (var == NULL)
+        {
             return NGX_ERROR;
         }
 

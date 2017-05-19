@@ -81,14 +81,16 @@ ngx_thread_mutex_create(ngx_thread_mutex_t *mtx, ngx_log_t *log)
     pthread_mutexattr_t  attr;
 
     err = pthread_mutexattr_init(&attr);
-    if (err != 0) {
+    if (err != 0)
+    {
         ngx_log_error(NGX_LOG_EMERG, log, err,
                       "pthread_mutexattr_init() failed");
         return NGX_ERROR;
     }
 
     err = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
-    if (err != 0) {
+    if (err != 0)
+    {
         ngx_log_error(NGX_LOG_EMERG, log, err,
                       "pthread_mutexattr_settype"
                       "(PTHREAD_MUTEX_ERRORCHECK) failed");
@@ -96,14 +98,16 @@ ngx_thread_mutex_create(ngx_thread_mutex_t *mtx, ngx_log_t *log)
     }
 
     err = pthread_mutex_init(mtx, &attr);
-    if (err != 0) {
+    if (err != 0)
+    {
         ngx_log_error(NGX_LOG_EMERG, log, err,
                       "pthread_mutex_init() failed");
         return NGX_ERROR;
     }
 
     err = pthread_mutexattr_destroy(&attr);
-    if (err != 0) {
+    if (err != 0)
+    {
         ngx_log_error(NGX_LOG_ALERT, log, err,
                       "pthread_mutexattr_destroy() failed");
     }
@@ -120,7 +124,8 @@ ngx_thread_mutex_destroy(ngx_thread_mutex_t *mtx, ngx_log_t *log)
     ngx_err_t  err;
 
     err = pthread_mutex_destroy(mtx);
-    if (err != 0) {
+    if (err != 0)
+    {
         ngx_log_error(NGX_LOG_ALERT, log, err,
                       "pthread_mutex_destroy() failed");
         return NGX_ERROR;
@@ -141,7 +146,8 @@ ngx_thread_mutex_lock(ngx_thread_mutex_t *mtx, ngx_log_t *log)
                    "pthread_mutex_lock(%p) enter", mtx);
 
     err = pthread_mutex_lock(mtx);
-    if (err == 0) {
+    if (err == 0)
+    {
         return NGX_OK;
     }
 
@@ -162,7 +168,8 @@ ngx_thread_mutex_unlock(ngx_thread_mutex_t *mtx, ngx_log_t *log)
     ngx_time_update();
 #endif
 
-    if (err == 0) {
+    if (err == 0)
+    {
         ngx_log_debug1(NGX_LOG_DEBUG_CORE, log, 0,
                        "pthread_mutex_unlock(%p) exit", mtx);
         return NGX_OK;

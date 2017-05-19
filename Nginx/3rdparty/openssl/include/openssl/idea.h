@@ -75,7 +75,8 @@
 extern "C" {
 #endif
 
-typedef struct idea_key_st {
+typedef struct idea_key_st
+{
     IDEA_INT data[9][6];
 } IDEA_KEY_SCHEDULE;
 

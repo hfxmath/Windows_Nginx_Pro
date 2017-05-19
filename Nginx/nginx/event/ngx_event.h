@@ -18,7 +18,8 @@
 
 #if (NGX_HAVE_IOCP)
 
-typedef struct {
+typedef struct
+{
     WSAOVERLAPPED    ovlp;
     ngx_event_t     *event;
     int              error;
@@ -27,62 +28,63 @@ typedef struct {
 #endif
 
 
-struct ngx_event_s {
+struct ngx_event_s
+{
     void            *data;
 
-    unsigned         write:1;
+    unsigned         write: 1;
 
-    unsigned         accept:1;
+    unsigned         accept: 1;
 
     /* used to detect the stale events in kqueue and epoll */
-    unsigned         instance:1;
+    unsigned         instance: 1;
 
     /*
      * the event was passed or would be passed to a kernel;
      * in aio mode - operation was posted.
      */
-    unsigned         active:1;
+    unsigned         active: 1;
 
-    unsigned         disabled:1;
+    unsigned         disabled: 1;
 
     /* the ready event; in aio mode 0 means that no operation can be posted */
-    unsigned         ready:1;
+    unsigned         ready: 1;
 
-    unsigned         oneshot:1;
+    unsigned         oneshot: 1;
 
     /* aio operation is complete */
-    unsigned         complete:1;
+    unsigned         complete: 1;
 
-    unsigned         eof:1;
-    unsigned         error:1;
+    unsigned         eof: 1;
+    unsigned         error: 1;
 
-    unsigned         timedout:1;
-    unsigned         timer_set:1;
+    unsigned         timedout: 1;
+    unsigned         timer_set: 1;
 
-    unsigned         delayed:1;
+    unsigned         delayed: 1;
 
-    unsigned         deferred_accept:1;
+    unsigned         deferred_accept: 1;
 
     /* the pending eof reported by kqueue, epoll or in aio chain operation */
-    unsigned         pending_eof:1;
+    unsigned         pending_eof: 1;
 
-    unsigned         posted:1;
+    unsigned         posted: 1;
 
-    unsigned         closed:1;
+    unsigned         closed: 1;
 
     /* to test on worker exit */
-    unsigned         channel:1;
-    unsigned         resolver:1;
+    unsigned         channel: 1;
+    unsigned         resolver: 1;
 
-    unsigned         cancelable:1;
+    unsigned         cancelable: 1;
 
 #if (NGX_WIN32)
     /* setsockopt(SO_UPDATE_ACCEPT_CONTEXT) was successful */
-    unsigned         accept_context_updated:1;
+    unsigned         accept_context_updated: 1;
 #endif
 
 #if (NGX_HAVE_KQUEUE)
-    unsigned         kq_vnode:1;
+    unsigned         kq_vnode: 1;
 
     /* the pending errno reported by kqueue */
     int              kq_errno;
@@ -105,7 +107,7 @@ struct ngx_event_s {
 #if (NGX_HAVE_KQUEUE) || (NGX_HAVE_IOCP)
     int              available;
 #else
-    unsigned         available:1;
+    unsigned         available: 1;
 #endif
 
     ngx_event_handler_pt  handler;
@@ -148,7 +150,8 @@ struct ngx_event_s {
 
 #if (NGX_HAVE_FILE_AIO)
 
-struct ngx_event_aio_s {
+struct ngx_event_aio_s
+{
     void                      *data;
     ngx_event_handler_pt       handler;
     ngx_file_t                *file;
@@ -175,7 +178,8 @@ struct ngx_event_aio_s {
 #endif
 
 
-typedef struct {
+typedef struct
+{
     ngx_int_t  (*add)(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags);
     ngx_int_t  (*del)(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags);
 
@@ -426,7 +430,8 @@ extern ngx_os_io_t  ngx_io;
 #define NGX_EVENT_CONF        0x02000000
 
 
-typedef struct {
+typedef struct
+{
     ngx_uint_t    connections;
     ngx_uint_t    use;
 
@@ -443,7 +448,8 @@ typedef struct {
 } ngx_event_conf_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t              *name;
 
     void                 *(*create_conf)(ngx_cycle_t *cycle);

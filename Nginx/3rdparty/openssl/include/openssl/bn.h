@@ -299,7 +299,7 @@ extern "C" {
 
 # ifndef OPENSSL_NO_DEPRECATED
 #  define BN_FLG_FREE             0x8000
-                                       /* used for debuging */
+/* used for debuging */
 # endif
 # define BN_set_flags(b,n)       ((b)->flags|=(n))
 # define BN_get_flags(b,n)       ((b)->flags&(n))
@@ -328,7 +328,8 @@ typedef struct bn_recp_ctx_st BN_RECP_CTX;
 typedef struct bn_gencb_st BN_GENCB;
 # endif
 
-struct bignum_st {
+struct bignum_st
+{
     BN_ULONG *d;                /* Pointer to an array of 'BN_BITS2' bit
                                  * chunks. */
     int top;                    /* Index of last used d +1. */
@@ -339,7 +340,8 @@ struct bignum_st {
 };
 
 /* Used for montgomery multiplication */
-struct bn_mont_ctx_st {
+struct bn_mont_ctx_st
+{
     int ri;                     /* number of bits in R */
     BIGNUM RR;                  /* used to convert to montgomery form */
     BIGNUM N;                   /* The modulus */
@@ -355,7 +357,8 @@ struct bn_mont_ctx_st {
  * Used for reciprocal division/mod functions It cannot be shared between
  * threads
  */
-struct bn_recp_ctx_st {
+struct bn_recp_ctx_st
+{
     BIGNUM N;                   /* the divisor */
     BIGNUM Nr;                  /* the reciprocal */
     int num_bits;
@@ -364,10 +367,12 @@ struct bn_recp_ctx_st {
 };
 
 /* Used for slow "generation" functions. */
-struct bn_gencb_st {
+struct bn_gencb_st
+{
     unsigned int ver;           /* To handle binary (in)compatibility */
     void *arg;                  /* callback-specific data */
-    union {
+    union
+    {
         /* if(ver==1) - handles old style callbacks */
         void (*cb_1) (int, int, void *);
         /* if(ver==2) - new callback style */
@@ -628,11 +633,11 @@ void BN_BLINDING_set_flags(BN_BLINDING *, unsigned long);
 BN_BLINDING *BN_BLINDING_create_param(BN_BLINDING *b,
                                       const BIGNUM *e, BIGNUM *m, BN_CTX *ctx,
                                       int (*bn_mod_exp) (BIGNUM *r,
-                                                         const BIGNUM *a,
-                                                         const BIGNUM *p,
-                                                         const BIGNUM *m,
-                                                         BN_CTX *ctx,
-                                                         BN_MONT_CTX *m_ctx),
+                                              const BIGNUM *a,
+                                              const BIGNUM *p,
+                                              const BIGNUM *m,
+                                              BN_CTX *ctx,
+                                              BN_MONT_CTX *m_ctx),
                                       BN_MONT_CTX *m_ctx);
 
 # ifndef OPENSSL_NO_DEPRECATED

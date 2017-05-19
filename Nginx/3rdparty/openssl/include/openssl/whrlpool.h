@@ -12,8 +12,10 @@ extern "C" {
 # define WHIRLPOOL_BBLOCK        512
 # define WHIRLPOOL_COUNTER       (256/8)
 
-typedef struct {
-    union {
+typedef struct
+{
+    union
+    {
         unsigned char c[WHIRLPOOL_DIGEST_LENGTH];
         /* double q is here to ensure 64-bit alignment */
         double q[WHIRLPOOL_DIGEST_LENGTH / sizeof(double)];

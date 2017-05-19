@@ -18,7 +18,7 @@ typedef gid_t  ngx_gid_t;
 
 
 ngx_int_t ngx_libc_crypt(ngx_pool_t *pool, u_char *key, u_char *salt,
-    u_char **encrypted);
+                         u_char **encrypted);
 
 
 #endif /* _NGX_USER_H_INCLUDED_ */

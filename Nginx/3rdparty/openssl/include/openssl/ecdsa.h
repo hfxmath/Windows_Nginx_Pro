@@ -75,7 +75,8 @@
 extern "C" {
 #endif
 
-typedef struct ECDSA_SIG_st {
+typedef struct ECDSA_SIG_st
+{
     BIGNUM *r;
     BIGNUM *s;
 } ECDSA_SIG;

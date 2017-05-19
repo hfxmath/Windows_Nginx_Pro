@@ -81,8 +81,10 @@ extern "C" {
 typedef unsigned int KEY_TABLE_TYPE[CAMELLIA_TABLE_WORD_LEN]; /* to match
                                                                * with WORD */
 
-struct camellia_key_st {
-    union {
+struct camellia_key_st
+{
+    union
+    {
         double d;               /* ensures 64-bit align */
         KEY_TABLE_TYPE rd_key;
     } u;

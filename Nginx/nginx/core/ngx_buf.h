@@ -13,11 +13,12 @@
 #include <ngx_core.h>
 
 
-typedef void *            ngx_buf_tag_t;
+typedef void             *ngx_buf_tag_t;
 
 typedef struct ngx_buf_s  ngx_buf_t;
 
-struct ngx_buf_s {
+struct ngx_buf_s
+{
     u_char          *pos;
     u_char          *last;
     off_t            file_pos;
@@ -31,38 +32,40 @@ struct ngx_buf_s {
 
 
     /* the buf's content could be changed */
-    unsigned         temporary:1;
+    unsigned         temporary: 1;
 
     /*
      * the buf's content is in a memory cache or in a read only memory
      * and must not be changed
      */
-    unsigned         memory:1;
+    unsigned         memory: 1;
 
     /* the buf's content is mmap()ed and must not be changed */
-    unsigned         mmap:1;
+    unsigned         mmap: 1;
 
-    unsigned         recycled:1;
-    unsigned         in_file:1;
-    unsigned         flush:1;
-    unsigned         sync:1;
-    unsigned         last_buf:1;
-    unsigned         last_in_chain:1;
+    unsigned         recycled: 1;
+    unsigned         in_file: 1;
+    unsigned         flush: 1;
+    unsigned         sync: 1;
+    unsigned         last_buf: 1;
+    unsigned         last_in_chain: 1;
 
-    unsigned         last_shadow:1;
-    unsigned         temp_file:1;
+    unsigned         last_shadow: 1;
+    unsigned         temp_file: 1;
 
     /* STUB */ int   num;
 };
 
 
-struct ngx_chain_s {
+struct ngx_chain_s
+{
     ngx_buf_t    *buf;
     ngx_chain_t  *next;
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_int_t    num;
     size_t       size;
 } ngx_bufs_t;
@@ -74,24 +77,25 @@ typedef ngx_int_t (*ngx_output_chain_filter_pt)(void *ctx, ngx_chain_t *in);
 
 #if (NGX_HAVE_FILE_AIO)
 typedef void (*ngx_output_chain_aio_pt)(ngx_output_chain_ctx_t *ctx,
-    ngx_file_t *file);
+                                        ngx_file_t *file);
 #endif
 
-struct ngx_output_chain_ctx_s {
+struct ngx_output_chain_ctx_s
+{
     ngx_buf_t                   *buf;
     ngx_chain_t                 *in;
     ngx_chain_t                 *free;
     ngx_chain_t                 *busy;
 
-    unsigned                     sendfile:1;
-    unsigned                     directio:1;
+    unsigned                     sendfile: 1;
+    unsigned                     directio: 1;
 #if (NGX_HAVE_ALIGNED_DIRECTIO)
-    unsigned                     unaligned:1;
+    unsigned                     unaligned: 1;
 #endif
-    unsigned                     need_in_memory:1;
-    unsigned                     need_in_temp:1;
+    unsigned                     need_in_memory: 1;
+    unsigned                     need_in_temp: 1;
 #if (NGX_HAVE_FILE_AIO || NGX_THREADS)
-    unsigned                     aio:1;
+    unsigned                     aio: 1;
 #endif
 
 #if (NGX_HAVE_FILE_AIO)
@@ -103,7 +107,7 @@ struct ngx_output_chain_ctx_s {
 
 #if (NGX_THREADS)
     ngx_int_t                  (*thread_handler)(ngx_thread_task_t *task,
-                                                 ngx_file_t *file);
+            ngx_file_t *file);
     ngx_thread_task_t           *thread_task;
 #endif
 
@@ -119,7 +123,8 @@ struct ngx_output_chain_ctx_s {
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_chain_t                 *out;
     ngx_chain_t                **last;
     ngx_connection_t            *connection;
@@ -164,10 +169,10 @@ ngx_int_t ngx_output_chain(ngx_output_chain_ctx_t *ctx, ngx_chain_t *in);
 ngx_int_t ngx_chain_writer(void *ctx, ngx_chain_t *in);
 
 ngx_int_t ngx_chain_add_copy(ngx_pool_t *pool, ngx_chain_t **chain,
-    ngx_chain_t *in);
+                             ngx_chain_t *in);
 ngx_chain_t *ngx_chain_get_free_buf(ngx_pool_t *p, ngx_chain_t **free);
 void ngx_chain_update_chains(ngx_pool_t *p, ngx_chain_t **free,
-    ngx_chain_t **busy, ngx_chain_t **out, ngx_buf_tag_t tag);
+                             ngx_chain_t **busy, ngx_chain_t **out, ngx_buf_tag_t tag);
 
 off_t ngx_chain_coalesce_file(ngx_chain_t **in, off_t limit);
 

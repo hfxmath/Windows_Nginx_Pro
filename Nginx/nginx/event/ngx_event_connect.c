@@ -23,7 +23,8 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
     ngx_connection_t  *c;
 
     rc = pc->get(pc, pc->data);
-    if (rc != NGX_OK) {
+    if (rc != NGX_OK)
+    {
         return rc;
     }
 
@@ -34,7 +35,8 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
     ngx_log_debug2(NGX_LOG_DEBUG_EVENT, pc->log, 0, "%s socket %d",
                    (type == SOCK_STREAM) ? "stream" : "dgram", s);
 
-    if (s == (ngx_socket_t) -1) {
+    if (s == (ngx_socket_t) - 1)
+    {
         ngx_log_error(NGX_LOG_ALERT, pc->log, ngx_socket_errno,
                       ngx_socket_n " failed");
         return NGX_ERROR;
@@ -43,8 +45,10 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
     c = ngx_get_connection(s, pc->log);
 
-    if (c == NULL) {
-        if (ngx_close_socket(s) == -1) {
+    if (c == NULL)
+    {
+        if (ngx_close_socket(s) == -1)
+        {
             ngx_log_error(NGX_LOG_ALERT, pc->log, ngx_socket_errno,
                           ngx_close_socket_n "failed");
         }
@@ -54,7 +58,8 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
     c->type = type;
 
-    if (pc->rcvbuf) {
+    if (pc->rcvbuf)
+    {
         if (setsockopt(s, SOL_SOCKET, SO_RCVBUF,
                        (const void *) &pc->rcvbuf, sizeof(int)) == -1)
         {
@@ -64,15 +69,18 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
         }
     }
 
-    if (ngx_nonblocking(s) == -1) {
+    if (ngx_nonblocking(s) == -1)
+    {
         ngx_log_error(NGX_LOG_ALERT, pc->log, ngx_socket_errno,
                       ngx_nonblocking_n " failed");
 
         goto failed;
     }
 
-    if (pc->local) {
-        if (bind(s, pc->local->sockaddr, pc->local->socklen) == -1) {
+    if (pc->local)
+    {
+        if (bind(s, pc->local->sockaddr, pc->local->socklen) == -1)
+        {
             ngx_log_error(NGX_LOG_CRIT, pc->log, ngx_socket_errno,
                           "bind(%V) failed", &pc->local->name);
 
@@ -80,7 +88,8 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
         }
     }
 
-    if (type == SOCK_STREAM) {
+    if (type == SOCK_STREAM)
+    {
         c->recv = ngx_recv;
         c->send = ngx_send;
         c->recv_chain = ngx_recv_chain;
@@ -88,7 +97,8 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
         c->sendfile = 1;
 
-        if (pc->sockaddr->sa_family == AF_UNIX) {
+        if (pc->sockaddr->sa_family == AF_UNIX)
+        {
             c->tcp_nopush = NGX_TCP_NOPUSH_DISABLED;
             c->tcp_nodelay = NGX_TCP_NODELAY_DISABLED;
 
@@ -98,7 +108,9 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 #endif
         }
 
-    } else { /* type == SOCK_DGRAM */
+    }
+    else     /* type == SOCK_DGRAM */
+    {
         c->recv = ngx_udp_recv;
         c->send = ngx_send;
     }
@@ -115,8 +127,10 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
     c->number = ngx_atomic_fetch_add(ngx_connection_counter, 1);
 
-    if (ngx_add_conn) {
-        if (ngx_add_conn(c) == NGX_ERROR) {
+    if (ngx_add_conn)
+    {
+        if (ngx_add_conn(c) == NGX_ERROR)
+        {
             goto failed;
         }
     }
@@ -126,34 +140,37 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
 
     rc = connect(s, pc->sockaddr, pc->socklen);
 
-    if (rc == -1) {
+    if (rc == -1)
+    {
         err = ngx_socket_errno;
 
 
         if (err != NGX_EINPROGRESS
 #if (NGX_WIN32)
-            /* Winsock returns WSAEWOULDBLOCK (NGX_EAGAIN) */
-            && err != NGX_EAGAIN
+                /* Winsock returns WSAEWOULDBLOCK (NGX_EAGAIN) */
+                && err != NGX_EAGAIN
 #endif
-            )
+           )
         {
             if (err == NGX_ECONNREFUSED
 #if (NGX_LINUX)
-                /*
-                 * Linux returns EAGAIN instead of ECONNREFUSED
-                 * for unix sockets if listen queue is full
-                 */
-                || err == NGX_EAGAIN
+                    /*
+                     * Linux returns EAGAIN instead of ECONNREFUSED
+                     * for unix sockets if listen queue is full
+                     */
+                    || err == NGX_EAGAIN
 #endif
-                || err == NGX_ECONNRESET
-                || err == NGX_ENETDOWN
-                || err == NGX_ENETUNREACH
-                || err == NGX_EHOSTDOWN
-                || err == NGX_EHOSTUNREACH)
+                    || err == NGX_ECONNRESET
+                    || err == NGX_ENETDOWN
+                    || err == NGX_ENETUNREACH
+                    || err == NGX_EHOSTDOWN
+                    || err == NGX_EHOSTUNREACH)
             {
                 level = NGX_LOG_ERR;
 
-            } else {
+            }
+            else
+            {
                 level = NGX_LOG_CRIT;
             }
 
@@ -167,8 +184,10 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
         }
     }
 
-    if (ngx_add_conn) {
-        if (rc == -1) {
+    if (ngx_add_conn)
+    {
+        if (rc == -1)
+        {
 
             /* NGX_EINPROGRESS */
 
@@ -182,12 +201,14 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
         return NGX_OK;
     }
 
-    if (ngx_event_flags & NGX_USE_IOCP_EVENT) {
+    if (ngx_event_flags & NGX_USE_IOCP_EVENT)
+    {
 
         ngx_log_debug1(NGX_LOG_DEBUG_EVENT, pc->log, ngx_socket_errno,
                        "connect(): %d", rc);
 
-        if (ngx_blocking(s) == -1) {
+        if (ngx_blocking(s) == -1)
+        {
             ngx_log_error(NGX_LOG_ALERT, pc->log, ngx_socket_errno,
                           ngx_blocking_n " failed");
             goto failed;
@@ -206,28 +227,34 @@ ngx_event_connect_peer(ngx_peer_connection_t *pc)
         return NGX_OK;
     }
 
-    if (ngx_event_flags & NGX_USE_CLEAR_EVENT) {
+    if (ngx_event_flags & NGX_USE_CLEAR_EVENT)
+    {
 
         /* kqueue */
 
         event = NGX_CLEAR_EVENT;
 
-    } else {
+    }
+    else
+    {
 
         /* select, poll, /dev/poll */
 
         event = NGX_LEVEL_EVENT;
     }
 
-    if (ngx_add_event(rev, NGX_READ_EVENT, event) != NGX_OK) {
+    if (ngx_add_event(rev, NGX_READ_EVENT, event) != NGX_OK)
+    {
         goto failed;
     }
 
-    if (rc == -1) {
+    if (rc == -1)
+    {
 
         /* NGX_EINPROGRESS */
 
-        if (ngx_add_event(wev, NGX_WRITE_EVENT, event) != NGX_OK) {
+        if (ngx_add_event(wev, NGX_WRITE_EVENT, event) != NGX_OK)
+        {
             goto failed;
         }
 

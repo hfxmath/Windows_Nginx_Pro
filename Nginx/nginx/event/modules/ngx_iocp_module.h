@@ -9,7 +9,8 @@
 #define _NGX_IOCP_MODULE_H_INCLUDED_
 
 
-typedef struct {
+typedef struct
+{
     int  threads;
     int  post_acceptex;
     int  acceptex_read;

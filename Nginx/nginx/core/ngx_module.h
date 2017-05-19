@@ -243,7 +243,8 @@
 #define NGX_MODULE_V1_PADDING  0, 0, 0, 0, 0, 0, 0, 0
 
 
-struct ngx_module_s {
+struct ngx_module_s
+{
     ngx_uint_t            ctx_index;
     ngx_uint_t            index;
 
@@ -281,7 +282,8 @@ struct ngx_module_s {
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t             name;
     void               *(*create_conf)(ngx_cycle_t *cycle);
     char               *(*init_conf)(ngx_cycle_t *cycle, void *conf);
@@ -295,7 +297,7 @@ ngx_int_t ngx_count_modules(ngx_cycle_t *cycle, ngx_uint_t type);
 
 
 ngx_int_t ngx_add_module(ngx_conf_t *cf, ngx_str_t *file,
-    ngx_module_t *module, char **order);
+                         ngx_module_t *module, char **order);
 
 
 extern ngx_module_t  *ngx_modules[];

@@ -14,14 +14,16 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     void        **main_conf;
     void        **srv_conf;
     void        **loc_conf;
 } ngx_http_conf_ctx_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_int_t   (*preconfiguration)(ngx_conf_t *cf);
     ngx_int_t   (*postconfiguration)(ngx_conf_t *cf);
 

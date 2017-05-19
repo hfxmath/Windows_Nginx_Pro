@@ -16,7 +16,8 @@
 
 typedef struct ngx_stream_upstream_rr_peer_s   ngx_stream_upstream_rr_peer_t;
 
-struct ngx_stream_upstream_rr_peer_s {
+struct ngx_stream_upstream_rr_peer_s
+{
     struct sockaddr                 *sockaddr;
     socklen_t                        socklen;
     ngx_str_t                        name;
@@ -52,7 +53,8 @@ struct ngx_stream_upstream_rr_peer_s {
 
 typedef struct ngx_stream_upstream_rr_peers_s  ngx_stream_upstream_rr_peers_t;
 
-struct ngx_stream_upstream_rr_peers_s {
+struct ngx_stream_upstream_rr_peers_s
+{
     ngx_uint_t                       number;
 
 #if (NGX_STREAM_UPSTREAM_ZONE)
@@ -63,8 +65,8 @@ struct ngx_stream_upstream_rr_peers_s {
 
     ngx_uint_t                       total_weight;
 
-    unsigned                         single:1;
-    unsigned                         weighted:1;
+    unsigned                         single: 1;
+    unsigned                         weighted: 1;
 
     ngx_str_t                       *name;
 
@@ -118,7 +120,8 @@ struct ngx_stream_upstream_rr_peers_s {
 #endif
 
 
-typedef struct {
+typedef struct
+{
     ngx_stream_upstream_rr_peers_t  *peers;
     ngx_stream_upstream_rr_peer_t   *current;
     uintptr_t                       *tried;
@@ -127,13 +130,13 @@ typedef struct {
 
 
 ngx_int_t ngx_stream_upstream_init_round_robin(ngx_conf_t *cf,
-    ngx_stream_upstream_srv_conf_t *us);
+        ngx_stream_upstream_srv_conf_t *us);
 ngx_int_t ngx_stream_upstream_init_round_robin_peer(ngx_stream_session_t *s,
-    ngx_stream_upstream_srv_conf_t *us);
+        ngx_stream_upstream_srv_conf_t *us);
 ngx_int_t ngx_stream_upstream_get_round_robin_peer(ngx_peer_connection_t *pc,
-    void *data);
+        void *data);
 void ngx_stream_upstream_free_round_robin_peer(ngx_peer_connection_t *pc,
-    void *data, ngx_uint_t state);
+        void *data, ngx_uint_t state);
 
 
 #endif /* _NGX_STREAM_UPSTREAM_ROUND_ROBIN_H_INCLUDED_ */

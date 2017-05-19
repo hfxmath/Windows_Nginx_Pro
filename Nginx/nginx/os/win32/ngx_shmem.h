@@ -13,7 +13,8 @@
 #include <ngx_core.h>
 
 
-typedef struct {
+typedef struct
+{
     u_char      *addr;
     size_t       size;
     ngx_str_t    name;

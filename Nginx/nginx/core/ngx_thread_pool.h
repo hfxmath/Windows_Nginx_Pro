@@ -14,7 +14,8 @@
 #include <ngx_event.h>
 
 
-struct ngx_thread_task_s {
+struct ngx_thread_task_s
+{
     ngx_thread_task_t   *next;
     ngx_uint_t           id;
     void                *ctx;

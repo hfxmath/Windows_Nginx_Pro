@@ -32,13 +32,13 @@
 
 static ngx_inline ngx_atomic_uint_t
 ngx_atomic_cmp_set(ngx_atomic_t *lock, ngx_atomic_uint_t old,
-    ngx_atomic_uint_t set)
+                   ngx_atomic_uint_t set)
 {
     __asm__ volatile (
 
-    NGX_CASA " [%1] 0x80, %2, %0"
+        NGX_CASA " [%1] 0x80, %2, %0"
 
-    : "+r" (set) : "r" (lock), "r" (old) : "memory");
+        : "+r" (set) : "r" (lock), "r" (old) : "memory");
 
     return (set == old);
 }
@@ -51,17 +51,19 @@ ngx_atomic_fetch_add(ngx_atomic_t *value, ngx_atomic_int_t add)
 
     old = *value;
 
-    for ( ;; ) {
+    for ( ;; )
+    {
 
         res = old + add;
 
         __asm__ volatile (
 
-        NGX_CASA " [%1] 0x80, %2, %0"
+            NGX_CASA " [%1] 0x80, %2, %0"
 
-        : "+r" (res) : "r" (value), "r" (old) : "memory");
+            : "+r" (res) : "r" (value), "r" (old) : "memory");
 
-        if (res == old) {
+        if (res == old)
+        {
             return res;
         }
 

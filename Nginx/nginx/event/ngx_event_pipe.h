@@ -17,12 +17,13 @@
 typedef struct ngx_event_pipe_s  ngx_event_pipe_t;
 
 typedef ngx_int_t (*ngx_event_pipe_input_filter_pt)(ngx_event_pipe_t *p,
-                                                    ngx_buf_t *buf);
+        ngx_buf_t *buf);
 typedef ngx_int_t (*ngx_event_pipe_output_filter_pt)(void *data,
-                                                     ngx_chain_t *chain);
+        ngx_chain_t *chain);
 
 
-struct ngx_event_pipe_s {
+struct ngx_event_pipe_s
+{
     ngx_connection_t  *upstream;
     ngx_connection_t  *downstream;
 
@@ -49,23 +50,23 @@ struct ngx_event_pipe_s {
 
 #if (NGX_THREADS)
     ngx_int_t                       (*thread_handler)(ngx_thread_task_t *task,
-                                                      ngx_file_t *file);
+            ngx_file_t *file);
     void                             *thread_ctx;
     ngx_thread_task_t                *thread_task;
 #endif
 
-    unsigned           read:1;
-    unsigned           cacheable:1;
-    unsigned           single_buf:1;
-    unsigned           free_bufs:1;
-    unsigned           upstream_done:1;
-    unsigned           upstream_error:1;
-    unsigned           upstream_eof:1;
-    unsigned           upstream_blocked:1;
-    unsigned           downstream_done:1;
-    unsigned           downstream_error:1;
-    unsigned           cyclic_temp_file:1;
-    unsigned           aio:1;
+    unsigned           read: 1;
+    unsigned           cacheable: 1;
+    unsigned           single_buf: 1;
+    unsigned           free_bufs: 1;
+    unsigned           upstream_done: 1;
+    unsigned           upstream_error: 1;
+    unsigned           upstream_eof: 1;
+    unsigned           upstream_blocked: 1;
+    unsigned           downstream_done: 1;
+    unsigned           downstream_error: 1;
+    unsigned           cyclic_temp_file: 1;
+    unsigned           aio: 1;
 
     ngx_int_t          allocated;
     ngx_bufs_t         bufs;

@@ -135,7 +135,7 @@ typedef volatile ngx_atomic_uint_t  ngx_atomic_t;
 
 ngx_atomic_uint_t
 ngx_atomic_cmp_set(ngx_atomic_t *lock, ngx_atomic_uint_t old,
-    ngx_atomic_uint_t set);
+                   ngx_atomic_uint_t set);
 
 ngx_atomic_int_t
 ngx_atomic_fetch_add(ngx_atomic_t *value, ngx_atomic_int_t add);
@@ -176,7 +176,7 @@ typedef volatile ngx_atomic_uint_t  ngx_atomic_t;
 
 ngx_atomic_uint_t
 ngx_atomic_cmp_set(ngx_atomic_t *lock, ngx_atomic_uint_t old,
-    ngx_atomic_uint_t set);
+                   ngx_atomic_uint_t set);
 
 ngx_atomic_int_t
 ngx_atomic_fetch_add(ngx_atomic_t *value, ngx_atomic_int_t add);
@@ -276,9 +276,10 @@ typedef volatile ngx_atomic_uint_t  ngx_atomic_t;
 
 static ngx_inline ngx_atomic_uint_t
 ngx_atomic_cmp_set(ngx_atomic_t *lock, ngx_atomic_uint_t old,
-    ngx_atomic_uint_t set)
+                   ngx_atomic_uint_t set)
 {
-    if (*lock == old) {
+    if (*lock == old)
+    {
         *lock = set;
         return 1;
     }

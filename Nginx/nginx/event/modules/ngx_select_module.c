@@ -13,11 +13,11 @@
 static ngx_int_t ngx_select_init(ngx_cycle_t *cycle, ngx_msec_t timer);
 static void ngx_select_done(ngx_cycle_t *cycle);
 static ngx_int_t ngx_select_add_event(ngx_event_t *ev, ngx_int_t event,
-    ngx_uint_t flags);
+                                      ngx_uint_t flags);
 static ngx_int_t ngx_select_del_event(ngx_event_t *ev, ngx_int_t event,
-    ngx_uint_t flags);
+                                      ngx_uint_t flags);
 static ngx_int_t ngx_select_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
-    ngx_uint_t flags);
+        ngx_uint_t flags);
 static void ngx_select_repair_fd_sets(ngx_cycle_t *cycle);
 static char *ngx_select_init_conf(ngx_cycle_t *cycle, void *conf);
 
@@ -35,7 +35,8 @@ static ngx_event_t  **event_index;
 
 static ngx_str_t    select_name = ngx_string("select");
 
-ngx_event_module_t  ngx_select_module_ctx = {
+ngx_event_module_t  ngx_select_module_ctx =
+{
     &select_name,
     NULL,                                  /* create configuration */
     ngx_select_init_conf,                  /* init configuration */
@@ -55,7 +56,8 @@ ngx_event_module_t  ngx_select_module_ctx = {
 
 };
 
-ngx_module_t  ngx_select_module = {
+ngx_module_t  ngx_select_module =
+{
     NGX_MODULE_V1,
     &ngx_select_module_ctx,                /* module context */
     NULL,                                  /* module directives */
@@ -76,23 +78,26 @@ ngx_select_init(ngx_cycle_t *cycle, ngx_msec_t timer)
 {
     ngx_event_t  **index;
 
-    if (event_index == NULL) {
+    if (event_index == NULL)
+    {
         FD_ZERO(&master_read_fd_set);
         FD_ZERO(&master_write_fd_set);
         nevents = 0;
     }
 
     if (ngx_process >= NGX_PROCESS_WORKER
-        || cycle->old_cycle == NULL
-        || cycle->old_cycle->connection_n < cycle->connection_n)
+            || cycle->old_cycle == NULL
+            || cycle->old_cycle->connection_n < cycle->connection_n)
     {
         index = ngx_alloc(sizeof(ngx_event_t *) * 2 * cycle->connection_n,
                           cycle->log);
-        if (index == NULL) {
+        if (index == NULL)
+        {
             return NGX_ERROR;
         }
 
-        if (event_index) {
+        if (event_index)
+        {
             ngx_memcpy(index, event_index, sizeof(ngx_event_t *) * nevents);
             ngx_free(event_index);
         }
@@ -131,14 +136,15 @@ ngx_select_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
     ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
                    "select add event fd:%d ev:%i", c->fd, event);
 
-    if (ev->index != NGX_INVALID_INDEX) {
+    if (ev->index != NGX_INVALID_INDEX)
+    {
         ngx_log_error(NGX_LOG_ALERT, ev->log, 0,
                       "select event fd:%d ev:%i is already set", c->fd, event);
         return NGX_OK;
     }
 
     if ((event == NGX_READ_EVENT && ev->write)
-        || (event == NGX_WRITE_EVENT && !ev->write))
+            || (event == NGX_WRITE_EVENT && !ev->write))
     {
         ngx_log_error(NGX_LOG_ALERT, ev->log, 0,
                       "invalid select %s event fd:%d ev:%i",
@@ -146,14 +152,18 @@ ngx_select_add_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
         return NGX_ERROR;
     }
 
-    if (event == NGX_READ_EVENT) {
+    if (event == NGX_READ_EVENT)
+    {
         FD_SET(c->fd, &master_read_fd_set);
 
-    } else if (event == NGX_WRITE_EVENT) {
+    }
+    else if (event == NGX_WRITE_EVENT)
+    {
         FD_SET(c->fd, &master_write_fd_set);
     }
 
-    if (max_fd != -1 && max_fd < c->fd) {
+    if (max_fd != -1 && max_fd < c->fd)
+    {
         max_fd = c->fd;
     }
 
@@ -177,25 +187,31 @@ ngx_select_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 
     ev->active = 0;
 
-    if (ev->index == NGX_INVALID_INDEX) {
+    if (ev->index == NGX_INVALID_INDEX)
+    {
         return NGX_OK;
     }
 
     ngx_log_debug2(NGX_LOG_DEBUG_EVENT, ev->log, 0,
                    "select del event fd:%d ev:%i", c->fd, event);
 
-    if (event == NGX_READ_EVENT) {
+    if (event == NGX_READ_EVENT)
+    {
         FD_CLR(c->fd, &master_read_fd_set);
 
-    } else if (event == NGX_WRITE_EVENT) {
+    }
+    else if (event == NGX_WRITE_EVENT)
+    {
         FD_CLR(c->fd, &master_write_fd_set);
     }
 
-    if (max_fd == c->fd) {
+    if (max_fd == c->fd)
+    {
         max_fd = -1;
     }
 
-    if (ev->index < --nevents) {
+    if (ev->index < --nevents)
+    {
         e = event_index[nevents];
         event_index[ev->index] = e;
         e->index = ev->index;
@@ -209,7 +225,7 @@ ngx_select_del_event(ngx_event_t *ev, ngx_int_t event, ngx_uint_t flags)
 
 static ngx_int_t
 ngx_select_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
-    ngx_uint_t flags)
+                          ngx_uint_t flags)
 {
     int                ready, nready;
     ngx_err_t          err;
@@ -219,10 +235,13 @@ ngx_select_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
     struct timeval     tv, *tp;
     ngx_connection_t  *c;
 
-    if (max_fd == -1) {
-        for (i = 0; i < nevents; i++) {
+    if (max_fd == -1)
+    {
+        for (i = 0; i < nevents; i++)
+        {
             c = event_index[i]->data;
-            if (max_fd < c->fd) {
+            if (max_fd < c->fd)
+            {
                 max_fd = c->fd;
             }
         }
@@ -232,8 +251,10 @@ ngx_select_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
     }
 
 #if (NGX_DEBUG)
-    if (cycle->log->log_level & NGX_LOG_DEBUG_ALL) {
-        for (i = 0; i < nevents; i++) {
+    if (cycle->log->log_level & NGX_LOG_DEBUG_ALL)
+    {
+        for (i = 0; i < nevents; i++)
+        {
             ev = event_index[i];
             c = ev->data;
             ngx_log_debug2(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
@@ -245,10 +266,13 @@ ngx_select_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
     }
 #endif
 
-    if (timer == NGX_TIMER_INFINITE) {
+    if (timer == NGX_TIMER_INFINITE)
+    {
         tp = NULL;
 
-    } else {
+    }
+    else
+    {
         tv.tv_sec = (long) (timer / 1000);
         tv.tv_usec = (long) ((timer % 1000) * 1000);
         tp = &tv;
@@ -264,40 +288,49 @@ ngx_select_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
 
     err = (ready == -1) ? ngx_errno : 0;
 
-    if (flags & NGX_UPDATE_TIME || ngx_event_timer_alarm) {
+    if (flags & NGX_UPDATE_TIME || ngx_event_timer_alarm)
+    {
         ngx_time_update();
     }
 
     ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                    "select ready %d", ready);
 
-    if (err) {
+    if (err)
+    {
         ngx_uint_t  level;
 
-        if (err == NGX_EINTR) {
+        if (err == NGX_EINTR)
+        {
 
-            if (ngx_event_timer_alarm) {
+            if (ngx_event_timer_alarm)
+            {
                 ngx_event_timer_alarm = 0;
                 return NGX_OK;
             }
 
             level = NGX_LOG_INFO;
 
-        } else {
+        }
+        else
+        {
             level = NGX_LOG_ALERT;
         }
 
         ngx_log_error(level, cycle->log, err, "select() failed");
 
-        if (err == NGX_EBADF) {
+        if (err == NGX_EBADF)
+        {
             ngx_select_repair_fd_sets(cycle);
         }
 
         return NGX_ERROR;
     }
 
-    if (ready == 0) {
-        if (timer != NGX_TIMER_INFINITE) {
+    if (ready == 0)
+    {
+        if (timer != NGX_TIMER_INFINITE)
+        {
             return NGX_OK;
         }
 
@@ -308,31 +341,38 @@ ngx_select_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
 
     nready = 0;
 
-    for (i = 0; i < nevents; i++) {
+    for (i = 0; i < nevents; i++)
+    {
         ev = event_index[i];
         c = ev->data;
         found = 0;
 
-        if (ev->write) {
-            if (FD_ISSET(c->fd, &work_write_fd_set)) {
+        if (ev->write)
+        {
+            if (FD_ISSET(c->fd, &work_write_fd_set))
+            {
                 found = 1;
                 ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                                "select write %d", c->fd);
             }
 
-        } else {
-            if (FD_ISSET(c->fd, &work_read_fd_set)) {
+        }
+        else
+        {
+            if (FD_ISSET(c->fd, &work_read_fd_set))
+            {
                 found = 1;
                 ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
                                "select read %d", c->fd);
             }
         }
 
-        if (found) {
+        if (found)
+        {
             ev->ready = 1;
 
             queue = ev->accept ? &ngx_posted_accept_events
-                               : &ngx_posted_events;
+                    : &ngx_posted_events;
 
             ngx_post_event(ev, queue);
 
@@ -340,7 +380,8 @@ ngx_select_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
         }
     }
 
-    if (ready != nready) {
+    if (ready != nready)
+    {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
                       "select ready != events: %d:%d", ready, nready);
 
@@ -359,15 +400,18 @@ ngx_select_repair_fd_sets(ngx_cycle_t *cycle)
     ngx_err_t     err;
     ngx_socket_t  s;
 
-    for (s = 0; s <= max_fd; s++) {
+    for (s = 0; s <= max_fd; s++)
+    {
 
-        if (FD_ISSET(s, &master_read_fd_set) == 0) {
+        if (FD_ISSET(s, &master_read_fd_set) == 0)
+        {
             continue;
         }
 
         len = sizeof(int);
 
-        if (getsockopt(s, SOL_SOCKET, SO_TYPE, &n, &len) == -1) {
+        if (getsockopt(s, SOL_SOCKET, SO_TYPE, &n, &len) == -1)
+        {
             err = ngx_socket_errno;
 
             ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
@@ -377,15 +421,18 @@ ngx_select_repair_fd_sets(ngx_cycle_t *cycle)
         }
     }
 
-    for (s = 0; s <= max_fd; s++) {
+    for (s = 0; s <= max_fd; s++)
+    {
 
-        if (FD_ISSET(s, &master_write_fd_set) == 0) {
+        if (FD_ISSET(s, &master_write_fd_set) == 0)
+        {
             continue;
         }
 
         len = sizeof(int);
 
-        if (getsockopt(s, SOL_SOCKET, SO_TYPE, &n, &len) == -1) {
+        if (getsockopt(s, SOL_SOCKET, SO_TYPE, &n, &len) == -1)
+        {
             err = ngx_socket_errno;
 
             ngx_log_error(NGX_LOG_ALERT, cycle->log, err,
@@ -406,13 +453,15 @@ ngx_select_init_conf(ngx_cycle_t *cycle, void *conf)
 
     ecf = ngx_event_get_conf(cycle->conf_ctx, ngx_event_core_module);
 
-    if (ecf->use != ngx_select_module.ctx_index) {
+    if (ecf->use != ngx_select_module.ctx_index)
+    {
         return NGX_CONF_OK;
     }
 
     /* disable warning: the default FD_SETSIZE is 1024U in FreeBSD 5.x */
 
-    if (cycle->connection_n > FD_SETSIZE) {
+    if (cycle->connection_n > FD_SETSIZE)
+    {
         ngx_log_error(NGX_LOG_EMERG, cycle->log, 0,
                       "the maximum number of files "
                       "supported by select() is %ud", FD_SETSIZE);

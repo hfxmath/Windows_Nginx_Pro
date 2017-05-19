@@ -10,37 +10,43 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     uint32_t                    percent;
     ngx_http_variable_value_t   value;
 } ngx_http_split_clients_part_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_http_complex_value_t    value;
     ngx_array_t                 parts;
 } ngx_http_split_clients_ctx_t;
 
 
 static char *ngx_conf_split_clients_block(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+        void *conf);
 static char *ngx_http_split_clients(ngx_conf_t *cf, ngx_command_t *dummy,
-    void *conf);
+                                    void *conf);
 
-static ngx_command_t  ngx_http_split_clients_commands[] = {
+static ngx_command_t  ngx_http_split_clients_commands[] =
+{
 
-    { ngx_string("split_clients"),
-      NGX_HTTP_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_TAKE2,
-      ngx_conf_split_clients_block,
-      NGX_HTTP_MAIN_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("split_clients"),
+        NGX_HTTP_MAIN_CONF | NGX_CONF_BLOCK | NGX_CONF_TAKE2,
+        ngx_conf_split_clients_block,
+        NGX_HTTP_MAIN_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_http_module_t  ngx_http_split_clients_module_ctx = {
+static ngx_http_module_t  ngx_http_split_clients_module_ctx =
+{
     NULL,                                  /* preconfiguration */
     NULL,                                  /* postconfiguration */
 
@@ -55,7 +61,8 @@ static ngx_http_module_t  ngx_http_split_clients_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_split_clients_module = {
+ngx_module_t  ngx_http_split_clients_module =
+{
     NGX_MODULE_V1,
     &ngx_http_split_clients_module_ctx,    /* module context */
     ngx_http_split_clients_commands,       /* module directives */
@@ -73,7 +80,7 @@ ngx_module_t  ngx_http_split_clients_module = {
 
 static ngx_int_t
 ngx_http_split_clients_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data)
+                                ngx_http_variable_value_t *v, uintptr_t data)
 {
     ngx_http_split_clients_ctx_t *ctx = (ngx_http_split_clients_ctx_t *) data;
 
@@ -84,7 +91,8 @@ ngx_http_split_clients_variable(ngx_http_request_t *r,
 
     *v = ngx_http_variable_null_value;
 
-    if (ngx_http_complex_value(r, &ctx->value, &val) != NGX_OK) {
+    if (ngx_http_complex_value(r, &ctx->value, &val) != NGX_OK)
+    {
         return NGX_OK;
     }
 
@@ -92,12 +100,14 @@ ngx_http_split_clients_variable(ngx_http_request_t *r,
 
     part = ctx->parts.elts;
 
-    for (i = 0; i < ctx->parts.nelts; i++) {
+    for (i = 0; i < ctx->parts.nelts; i++)
+    {
 
         ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                        "http split: %uD %uD", hash, part[i].percent);
 
-        if (hash < part[i].percent || part[i].percent == 0) {
+        if (hash < part[i].percent || part[i].percent == 0)
+        {
             *v = part[i].value;
             return NGX_OK;
         }
@@ -121,7 +131,8 @@ ngx_conf_split_clients_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_http_compile_complex_value_t     ccv;
 
     ctx = ngx_pcalloc(cf->pool, sizeof(ngx_http_split_clients_ctx_t));
-    if (ctx == NULL) {
+    if (ctx == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -133,13 +144,15 @@ ngx_conf_split_clients_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ccv.value = &value[1];
     ccv.complex_value = &ctx->value;
 
-    if (ngx_http_compile_complex_value(&ccv) != NGX_OK) {
+    if (ngx_http_compile_complex_value(&ccv) != NGX_OK)
+    {
         return NGX_CONF_ERROR;
     }
 
     name = value[2];
 
-    if (name.data[0] != '$') {
+    if (name.data[0] != '$')
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "invalid variable name \"%V\"", &name);
         return NGX_CONF_ERROR;
@@ -149,7 +162,8 @@ ngx_conf_split_clients_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     name.data++;
 
     var = ngx_http_add_variable(cf, &name, NGX_HTTP_VAR_CHANGEABLE);
-    if (var == NULL) {
+    if (var == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -158,7 +172,7 @@ ngx_conf_split_clients_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     if (ngx_array_init(&ctx->parts, cf->pool, 2,
                        sizeof(ngx_http_split_clients_part_t))
-        != NGX_OK)
+            != NGX_OK)
     {
         return NGX_CONF_ERROR;
     }
@@ -172,7 +186,8 @@ ngx_conf_split_clients_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     *cf = save;
 
-    if (rv != NGX_CONF_OK) {
+    if (rv != NGX_CONF_OK)
+    {
         return rv;
     }
 
@@ -180,15 +195,18 @@ ngx_conf_split_clients_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     last = 0;
     part = ctx->parts.elts;
 
-    for (i = 0; i < ctx->parts.nelts; i++) {
+    for (i = 0; i < ctx->parts.nelts; i++)
+    {
         sum = part[i].percent ? sum + part[i].percent : 10000;
-        if (sum > 10000) {
+        if (sum > 10000)
+        {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                                "percent total is greater than 100%%");
             return NGX_CONF_ERROR;
         }
 
-        if (part[i].percent) {
+        if (part[i].percent)
+        {
             last += part[i].percent * (uint64_t) 0xffffffff / 10000;
             part[i].percent = last;
         }
@@ -210,20 +228,26 @@ ngx_http_split_clients(ngx_conf_t *cf, ngx_command_t *dummy, void *conf)
     value = cf->args->elts;
 
     part = ngx_array_push(&ctx->parts);
-    if (part == NULL) {
+    if (part == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
-    if (value[0].len == 1 && value[0].data[0] == '*') {
+    if (value[0].len == 1 && value[0].data[0] == '*')
+    {
         part->percent = 0;
 
-    } else {
-        if (value[0].len == 0 || value[0].data[value[0].len - 1] != '%') {
+    }
+    else
+    {
+        if (value[0].len == 0 || value[0].data[value[0].len - 1] != '%')
+        {
             goto invalid;
         }
 
         n = ngx_atofp(value[0].data, value[0].len - 1, 2);
-        if (n == NGX_ERROR || n == 0) {
+        if (n == NGX_ERROR || n == 0)
+        {
             goto invalid;
         }
 

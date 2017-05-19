@@ -97,7 +97,8 @@ extern "C" {
 # define SHA_LAST_BLOCK  (SHA_CBLOCK-8)
 # define SHA_DIGEST_LENGTH 20
 
-typedef struct SHAstate_st {
+typedef struct SHAstate_st
+{
     SHA_LONG h0, h1, h2, h3, h4;
     SHA_LONG Nl, Nh;
     SHA_LONG data[SHA_LBLOCK];
@@ -131,7 +132,8 @@ void SHA1_Transform(SHA_CTX *c, const unsigned char *data);
 # define SHA224_DIGEST_LENGTH    28
 # define SHA256_DIGEST_LENGTH    32
 
-typedef struct SHA256state_st {
+typedef struct SHA256state_st
+{
     SHA_LONG h[8];
     SHA_LONG Nl, Nh;
     SHA_LONG data[SHA_LBLOCK];
@@ -180,10 +182,12 @@ void SHA256_Transform(SHA256_CTX *c, const unsigned char *data);
 #   define U64(C)     C##ULL
 #  endif
 
-typedef struct SHA512state_st {
+typedef struct SHA512state_st
+{
     SHA_LONG64 h[8];
     SHA_LONG64 Nl, Nh;
-    union {
+    union
+    {
         SHA_LONG64 d[SHA_LBLOCK];
         unsigned char p[SHA512_CBLOCK];
     } u;

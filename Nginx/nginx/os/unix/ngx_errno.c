@@ -34,8 +34,8 @@ ngx_strerror(ngx_err_t err, u_char *errstr, size_t size)
 {
     ngx_str_t  *msg;
 
-    msg = ((ngx_uint_t) err < NGX_SYS_NERR) ? &ngx_sys_errlist[err]:
-                                              &ngx_unknown_error;
+    msg = ((ngx_uint_t) err < NGX_SYS_NERR) ? &ngx_sys_errlist[err] :
+          &ngx_unknown_error;
     size = ngx_min(size, msg->len);
 
     return ngx_cpymem(errstr, msg->data, size);
@@ -58,16 +58,19 @@ ngx_strerror_init(void)
     len = NGX_SYS_NERR * sizeof(ngx_str_t);
 
     ngx_sys_errlist = malloc(len);
-    if (ngx_sys_errlist == NULL) {
+    if (ngx_sys_errlist == NULL)
+    {
         goto failed;
     }
 
-    for (err = 0; err < NGX_SYS_NERR; err++) {
+    for (err = 0; err < NGX_SYS_NERR; err++)
+    {
         msg = strerror(err);
         len = ngx_strlen(msg);
 
         p = malloc(len);
-        if (p == NULL) {
+        if (p == NULL)
+        {
             goto failed;
         }
 

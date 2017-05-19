@@ -23,7 +23,7 @@ ngx_casxa(ngx_atomic_uint_t set, ngx_atomic_uint_t old, ngx_atomic_t *lock);
 
 static ngx_inline ngx_atomic_uint_t
 ngx_atomic_cmp_set(ngx_atomic_t *lock, ngx_atomic_uint_t old,
-    ngx_atomic_uint_t set)
+                   ngx_atomic_uint_t set)
 {
     set = NGX_CASA(set, old, lock);
 
@@ -38,13 +38,15 @@ ngx_atomic_fetch_add(ngx_atomic_t *value, ngx_atomic_int_t add)
 
     old = *value;
 
-    for ( ;; ) {
+    for ( ;; )
+    {
 
         res = old + add;
 
         res = NGX_CASA(res, old, value);
 
-        if (res == old) {
+        if (res == old)
+        {
             return res;
         }
 

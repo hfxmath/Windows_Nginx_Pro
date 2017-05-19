@@ -14,13 +14,15 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     size_t                          recv_buffer_size;
     u_char                         *recv_buffer;
 } ngx_http_v2_main_conf_t;
 
 
-typedef struct {
+typedef struct
+{
     size_t                          pool_size;
     ngx_uint_t                      concurrent_streams;
     size_t                          max_field_size;
@@ -31,7 +33,8 @@ typedef struct {
 } ngx_http_v2_srv_conf_t;
 
 
-typedef struct {
+typedef struct
+{
     size_t                          chunk_size;
 } ngx_http_v2_loc_conf_t;
 

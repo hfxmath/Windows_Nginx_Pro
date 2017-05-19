@@ -15,7 +15,8 @@ ngx_murmur_hash2(u_char *data, size_t len)
 
     h = 0 ^ len;
 
-    while (len >= 4) {
+    while (len >= 4)
+    {
         k  = data[0];
         k |= data[1] << 8;
         k |= data[2] << 16;
@@ -32,7 +33,8 @@ ngx_murmur_hash2(u_char *data, size_t len)
         len -= 4;
     }
 
-    switch (len) {
+    switch (len)
+    {
     case 3:
         h ^= data[2] << 16;
     case 2:

@@ -13,11 +13,12 @@
 static ngx_uint_t ngx_http_test_if_unmodified(ngx_http_request_t *r);
 static ngx_uint_t ngx_http_test_if_modified(ngx_http_request_t *r);
 static ngx_uint_t ngx_http_test_if_match(ngx_http_request_t *r,
-    ngx_table_elt_t *header, ngx_uint_t weak);
+        ngx_table_elt_t *header, ngx_uint_t weak);
 static ngx_int_t ngx_http_not_modified_filter_init(ngx_conf_t *cf);
 
 
-static ngx_http_module_t  ngx_http_not_modified_filter_module_ctx = {
+static ngx_http_module_t  ngx_http_not_modified_filter_module_ctx =
+{
     NULL,                                  /* preconfiguration */
     ngx_http_not_modified_filter_init,     /* postconfiguration */
 
@@ -32,7 +33,8 @@ static ngx_http_module_t  ngx_http_not_modified_filter_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_not_modified_filter_module = {
+ngx_module_t  ngx_http_not_modified_filter_module =
+{
     NGX_MODULE_V1,
     &ngx_http_not_modified_filter_module_ctx, /* module context */
     NULL,                                  /* module directives */
@@ -55,36 +57,37 @@ static ngx_int_t
 ngx_http_not_modified_header_filter(ngx_http_request_t *r)
 {
     if (r->headers_out.status != NGX_HTTP_OK
-        || r != r->main
-        || r->disable_not_modified)
+            || r != r->main
+            || r->disable_not_modified)
     {
         return ngx_http_next_header_filter(r);
     }
 
     if (r->headers_in.if_unmodified_since
-        && !ngx_http_test_if_unmodified(r))
+            && !ngx_http_test_if_unmodified(r))
     {
         return ngx_http_filter_finalize_request(r, NULL,
                                                 NGX_HTTP_PRECONDITION_FAILED);
     }
 
     if (r->headers_in.if_match
-        && !ngx_http_test_if_match(r, r->headers_in.if_match, 0))
+            && !ngx_http_test_if_match(r, r->headers_in.if_match, 0))
     {
         return ngx_http_filter_finalize_request(r, NULL,
                                                 NGX_HTTP_PRECONDITION_FAILED);
     }
 
-    if (r->headers_in.if_modified_since || r->headers_in.if_none_match) {
+    if (r->headers_in.if_modified_since || r->headers_in.if_none_match)
+    {
 
         if (r->headers_in.if_modified_since
-            && ngx_http_test_if_modified(r))
+                && ngx_http_test_if_modified(r))
         {
             return ngx_http_next_header_filter(r);
         }
 
         if (r->headers_in.if_none_match
-            && !ngx_http_test_if_match(r, r->headers_in.if_none_match, 1))
+                && !ngx_http_test_if_match(r, r->headers_in.if_none_match, 1))
         {
             return ngx_http_next_header_filter(r);
         }
@@ -97,7 +100,8 @@ ngx_http_not_modified_header_filter(ngx_http_request_t *r)
         ngx_http_clear_content_length(r);
         ngx_http_clear_accept_ranges(r);
 
-        if (r->headers_out.content_encoding) {
+        if (r->headers_out.content_encoding)
+        {
             r->headers_out.content_encoding->hash = 0;
             r->headers_out.content_encoding = NULL;
         }
@@ -114,7 +118,8 @@ ngx_http_test_if_unmodified(ngx_http_request_t *r)
 {
     time_t  iums;
 
-    if (r->headers_out.last_modified_time == (time_t) -1) {
+    if (r->headers_out.last_modified_time == (time_t) - 1)
+    {
         return 0;
     }
 
@@ -122,9 +127,10 @@ ngx_http_test_if_unmodified(ngx_http_request_t *r)
                                r->headers_in.if_unmodified_since->value.len);
 
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                 "http iums:%T lm:%T", iums, r->headers_out.last_modified_time);
+                   "http iums:%T lm:%T", iums, r->headers_out.last_modified_time);
 
-    if (iums >= r->headers_out.last_modified_time) {
+    if (iums >= r->headers_out.last_modified_time)
+    {
         return 1;
     }
 
@@ -138,13 +144,15 @@ ngx_http_test_if_modified(ngx_http_request_t *r)
     time_t                     ims;
     ngx_http_core_loc_conf_t  *clcf;
 
-    if (r->headers_out.last_modified_time == (time_t) -1) {
+    if (r->headers_out.last_modified_time == (time_t) - 1)
+    {
         return 1;
     }
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
-    if (clcf->if_modified_since == NGX_HTTP_IMS_OFF) {
+    if (clcf->if_modified_since == NGX_HTTP_IMS_OFF)
+    {
         return 1;
     }
 
@@ -154,12 +162,13 @@ ngx_http_test_if_modified(ngx_http_request_t *r)
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    "http ims:%T lm:%T", ims, r->headers_out.last_modified_time);
 
-    if (ims == r->headers_out.last_modified_time) {
+    if (ims == r->headers_out.last_modified_time)
+    {
         return 0;
     }
 
     if (clcf->if_modified_since == NGX_HTTP_IMS_EXACT
-        || ims < r->headers_out.last_modified_time)
+            || ims < r->headers_out.last_modified_time)
     {
         return 1;
     }
@@ -170,18 +179,20 @@ ngx_http_test_if_modified(ngx_http_request_t *r)
 
 static ngx_uint_t
 ngx_http_test_if_match(ngx_http_request_t *r, ngx_table_elt_t *header,
-    ngx_uint_t weak)
+                       ngx_uint_t weak)
 {
     u_char     *start, *end, ch;
     ngx_str_t   etag, *list;
 
     list = &header->value;
 
-    if (list->len == 1 && list->data[0] == '*') {
+    if (list->len == 1 && list->data[0] == '*')
+    {
         return 1;
     }
 
-    if (r->headers_out.etag == NULL) {
+    if (r->headers_out.etag == NULL)
+    {
         return 0;
     }
 
@@ -191,9 +202,9 @@ ngx_http_test_if_match(ngx_http_request_t *r, ngx_table_elt_t *header,
                    "http im:\"%V\" etag:%V", list, &etag);
 
     if (weak
-        && etag.len > 2
-        && etag.data[0] == 'W'
-        && etag.data[1] == '/')
+            && etag.len > 2
+            && etag.data[0] == 'W'
+            && etag.data[1] == '/')
     {
         etag.len -= 2;
         etag.data += 2;
@@ -202,30 +213,35 @@ ngx_http_test_if_match(ngx_http_request_t *r, ngx_table_elt_t *header,
     start = list->data;
     end = list->data + list->len;
 
-    while (start < end) {
+    while (start < end)
+    {
 
         if (weak
-            && end - start > 2
-            && start[0] == 'W'
-            && start[1] == '/')
+                && end - start > 2
+                && start[0] == 'W'
+                && start[1] == '/')
         {
             start += 2;
         }
 
-        if (etag.len > (size_t) (end - start)) {
+        if (etag.len > (size_t) (end - start))
+        {
             return 0;
         }
 
-        if (ngx_strncmp(start, etag.data, etag.len) != 0) {
+        if (ngx_strncmp(start, etag.data, etag.len) != 0)
+        {
             goto skip;
         }
 
         start += etag.len;
 
-        while (start < end) {
+        while (start < end)
+        {
             ch = *start;
 
-            if (ch == ' ' || ch == '\t') {
+            if (ch == ' ' || ch == '\t')
+            {
                 start++;
                 continue;
             }
@@ -233,17 +249,23 @@ ngx_http_test_if_match(ngx_http_request_t *r, ngx_table_elt_t *header,
             break;
         }
 
-        if (start == end || *start == ',') {
+        if (start == end || *start == ',')
+        {
             return 1;
         }
 
-    skip:
+skip:
 
-        while (start < end && *start != ',') { start++; }
-        while (start < end) {
+        while (start < end && *start != ',')
+        {
+            start++;
+        }
+        while (start < end)
+        {
             ch = *start;
 
-            if (ch == ' ' || ch == '\t' || ch == ',') {
+            if (ch == ' ' || ch == '\t' || ch == ',')
+            {
                 start++;
                 continue;
             }

@@ -80,7 +80,8 @@ extern "C" {
 typedef OPENSSL_STRING *OPENSSL_PSTRING;
 DECLARE_SPECIAL_STACK_OF(OPENSSL_PSTRING, OPENSSL_STRING)
 
-typedef struct txt_db_st {
+typedef struct txt_db_st
+{
     int num_fields;
     STACK_OF(OPENSSL_PSTRING) *data;
     LHASH_OF(OPENSSL_STRING) **index;

@@ -14,7 +14,8 @@
 #include <ngx_stream.h>
 
 
-typedef struct {
+typedef struct
+{
     ngx_msec_t       handshake_timeout;
 
     ngx_flag_t       prefer_server_ciphers;

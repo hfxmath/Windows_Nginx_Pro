@@ -18,12 +18,13 @@
 
 typedef ssize_t (*ngx_recv_pt)(ngx_connection_t *c, u_char *buf, size_t size);
 typedef ssize_t (*ngx_recv_chain_pt)(ngx_connection_t *c, ngx_chain_t *in,
-    off_t limit);
+                                     off_t limit);
 typedef ssize_t (*ngx_send_pt)(ngx_connection_t *c, u_char *buf, size_t size);
 typedef ngx_chain_t *(*ngx_send_chain_pt)(ngx_connection_t *c, ngx_chain_t *in,
-    off_t limit);
+        off_t limit);
 
-typedef struct {
+typedef struct
+{
     ngx_recv_pt        recv;
     ngx_recv_chain_pt  recv_chain;
     ngx_recv_pt        udp_recv;
@@ -47,7 +48,7 @@ ssize_t ngx_readv_chain(ngx_connection_t *c, ngx_chain_t *entry, off_t limit);
 ssize_t ngx_udp_unix_recv(ngx_connection_t *c, u_char *buf, size_t size);
 ssize_t ngx_unix_send(ngx_connection_t *c, u_char *buf, size_t size);
 ngx_chain_t *ngx_writev_chain(ngx_connection_t *c, ngx_chain_t *in,
-    off_t limit);
+                              off_t limit);
 ssize_t ngx_udp_unix_send(ngx_connection_t *c, u_char *buf, size_t size);
 
 
@@ -58,7 +59,8 @@ ssize_t ngx_udp_unix_send(ngx_connection_t *c, u_char *buf, size_t size);
 #endif
 
 
-typedef struct {
+typedef struct
+{
     struct iovec  *iovs;
     ngx_uint_t     count;
     size_t         size;
@@ -66,7 +68,7 @@ typedef struct {
 } ngx_iovec_t;
 
 ngx_chain_t *ngx_output_chain_to_iovec(ngx_iovec_t *vec, ngx_chain_t *in,
-    size_t limit, ngx_log_t *log);
+                                       size_t limit, ngx_log_t *log);
 
 
 ssize_t ngx_writev(ngx_connection_t *c, ngx_iovec_t *vec);

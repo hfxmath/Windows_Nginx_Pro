@@ -14,7 +14,7 @@
 static ngx_int_t ngx_http_v2_add_variables(ngx_conf_t *cf);
 
 static ngx_int_t ngx_http_v2_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data);
+                                      ngx_http_variable_value_t *v, uintptr_t data);
 
 static ngx_int_t ngx_http_v2_module_init(ngx_cycle_t *cycle);
 
@@ -22,157 +22,193 @@ static void *ngx_http_v2_create_main_conf(ngx_conf_t *cf);
 static char *ngx_http_v2_init_main_conf(ngx_conf_t *cf, void *conf);
 static void *ngx_http_v2_create_srv_conf(ngx_conf_t *cf);
 static char *ngx_http_v2_merge_srv_conf(ngx_conf_t *cf, void *parent,
-    void *child);
+                                        void *child);
 static void *ngx_http_v2_create_loc_conf(ngx_conf_t *cf);
 static char *ngx_http_v2_merge_loc_conf(ngx_conf_t *cf, void *parent,
-    void *child);
+                                        void *child);
 
 static char *ngx_http_v2_recv_buffer_size(ngx_conf_t *cf, void *post,
-    void *data);
+        void *data);
 static char *ngx_http_v2_pool_size(ngx_conf_t *cf, void *post, void *data);
 static char *ngx_http_v2_streams_index_mask(ngx_conf_t *cf, void *post,
-    void *data);
+        void *data);
 static char *ngx_http_v2_chunk_size(ngx_conf_t *cf, void *post, void *data);
 static char *ngx_http_v2_spdy_deprecated(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+        void *conf);
 
 
 static ngx_conf_post_t  ngx_http_v2_recv_buffer_size_post =
-    { ngx_http_v2_recv_buffer_size };
+{ ngx_http_v2_recv_buffer_size };
 static ngx_conf_post_t  ngx_http_v2_pool_size_post =
-    { ngx_http_v2_pool_size };
+{ ngx_http_v2_pool_size };
 static ngx_conf_post_t  ngx_http_v2_streams_index_mask_post =
-    { ngx_http_v2_streams_index_mask };
+{ ngx_http_v2_streams_index_mask };
 static ngx_conf_post_t  ngx_http_v2_chunk_size_post =
-    { ngx_http_v2_chunk_size };
+{ ngx_http_v2_chunk_size };
 
 
-static ngx_command_t  ngx_http_v2_commands[] = {
+static ngx_command_t  ngx_http_v2_commands[] =
+{
 
-    { ngx_string("http2_recv_buffer_size"),
-      NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_MAIN_CONF_OFFSET,
-      offsetof(ngx_http_v2_main_conf_t, recv_buffer_size),
-      &ngx_http_v2_recv_buffer_size_post },
+    {
+        ngx_string("http2_recv_buffer_size"),
+        NGX_HTTP_MAIN_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_MAIN_CONF_OFFSET,
+        offsetof(ngx_http_v2_main_conf_t, recv_buffer_size),
+        &ngx_http_v2_recv_buffer_size_post
+    },
 
-    { ngx_string("http2_pool_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      offsetof(ngx_http_v2_srv_conf_t, pool_size),
-      &ngx_http_v2_pool_size_post },
+    {
+        ngx_string("http2_pool_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        offsetof(ngx_http_v2_srv_conf_t, pool_size),
+        &ngx_http_v2_pool_size_post
+    },
 
-    { ngx_string("http2_max_concurrent_streams"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_num_slot,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      offsetof(ngx_http_v2_srv_conf_t, concurrent_streams),
-      NULL },
+    {
+        ngx_string("http2_max_concurrent_streams"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_num_slot,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        offsetof(ngx_http_v2_srv_conf_t, concurrent_streams),
+        NULL
+    },
 
-    { ngx_string("http2_max_field_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      offsetof(ngx_http_v2_srv_conf_t, max_field_size),
-      NULL },
+    {
+        ngx_string("http2_max_field_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        offsetof(ngx_http_v2_srv_conf_t, max_field_size),
+        NULL
+    },
 
-    { ngx_string("http2_max_header_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      offsetof(ngx_http_v2_srv_conf_t, max_header_size),
-      NULL },
+    {
+        ngx_string("http2_max_header_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        offsetof(ngx_http_v2_srv_conf_t, max_header_size),
+        NULL
+    },
 
-    { ngx_string("http2_streams_index_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_num_slot,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      offsetof(ngx_http_v2_srv_conf_t, streams_index_mask),
-      &ngx_http_v2_streams_index_mask_post },
+    {
+        ngx_string("http2_streams_index_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_num_slot,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        offsetof(ngx_http_v2_srv_conf_t, streams_index_mask),
+        &ngx_http_v2_streams_index_mask_post
+    },
 
-    { ngx_string("http2_recv_timeout"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_msec_slot,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      offsetof(ngx_http_v2_srv_conf_t, recv_timeout),
-      NULL },
+    {
+        ngx_string("http2_recv_timeout"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_msec_slot,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        offsetof(ngx_http_v2_srv_conf_t, recv_timeout),
+        NULL
+    },
 
-    { ngx_string("http2_idle_timeout"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_msec_slot,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      offsetof(ngx_http_v2_srv_conf_t, idle_timeout),
-      NULL },
+    {
+        ngx_string("http2_idle_timeout"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_msec_slot,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        offsetof(ngx_http_v2_srv_conf_t, idle_timeout),
+        NULL
+    },
 
-    { ngx_string("http2_chunk_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_v2_loc_conf_t, chunk_size),
-      &ngx_http_v2_chunk_size_post },
+    {
+        ngx_string("http2_chunk_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_v2_loc_conf_t, chunk_size),
+        &ngx_http_v2_chunk_size_post
+    },
 
-    { ngx_string("spdy_recv_buffer_size"),
-      NGX_HTTP_MAIN_CONF|NGX_CONF_TAKE1,
-      ngx_http_v2_spdy_deprecated,
-      NGX_HTTP_MAIN_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("spdy_recv_buffer_size"),
+        NGX_HTTP_MAIN_CONF | NGX_CONF_TAKE1,
+        ngx_http_v2_spdy_deprecated,
+        NGX_HTTP_MAIN_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("spdy_pool_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_http_v2_spdy_deprecated,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("spdy_pool_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_http_v2_spdy_deprecated,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("spdy_max_concurrent_streams"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_http_v2_spdy_deprecated,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("spdy_max_concurrent_streams"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_http_v2_spdy_deprecated,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("spdy_streams_index_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_http_v2_spdy_deprecated,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("spdy_streams_index_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_http_v2_spdy_deprecated,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("spdy_recv_timeout"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_http_v2_spdy_deprecated,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("spdy_recv_timeout"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_http_v2_spdy_deprecated,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("spdy_keepalive_timeout"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_http_v2_spdy_deprecated,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("spdy_keepalive_timeout"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_http_v2_spdy_deprecated,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("spdy_headers_comp"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_CONF_TAKE1,
-      ngx_http_v2_spdy_deprecated,
-      NGX_HTTP_SRV_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("spdy_headers_comp"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_CONF_TAKE1,
+        ngx_http_v2_spdy_deprecated,
+        NGX_HTTP_SRV_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("spdy_chunk_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_http_v2_spdy_deprecated,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("spdy_chunk_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_http_v2_spdy_deprecated,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_http_module_t  ngx_http_v2_module_ctx = {
+static ngx_http_module_t  ngx_http_v2_module_ctx =
+{
     ngx_http_v2_add_variables,             /* preconfiguration */
     NULL,                                  /* postconfiguration */
 
@@ -187,7 +223,8 @@ static ngx_http_module_t  ngx_http_v2_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_v2_module = {
+ngx_module_t  ngx_http_v2_module =
+{
     NGX_MODULE_V1,
     &ngx_http_v2_module_ctx,               /* module context */
     ngx_http_v2_commands,                  /* module directives */
@@ -203,10 +240,13 @@ ngx_module_t  ngx_http_v2_module = {
 };
 
 
-static ngx_http_variable_t  ngx_http_v2_vars[] = {
+static ngx_http_variable_t  ngx_http_v2_vars[] =
+{
 
-    { ngx_string("http2"), NULL,
-      ngx_http_v2_variable, 0, 0, 0 },
+    {
+        ngx_string("http2"), NULL,
+        ngx_http_v2_variable, 0, 0, 0
+    },
 
     { ngx_null_string, NULL, NULL, 0, 0, 0 }
 };
@@ -217,9 +257,11 @@ ngx_http_v2_add_variables(ngx_conf_t *cf)
 {
     ngx_http_variable_t  *var, *v;
 
-    for (v = ngx_http_v2_vars; v->name.len; v++) {
+    for (v = ngx_http_v2_vars; v->name.len; v++)
+    {
         var = ngx_http_add_variable(cf, &v->name, v->flags);
-        if (var == NULL) {
+        if (var == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -233,13 +275,15 @@ ngx_http_v2_add_variables(ngx_conf_t *cf)
 
 static ngx_int_t
 ngx_http_v2_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data)
+                     ngx_http_variable_value_t *v, uintptr_t data)
 {
 
-    if (r->stream) {
+    if (r->stream)
+    {
 #if (NGX_HTTP_SSL)
 
-        if (r->connection->ssl) {
+        if (r->connection->ssl)
+        {
             v->len = sizeof("h2") - 1;
             v->valid = 1;
             v->no_cacheable = 0;
@@ -278,7 +322,8 @@ ngx_http_v2_create_main_conf(ngx_conf_t *cf)
     ngx_http_v2_main_conf_t  *h2mcf;
 
     h2mcf = ngx_pcalloc(cf->pool, sizeof(ngx_http_v2_main_conf_t));
-    if (h2mcf == NULL) {
+    if (h2mcf == NULL)
+    {
         return NULL;
     }
 
@@ -305,7 +350,8 @@ ngx_http_v2_create_srv_conf(ngx_conf_t *cf)
     ngx_http_v2_srv_conf_t  *h2scf;
 
     h2scf = ngx_pcalloc(cf->pool, sizeof(ngx_http_v2_srv_conf_t));
-    if (h2scf == NULL) {
+    if (h2scf == NULL)
+    {
         return NULL;
     }
 
@@ -359,7 +405,8 @@ ngx_http_v2_create_loc_conf(ngx_conf_t *cf)
     ngx_http_v2_loc_conf_t  *h2lcf;
 
     h2lcf = ngx_pcalloc(cf->pool, sizeof(ngx_http_v2_loc_conf_t));
-    if (h2lcf == NULL) {
+    if (h2lcf == NULL)
+    {
         return NULL;
     }
 
@@ -386,7 +433,8 @@ ngx_http_v2_recv_buffer_size(ngx_conf_t *cf, void *post, void *data)
 {
     size_t *sp = data;
 
-    if (*sp <= 2 * NGX_HTTP_V2_STATE_BUFFER_SIZE) {
+    if (*sp <= 2 * NGX_HTTP_V2_STATE_BUFFER_SIZE)
+    {
         return "value is too small";
     }
 
@@ -399,7 +447,8 @@ ngx_http_v2_pool_size(ngx_conf_t *cf, void *post, void *data)
 {
     size_t *sp = data;
 
-    if (*sp < NGX_MIN_POOL_SIZE) {
+    if (*sp < NGX_MIN_POOL_SIZE)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "the pool size must be no less than %uz",
                            NGX_MIN_POOL_SIZE);
@@ -407,7 +456,8 @@ ngx_http_v2_pool_size(ngx_conf_t *cf, void *post, void *data)
         return NGX_CONF_ERROR;
     }
 
-    if (*sp % NGX_POOL_ALIGNMENT) {
+    if (*sp % NGX_POOL_ALIGNMENT)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "the pool size must be a multiple of %uz",
                            NGX_POOL_ALIGNMENT);
@@ -428,7 +478,8 @@ ngx_http_v2_streams_index_mask(ngx_conf_t *cf, void *post, void *data)
 
     mask = *np - 1;
 
-    if (*np == 0 || (*np & mask)) {
+    if (*np == 0 || (*np & mask))
+    {
         return "must be a power of two";
     }
 
@@ -443,14 +494,16 @@ ngx_http_v2_chunk_size(ngx_conf_t *cf, void *post, void *data)
 {
     size_t *sp = data;
 
-    if (*sp == 0) {
+    if (*sp == 0)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "the http2 chunk size cannot be zero");
 
         return NGX_CONF_ERROR;
     }
 
-    if (*sp > NGX_HTTP_V2_MAX_FRAME_SIZE) {
+    if (*sp > NGX_HTTP_V2_MAX_FRAME_SIZE)
+    {
         *sp = NGX_HTTP_V2_MAX_FRAME_SIZE;
     }
 

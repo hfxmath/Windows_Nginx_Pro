@@ -14,7 +14,8 @@
 #include <ngx_mail.h>
 
 
-typedef struct {
+typedef struct
+{
     size_t       client_buffer_size;
 
     ngx_str_t    capability;

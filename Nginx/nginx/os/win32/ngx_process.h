@@ -24,7 +24,8 @@ typedef DWORD               ngx_pid_t;
 typedef uint64_t            ngx_cpuset_t;
 
 
-typedef struct {
+typedef struct
+{
     HANDLE                  handle;
     ngx_pid_t               pid;
     char                   *name;
@@ -37,12 +38,13 @@ typedef struct {
     u_char                  quit_event[NGX_PROCESS_SYNC_NAME];
     u_char                  reopen_event[NGX_PROCESS_SYNC_NAME];
 
-    unsigned                just_spawn:1;
-    unsigned                exiting:1;
+    unsigned                just_spawn: 1;
+    unsigned                exiting: 1;
 } ngx_process_t;
 
 
-typedef struct {
+typedef struct
+{
     char                   *path;
     char                   *name;
     char                   *args;

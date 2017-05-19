@@ -29,17 +29,17 @@ ngx_cpuid(uint32_t i, uint32_t *buf)
 
     __asm__ (
 
-    "    mov    %%ebx, %%esi;  "
+        "    mov    %%ebx, %%esi;  "
 
-    "    cpuid;                "
-    "    mov    %%eax, (%1);   "
-    "    mov    %%ebx, 4(%1);  "
-    "    mov    %%edx, 8(%1);  "
-    "    mov    %%ecx, 12(%1); "
+        "    cpuid;                "
+        "    mov    %%eax, (%1);   "
+        "    mov    %%ebx, 4(%1);  "
+        "    mov    %%edx, 8(%1);  "
+        "    mov    %%ecx, 12(%1); "
 
-    "    mov    %%esi, %%ebx;  "
+        "    mov    %%esi, %%ebx;  "
 
-    : : "a" (i), "D" (buf) : "ecx", "edx", "esi", "memory" );
+        : : "a" (i), "D" (buf) : "ecx", "edx", "esi", "memory" );
 }
 
 
@@ -55,7 +55,7 @@ ngx_cpuid(uint32_t i, uint32_t *buf)
 
         "cpuid"
 
-    : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx) : "a" (i) );
+        : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx) : "a" (i) );
 
     buf[0] = eax;
     buf[1] = ebx;
@@ -85,15 +85,18 @@ ngx_cpuinfo(void)
 
     vendor = (u_char *) &vbuf[1];
 
-    if (vbuf[0] == 0) {
+    if (vbuf[0] == 0)
+    {
         return;
     }
 
     ngx_cpuid(1, cpu);
 
-    if (ngx_strcmp(vendor, "GenuineIntel") == 0) {
+    if (ngx_strcmp(vendor, "GenuineIntel") == 0)
+    {
 
-        switch ((cpu[0] & 0xf00) >> 8) {
+        switch ((cpu[0] & 0xf00) >> 8)
+        {
 
         /* Pentium */
         case 5:
@@ -106,7 +109,8 @@ ngx_cpuinfo(void)
 
             model = ((cpu[0] & 0xf0000) >> 8) | (cpu[0] & 0xf0);
 
-            if (model >= 0xd0) {
+            if (model >= 0xd0)
+            {
                 /* Intel Core, Core 2, Atom */
                 ngx_cacheline_size = 64;
             }
@@ -122,7 +126,9 @@ ngx_cpuinfo(void)
             break;
         }
 
-    } else if (ngx_strcmp(vendor, "AuthenticAMD") == 0) {
+    }
+    else if (ngx_strcmp(vendor, "AuthenticAMD") == 0)
+    {
         ngx_cacheline_size = 64;
     }
 }

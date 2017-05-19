@@ -78,8 +78,8 @@ typedef void (*X509V3_EXT_FREE) (void *);
 typedef void *(*X509V3_EXT_D2I)(void *, const unsigned char **, long);
 typedef int (*X509V3_EXT_I2D) (void *, unsigned char **);
 typedef STACK_OF(CONF_VALUE) *
-    (*X509V3_EXT_I2V) (const struct v3_ext_method *method, void *ext,
-                       STACK_OF(CONF_VALUE) *extlist);
+(*X509V3_EXT_I2V) (const struct v3_ext_method *method, void *ext,
+                   STACK_OF(CONF_VALUE) *extlist);
 typedef void *(*X509V3_EXT_V2I)(const struct v3_ext_method *method,
                                 struct v3_ext_ctx *ctx,
                                 STACK_OF(CONF_VALUE) *values);
@@ -94,29 +94,31 @@ typedef void *(*X509V3_EXT_R2I)(const struct v3_ext_method *method,
 
 /* V3 extension structure */
 
-struct v3_ext_method {
+struct v3_ext_method
+{
     int ext_nid;
     int ext_flags;
-/* If this is set the following four fields are ignored */
+    /* If this is set the following four fields are ignored */
     ASN1_ITEM_EXP *it;
-/* Old style ASN1 calls */
+    /* Old style ASN1 calls */
     X509V3_EXT_NEW ext_new;
     X509V3_EXT_FREE ext_free;
     X509V3_EXT_D2I d2i;
     X509V3_EXT_I2D i2d;
-/* The following pair is used for string extensions */
+    /* The following pair is used for string extensions */
     X509V3_EXT_I2S i2s;
     X509V3_EXT_S2I s2i;
-/* The following pair is used for multi-valued extensions */
+    /* The following pair is used for multi-valued extensions */
     X509V3_EXT_I2V i2v;
     X509V3_EXT_V2I v2i;
-/* The following are used for raw extensions */
+    /* The following are used for raw extensions */
     X509V3_EXT_I2R i2r;
     X509V3_EXT_R2I r2i;
     void *usr_data;             /* Any extension specific data */
 };
 
-typedef struct X509V3_CONF_METHOD_st {
+typedef struct X509V3_CONF_METHOD_st
+{
     char *(*get_string) (void *db, char *section, char *value);
     STACK_OF(CONF_VALUE) *(*get_section) (void *db, char *section);
     void (*free_string) (void *db, char *string);
@@ -124,7 +126,8 @@ typedef struct X509V3_CONF_METHOD_st {
 } X509V3_CONF_METHOD;
 
 /* Context specific info */
-struct v3_ext_ctx {
+struct v3_ext_ctx
+{
 # define CTX_TEST 0x1
     int flags;
     X509 *issuer_cert;
@@ -133,7 +136,7 @@ struct v3_ext_ctx {
     X509_CRL *crl;
     X509V3_CONF_METHOD *db_meth;
     void *db;
-/* Maybe more here */
+    /* Maybe more here */
 };
 
 typedef struct v3_ext_method X509V3_EXT_METHOD;
@@ -147,27 +150,32 @@ DECLARE_STACK_OF(X509V3_EXT_METHOD)
 
 typedef BIT_STRING_BITNAME ENUMERATED_NAMES;
 
-typedef struct BASIC_CONSTRAINTS_st {
+typedef struct BASIC_CONSTRAINTS_st
+{
     int ca;
     ASN1_INTEGER *pathlen;
 } BASIC_CONSTRAINTS;
 
-typedef struct PKEY_USAGE_PERIOD_st {
+typedef struct PKEY_USAGE_PERIOD_st
+{
     ASN1_GENERALIZEDTIME *notBefore;
     ASN1_GENERALIZEDTIME *notAfter;
 } PKEY_USAGE_PERIOD;
 
-typedef struct otherName_st {
+typedef struct otherName_st
+{
     ASN1_OBJECT *type_id;
     ASN1_TYPE *value;
 } OTHERNAME;
 
-typedef struct EDIPartyName_st {
+typedef struct EDIPartyName_st
+{
     ASN1_STRING *nameAssigner;
     ASN1_STRING *partyName;
 } EDIPARTYNAME;
 
-typedef struct GENERAL_NAME_st {
+typedef struct GENERAL_NAME_st
+{
 # define GEN_OTHERNAME   0
 # define GEN_EMAIL       1
 # define GEN_DNS         2
@@ -178,7 +186,8 @@ typedef struct GENERAL_NAME_st {
 # define GEN_IPADD       7
 # define GEN_RID         8
     int type;
-    union {
+    union
+    {
         char *ptr;
         OTHERNAME *otherName;   /* otherName */
         ASN1_IA5STRING *rfc822Name;
@@ -201,7 +210,8 @@ typedef struct GENERAL_NAME_st {
 
 typedef STACK_OF(GENERAL_NAME) GENERAL_NAMES;
 
-typedef struct ACCESS_DESCRIPTION_st {
+typedef struct ACCESS_DESCRIPTION_st
+{
     ASN1_OBJECT *method;
     GENERAL_NAME *location;
 } ACCESS_DESCRIPTION;
@@ -216,13 +226,15 @@ DECLARE_ASN1_SET_OF(GENERAL_NAME)
 DECLARE_STACK_OF(ACCESS_DESCRIPTION)
 DECLARE_ASN1_SET_OF(ACCESS_DESCRIPTION)
 
-typedef struct DIST_POINT_NAME_st {
+typedef struct DIST_POINT_NAME_st
+{
     int type;
-    union {
+    union
+    {
         GENERAL_NAMES *fullname;
         STACK_OF(X509_NAME_ENTRY) *relativename;
     } name;
-/* If relativename then this contains the full distribution point name */
+    /* If relativename then this contains the full distribution point name */
     X509_NAME *dpname;
 } DIST_POINT_NAME;
 /* All existing reasons */
@@ -240,7 +252,8 @@ typedef struct DIST_POINT_NAME_st {
 # define CRL_REASON_PRIVILEGE_WITHDRAWN          9
 # define CRL_REASON_AA_COMPROMISE                10
 
-struct DIST_POINT_st {
+struct DIST_POINT_st
+{
     DIST_POINT_NAME *distpoint;
     ASN1_BIT_STRING *reasons;
     GENERAL_NAMES *CRLissuer;
@@ -252,7 +265,8 @@ typedef STACK_OF(DIST_POINT) CRL_DIST_POINTS;
 DECLARE_STACK_OF(DIST_POINT)
 DECLARE_ASN1_SET_OF(DIST_POINT)
 
-struct AUTHORITY_KEYID_st {
+struct AUTHORITY_KEYID_st
+{
     ASN1_OCTET_STRING *keyid;
     GENERAL_NAMES *issuer;
     ASN1_INTEGER *serial;
@@ -260,7 +274,8 @@ struct AUTHORITY_KEYID_st {
 
 /* Strong extranet structures */
 
-typedef struct SXNET_ID_st {
+typedef struct SXNET_ID_st
+{
     ASN1_INTEGER *zone;
     ASN1_OCTET_STRING *user;
 } SXNETID;
@@ -268,24 +283,29 @@ typedef struct SXNET_ID_st {
 DECLARE_STACK_OF(SXNETID)
 DECLARE_ASN1_SET_OF(SXNETID)
 
-typedef struct SXNET_st {
+typedef struct SXNET_st
+{
     ASN1_INTEGER *version;
     STACK_OF(SXNETID) *ids;
 } SXNET;
 
-typedef struct NOTICEREF_st {
+typedef struct NOTICEREF_st
+{
     ASN1_STRING *organization;
     STACK_OF(ASN1_INTEGER) *noticenos;
 } NOTICEREF;
 
-typedef struct USERNOTICE_st {
+typedef struct USERNOTICE_st
+{
     NOTICEREF *noticeref;
     ASN1_STRING *exptext;
 } USERNOTICE;
 
-typedef struct POLICYQUALINFO_st {
+typedef struct POLICYQUALINFO_st
+{
     ASN1_OBJECT *pqualid;
-    union {
+    union
+    {
         ASN1_IA5STRING *cpsuri;
         USERNOTICE *usernotice;
         ASN1_TYPE *other;
@@ -295,7 +315,8 @@ typedef struct POLICYQUALINFO_st {
 DECLARE_STACK_OF(POLICYQUALINFO)
 DECLARE_ASN1_SET_OF(POLICYQUALINFO)
 
-typedef struct POLICYINFO_st {
+typedef struct POLICYINFO_st
+{
     ASN1_OBJECT *policyid;
     STACK_OF(POLICYQUALINFO) *qualifiers;
 } POLICYINFO;
@@ -305,7 +326,8 @@ typedef STACK_OF(POLICYINFO) CERTIFICATEPOLICIES;
 DECLARE_STACK_OF(POLICYINFO)
 DECLARE_ASN1_SET_OF(POLICYINFO)
 
-typedef struct POLICY_MAPPING_st {
+typedef struct POLICY_MAPPING_st
+{
     ASN1_OBJECT *issuerDomainPolicy;
     ASN1_OBJECT *subjectDomainPolicy;
 } POLICY_MAPPING;
@@ -314,7 +336,8 @@ DECLARE_STACK_OF(POLICY_MAPPING)
 
 typedef STACK_OF(POLICY_MAPPING) POLICY_MAPPINGS;
 
-typedef struct GENERAL_SUBTREE_st {
+typedef struct GENERAL_SUBTREE_st
+{
     GENERAL_NAME *base;
     ASN1_INTEGER *minimum;
     ASN1_INTEGER *maximum;
@@ -322,23 +345,27 @@ typedef struct GENERAL_SUBTREE_st {
 
 DECLARE_STACK_OF(GENERAL_SUBTREE)
 
-struct NAME_CONSTRAINTS_st {
+struct NAME_CONSTRAINTS_st
+{
     STACK_OF(GENERAL_SUBTREE) *permittedSubtrees;
     STACK_OF(GENERAL_SUBTREE) *excludedSubtrees;
 };
 
-typedef struct POLICY_CONSTRAINTS_st {
+typedef struct POLICY_CONSTRAINTS_st
+{
     ASN1_INTEGER *requireExplicitPolicy;
     ASN1_INTEGER *inhibitPolicyMapping;
 } POLICY_CONSTRAINTS;
 
 /* Proxy certificate structures, see RFC 3820 */
-typedef struct PROXY_POLICY_st {
+typedef struct PROXY_POLICY_st
+{
     ASN1_OBJECT *policyLanguage;
     ASN1_OCTET_STRING *policy;
 } PROXY_POLICY;
 
-typedef struct PROXY_CERT_INFO_EXTENSION_st {
+typedef struct PROXY_CERT_INFO_EXTENSION_st
+{
     ASN1_INTEGER *pcPathLengthConstraint;
     PROXY_POLICY *proxyPolicy;
 } PROXY_CERT_INFO_EXTENSION;
@@ -346,7 +373,8 @@ typedef struct PROXY_CERT_INFO_EXTENSION_st {
 DECLARE_ASN1_FUNCTIONS(PROXY_POLICY)
 DECLARE_ASN1_FUNCTIONS(PROXY_CERT_INFO_EXTENSION)
 
-struct ISSUING_DIST_POINT_st {
+struct ISSUING_DIST_POINT_st
+{
     DIST_POINT_NAME *distpoint;
     int onlyuser;
     int onlyCA;
@@ -446,7 +474,8 @@ struct ISSUING_DIST_POINT_st {
 # define X509_PURPOSE_DYNAMIC    0x1
 # define X509_PURPOSE_DYNAMIC_NAME       0x2
 
-typedef struct x509_purpose_st {
+typedef struct x509_purpose_st
+{
     int purpose;
     int trust;                  /* Default trust ID */
     int flags;
@@ -521,8 +550,8 @@ ASN1_BIT_STRING *v2i_ASN1_BIT_STRING(X509V3_EXT_METHOD *method,
                                      X509V3_CTX *ctx,
                                      STACK_OF(CONF_VALUE) *nval);
 STACK_OF(CONF_VALUE) *i2v_ASN1_BIT_STRING(X509V3_EXT_METHOD *method,
-                                          ASN1_BIT_STRING *bits,
-                                          STACK_OF(CONF_VALUE) *extlist);
+        ASN1_BIT_STRING *bits,
+        STACK_OF(CONF_VALUE) *extlist);
 
 STACK_OF(CONF_VALUE) *i2v_GENERAL_NAME(X509V3_EXT_METHOD *method,
                                        GENERAL_NAME *gen,
@@ -550,7 +579,7 @@ int GENERAL_NAME_get0_otherName(GENERAL_NAME *gen,
 char *i2s_ASN1_OCTET_STRING(X509V3_EXT_METHOD *method,
                             ASN1_OCTET_STRING *ia5);
 ASN1_OCTET_STRING *s2i_ASN1_OCTET_STRING(X509V3_EXT_METHOD *method,
-                                         X509V3_CTX *ctx, char *str);
+        X509V3_CTX *ctx, char *str);
 
 DECLARE_ASN1_FUNCTIONS(EXTENDED_KEY_USAGE)
 int i2a_ACCESS_DESCRIPTION(BIO *bp, ACCESS_DESCRIPTION *a);
@@ -719,16 +748,19 @@ DECLARE_STACK_OF(X509_POLICY_NODE)
 
 # ifndef OPENSSL_NO_RFC3779
 
-typedef struct ASRange_st {
+typedef struct ASRange_st
+{
     ASN1_INTEGER *min, *max;
 } ASRange;
 
 #  define ASIdOrRange_id          0
 #  define ASIdOrRange_range       1
 
-typedef struct ASIdOrRange_st {
+typedef struct ASIdOrRange_st
+{
     int type;
-    union {
+    union
+    {
         ASN1_INTEGER *id;
         ASRange *range;
     } u;
@@ -740,15 +772,18 @@ DECLARE_STACK_OF(ASIdOrRange)
 #  define ASIdentifierChoice_inherit              0
 #  define ASIdentifierChoice_asIdsOrRanges        1
 
-typedef struct ASIdentifierChoice_st {
+typedef struct ASIdentifierChoice_st
+{
     int type;
-    union {
+    union
+    {
         ASN1_NULL *inherit;
         ASIdOrRanges *asIdsOrRanges;
     } u;
 } ASIdentifierChoice;
 
-typedef struct ASIdentifiers_st {
+typedef struct ASIdentifiers_st
+{
     ASIdentifierChoice *asnum, *rdi;
 } ASIdentifiers;
 
@@ -757,16 +792,19 @@ DECLARE_ASN1_FUNCTIONS(ASIdOrRange)
 DECLARE_ASN1_FUNCTIONS(ASIdentifierChoice)
 DECLARE_ASN1_FUNCTIONS(ASIdentifiers)
 
-typedef struct IPAddressRange_st {
+typedef struct IPAddressRange_st
+{
     ASN1_BIT_STRING *min, *max;
 } IPAddressRange;
 
 #  define IPAddressOrRange_addressPrefix  0
 #  define IPAddressOrRange_addressRange   1
 
-typedef struct IPAddressOrRange_st {
+typedef struct IPAddressOrRange_st
+{
     int type;
-    union {
+    union
+    {
         ASN1_BIT_STRING *addressPrefix;
         IPAddressRange *addressRange;
     } u;
@@ -778,15 +816,18 @@ DECLARE_STACK_OF(IPAddressOrRange)
 #  define IPAddressChoice_inherit                 0
 #  define IPAddressChoice_addressesOrRanges       1
 
-typedef struct IPAddressChoice_st {
+typedef struct IPAddressChoice_st
+{
     int type;
-    union {
+    union
+    {
         ASN1_NULL *inherit;
         IPAddressOrRanges *addressesOrRanges;
     } u;
 } IPAddressChoice;
 
-typedef struct IPAddressFamily_st {
+typedef struct IPAddressFamily_st
+{
     ASN1_OCTET_STRING *addressFamily;
     IPAddressChoice *ipAddressChoice;
 } IPAddressFamily;

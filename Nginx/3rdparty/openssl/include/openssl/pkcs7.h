@@ -83,12 +83,14 @@ Digest_Encryption_ID    rsaEncryption
 Key_Encryption_ID       rsaEncryption
 */
 
-typedef struct pkcs7_issuer_and_serial_st {
+typedef struct pkcs7_issuer_and_serial_st
+{
     X509_NAME *issuer;
     ASN1_INTEGER *serial;
 } PKCS7_ISSUER_AND_SERIAL;
 
-typedef struct pkcs7_signer_info_st {
+typedef struct pkcs7_signer_info_st
+{
     ASN1_INTEGER *version;      /* version 1 */
     PKCS7_ISSUER_AND_SERIAL *issuer_and_serial;
     X509_ALGOR *digest_alg;
@@ -103,7 +105,8 @@ typedef struct pkcs7_signer_info_st {
 DECLARE_STACK_OF(PKCS7_SIGNER_INFO)
 DECLARE_ASN1_SET_OF(PKCS7_SIGNER_INFO)
 
-typedef struct pkcs7_recip_info_st {
+typedef struct pkcs7_recip_info_st
+{
     ASN1_INTEGER *version;      /* version 0 */
     PKCS7_ISSUER_AND_SERIAL *issuer_and_serial;
     X509_ALGOR *key_enc_algor;
@@ -114,7 +117,8 @@ typedef struct pkcs7_recip_info_st {
 DECLARE_STACK_OF(PKCS7_RECIP_INFO)
 DECLARE_ASN1_SET_OF(PKCS7_RECIP_INFO)
 
-typedef struct pkcs7_signed_st {
+typedef struct pkcs7_signed_st
+{
     ASN1_INTEGER *version;      /* version 1 */
     STACK_OF(X509_ALGOR) *md_algs; /* md used */
     STACK_OF(X509) *cert;       /* [ 0 ] */
@@ -127,20 +131,23 @@ typedef struct pkcs7_signed_st {
  * merging the two
  */
 
-typedef struct pkcs7_enc_content_st {
+typedef struct pkcs7_enc_content_st
+{
     ASN1_OBJECT *content_type;
     X509_ALGOR *algorithm;
     ASN1_OCTET_STRING *enc_data; /* [ 0 ] */
     const EVP_CIPHER *cipher;
 } PKCS7_ENC_CONTENT;
 
-typedef struct pkcs7_enveloped_st {
+typedef struct pkcs7_enveloped_st
+{
     ASN1_INTEGER *version;      /* version 0 */
     STACK_OF(PKCS7_RECIP_INFO) *recipientinfo;
     PKCS7_ENC_CONTENT *enc_data;
 } PKCS7_ENVELOPE;
 
-typedef struct pkcs7_signedandenveloped_st {
+typedef struct pkcs7_signedandenveloped_st
+{
     ASN1_INTEGER *version;      /* version 1 */
     STACK_OF(X509_ALGOR) *md_algs; /* md used */
     STACK_OF(X509) *cert;       /* [ 0 ] */
@@ -150,19 +157,22 @@ typedef struct pkcs7_signedandenveloped_st {
     STACK_OF(PKCS7_RECIP_INFO) *recipientinfo;
 } PKCS7_SIGN_ENVELOPE;
 
-typedef struct pkcs7_digest_st {
+typedef struct pkcs7_digest_st
+{
     ASN1_INTEGER *version;      /* version 0 */
     X509_ALGOR *md;             /* md used */
     struct pkcs7_st *contents;
     ASN1_OCTET_STRING *digest;
 } PKCS7_DIGEST;
 
-typedef struct pkcs7_encrypted_st {
+typedef struct pkcs7_encrypted_st
+{
     ASN1_INTEGER *version;      /* version 0 */
     PKCS7_ENC_CONTENT *enc_data;
 } PKCS7_ENCRYPT;
 
-typedef struct pkcs7_st {
+typedef struct pkcs7_st
+{
     /*
      * The following is non NULL if it contains ASN1 encoding of this
      * structure
@@ -180,7 +190,8 @@ typedef struct pkcs7_st {
      * all encryption/message digests are applied to the 'contents', leaving
      * out the 'type' field.
      */
-    union {
+    union
+    {
         char *ptr;
         /* NID_pkcs7_data */
         ASN1_OCTET_STRING *data;
@@ -339,8 +350,8 @@ PKCS7 *PKCS7_sign(X509 *signcert, EVP_PKEY *pkey, STACK_OF(X509) *certs,
                   BIO *data, int flags);
 
 PKCS7_SIGNER_INFO *PKCS7_sign_add_signer(PKCS7 *p7,
-                                         X509 *signcert, EVP_PKEY *pkey,
-                                         const EVP_MD *md, int flags);
+        X509 *signcert, EVP_PKEY *pkey,
+        const EVP_MD *md, int flags);
 
 int PKCS7_final(PKCS7 *p7, BIO *data, int flags);
 int PKCS7_verify(PKCS7 *p7, STACK_OF(X509) *certs, X509_STORE *store,

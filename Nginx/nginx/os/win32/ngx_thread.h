@@ -18,7 +18,7 @@ typedef DWORD   ngx_thread_value_t;
 
 
 ngx_err_t ngx_create_thread(ngx_tid_t *tid,
-    ngx_thread_value_t (__stdcall *func)(void *arg), void *arg, ngx_log_t *log);
+                            ngx_thread_value_t (__stdcall *func)(void *arg), void *arg, ngx_log_t *log);
 
 #define ngx_log_tid                 GetCurrentThreadId()
 #define NGX_TID_T_FMT               "%ud"

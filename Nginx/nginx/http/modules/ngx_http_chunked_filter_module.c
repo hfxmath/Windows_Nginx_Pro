@@ -10,7 +10,8 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     ngx_chain_t         *free;
     ngx_chain_t         *busy;
 } ngx_http_chunked_filter_ctx_t;
@@ -19,7 +20,8 @@ typedef struct {
 static ngx_int_t ngx_http_chunked_filter_init(ngx_conf_t *cf);
 
 
-static ngx_http_module_t  ngx_http_chunked_filter_module_ctx = {
+static ngx_http_module_t  ngx_http_chunked_filter_module_ctx =
+{
     NULL,                                  /* preconfiguration */
     ngx_http_chunked_filter_init,          /* postconfiguration */
 
@@ -34,7 +36,8 @@ static ngx_http_module_t  ngx_http_chunked_filter_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_chunked_filter_module = {
+ngx_module_t  ngx_http_chunked_filter_module =
+{
     NGX_MODULE_V1,
     &ngx_http_chunked_filter_module_ctx,   /* module context */
     NULL,                                  /* module directives */
@@ -61,33 +64,41 @@ ngx_http_chunked_header_filter(ngx_http_request_t *r)
     ngx_http_chunked_filter_ctx_t  *ctx;
 
     if (r->headers_out.status == NGX_HTTP_NOT_MODIFIED
-        || r->headers_out.status == NGX_HTTP_NO_CONTENT
-        || r->headers_out.status < NGX_HTTP_OK
-        || r != r->main
-        || r->method == NGX_HTTP_HEAD)
+            || r->headers_out.status == NGX_HTTP_NO_CONTENT
+            || r->headers_out.status < NGX_HTTP_OK
+            || r != r->main
+            || r->method == NGX_HTTP_HEAD)
     {
         return ngx_http_next_header_filter(r);
     }
 
-    if (r->headers_out.content_length_n == -1) {
-        if (r->http_version < NGX_HTTP_VERSION_11) {
+    if (r->headers_out.content_length_n == -1)
+    {
+        if (r->http_version < NGX_HTTP_VERSION_11)
+        {
             r->keepalive = 0;
 
-        } else {
+        }
+        else
+        {
             clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
-            if (clcf->chunked_transfer_encoding) {
+            if (clcf->chunked_transfer_encoding)
+            {
                 r->chunked = 1;
 
                 ctx = ngx_pcalloc(r->pool,
                                   sizeof(ngx_http_chunked_filter_ctx_t));
-                if (ctx == NULL) {
+                if (ctx == NULL)
+                {
                     return NGX_ERROR;
                 }
 
                 ngx_http_set_ctx(r, ctx, ngx_http_chunked_filter_module);
 
-            } else {
+            }
+            else
+            {
                 r->keepalive = 0;
             }
         }
@@ -107,7 +118,8 @@ ngx_http_chunked_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     ngx_chain_t                    *out, *cl, *tl, **ll;
     ngx_http_chunked_filter_ctx_t  *ctx;
 
-    if (in == NULL || !r->chunked || r->header_only) {
+    if (in == NULL || !r->chunked || r->header_only)
+    {
         return ngx_http_next_body_filter(r, in);
     }
 
@@ -119,19 +131,21 @@ ngx_http_chunked_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     size = 0;
     cl = in;
 
-    for ( ;; ) {
+    for ( ;; )
+    {
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                        "http chunk: %O", ngx_buf_size(cl->buf));
 
         size += ngx_buf_size(cl->buf);
 
         if (cl->buf->flush
-            || cl->buf->sync
-            || ngx_buf_in_memory(cl->buf)
-            || cl->buf->in_file)
+                || cl->buf->sync
+                || ngx_buf_in_memory(cl->buf)
+                || cl->buf->in_file)
         {
             tl = ngx_alloc_chain_link(r->pool);
-            if (tl == NULL) {
+            if (tl == NULL)
+            {
                 return NGX_ERROR;
             }
 
@@ -140,27 +154,32 @@ ngx_http_chunked_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
             ll = &tl->next;
         }
 
-        if (cl->next == NULL) {
+        if (cl->next == NULL)
+        {
             break;
         }
 
         cl = cl->next;
     }
 
-    if (size) {
+    if (size)
+    {
         tl = ngx_chain_get_free_buf(r->pool, &ctx->free);
-        if (tl == NULL) {
+        if (tl == NULL)
+        {
             return NGX_ERROR;
         }
 
         b = tl->buf;
         chunk = b->start;
 
-        if (chunk == NULL) {
+        if (chunk == NULL)
+        {
             /* the "0000000000000000" is 64-bit hexadecimal string */
 
             chunk = ngx_palloc(r->pool, sizeof("0000000000000000" CRLF) - 1);
-            if (chunk == NULL) {
+            if (chunk == NULL)
+            {
                 return NGX_ERROR;
             }
 
@@ -178,9 +197,11 @@ ngx_http_chunked_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         out = tl;
     }
 
-    if (cl->buf->last_buf) {
+    if (cl->buf->last_buf)
+    {
         tl = ngx_chain_get_free_buf(r->pool, &ctx->free);
-        if (tl == NULL) {
+        if (tl == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -197,13 +218,17 @@ ngx_http_chunked_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
         *ll = tl;
 
-        if (size == 0) {
+        if (size == 0)
+        {
             b->pos += 2;
         }
 
-    } else if (size > 0) {
+    }
+    else if (size > 0)
+    {
         tl = ngx_chain_get_free_buf(r->pool, &ctx->free);
-        if (tl == NULL) {
+        if (tl == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -217,7 +242,9 @@ ngx_http_chunked_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
         *ll = tl;
 
-    } else {
+    }
+    else
+    {
         *ll = NULL;
     }
 

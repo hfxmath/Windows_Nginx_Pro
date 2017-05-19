@@ -19,7 +19,8 @@
 #define NGX_MAIL_STARTTLS_ONLY  2
 
 
-typedef struct {
+typedef struct
+{
     ngx_flag_t       enable;
     ngx_flag_t       prefer_server_ciphers;
 

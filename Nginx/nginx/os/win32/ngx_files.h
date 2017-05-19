@@ -18,7 +18,8 @@ typedef BY_HANDLE_FILE_INFORMATION  ngx_file_info_t;
 typedef uint64_t                    ngx_file_uniq_t;
 
 
-typedef struct {
+typedef struct
+{
     u_char                         *name;
     size_t                          size;
     void                           *addr;
@@ -28,23 +29,25 @@ typedef struct {
 } ngx_file_mapping_t;
 
 
-typedef struct {
+typedef struct
+{
     HANDLE                          dir;
     WIN32_FIND_DATA                 finddata;
 
-    unsigned                        valid_info:1;
-    unsigned                        type:1;
-    unsigned                        ready:1;
+    unsigned                        valid_info: 1;
+    unsigned                        type: 1;
+    unsigned                        ready: 1;
 } ngx_dir_t;
 
 
-typedef struct {
+typedef struct
+{
     HANDLE                          dir;
     WIN32_FIND_DATA                 finddata;
 
-    unsigned                        ready:1;
-    unsigned                        test:1;
-    unsigned                        no_match:1;
+    unsigned                        ready: 1;
+    unsigned                        test: 1;
+    unsigned                        no_match: 1;
 
     u_char                         *pattern;
     ngx_str_t                       name;
@@ -247,10 +250,10 @@ ssize_t ngx_read_file(ngx_file_t *file, u_char *buf, size_t size, off_t offset);
 #define ngx_read_file_n             "ReadFile()"
 
 ssize_t ngx_write_file(ngx_file_t *file, u_char *buf, size_t size,
-    off_t offset);
+                       off_t offset);
 
 ssize_t ngx_write_chain_to_file(ngx_file_t *file, ngx_chain_t *ce,
-    off_t offset, ngx_pool_t *pool);
+                                off_t offset, ngx_pool_t *pool);
 
 ngx_int_t ngx_read_ahead(ngx_fd_t fd, size_t n);
 #define ngx_read_ahead_n            "ngx_read_ahead_n"

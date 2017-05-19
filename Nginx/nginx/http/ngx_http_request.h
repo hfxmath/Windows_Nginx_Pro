@@ -142,7 +142,8 @@
 #define NGX_HTTP_COPY_BUFFERED             0x04
 
 
-typedef enum {
+typedef enum
+{
     NGX_HTTP_INITING_REQUEST_STATE = 0,
     NGX_HTTP_READING_REQUEST_STATE,
     NGX_HTTP_PROCESS_REQUEST_STATE,
@@ -157,20 +158,23 @@ typedef enum {
 } ngx_http_state_e;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                         name;
     ngx_uint_t                        offset;
     ngx_http_header_handler_pt        handler;
 } ngx_http_header_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                         name;
     ngx_uint_t                        offset;
 } ngx_http_header_out_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_list_t                        headers;
 
     ngx_table_elt_t                  *host;
@@ -229,19 +233,20 @@ typedef struct {
     off_t                             content_length_n;
     time_t                            keep_alive_n;
 
-    unsigned                          connection_type:2;
-    unsigned                          chunked:1;
-    unsigned                          msie:1;
-    unsigned                          msie6:1;
-    unsigned                          opera:1;
-    unsigned                          gecko:1;
-    unsigned                          chrome:1;
-    unsigned                          safari:1;
-    unsigned                          konqueror:1;
+    unsigned                          connection_type: 2;
+    unsigned                          chunked: 1;
+    unsigned                          msie: 1;
+    unsigned                          msie6: 1;
+    unsigned                          opera: 1;
+    unsigned                          gecko: 1;
+    unsigned                          chrome: 1;
+    unsigned                          safari: 1;
+    unsigned                          konqueror: 1;
 } ngx_http_headers_in_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_list_t                        headers;
 
     ngx_uint_t                        status;
@@ -279,7 +284,8 @@ typedef struct {
 
 typedef void (*ngx_http_client_body_handler_pt)(ngx_http_request_t *r);
 
-typedef struct {
+typedef struct
+{
     ngx_temp_file_t                  *temp_file;
     ngx_chain_t                      *bufs;
     ngx_buf_t                        *buf;
@@ -296,7 +302,8 @@ typedef struct {
 
 typedef struct ngx_http_addr_conf_s  ngx_http_addr_conf_t;
 
-typedef struct {
+typedef struct
+{
     ngx_http_addr_conf_t             *addr_conf;
     ngx_http_conf_ctx_t              *conf_ctx;
 
@@ -314,9 +321,9 @@ typedef struct {
     ngx_int_t                         nfree;
 
 #if (NGX_HTTP_SSL)
-    unsigned                          ssl:1;
+    unsigned                          ssl: 1;
 #endif
-    unsigned                          proxy_protocol:1;
+    unsigned                          proxy_protocol: 1;
 } ngx_http_connection_t;
 
 
@@ -324,7 +331,8 @@ typedef void (*ngx_http_cleanup_pt)(void *data);
 
 typedef struct ngx_http_cleanup_s  ngx_http_cleanup_t;
 
-struct ngx_http_cleanup_s {
+struct ngx_http_cleanup_s
+{
     ngx_http_cleanup_pt               handler;
     void                             *data;
     ngx_http_cleanup_t               *next;
@@ -332,9 +340,10 @@ struct ngx_http_cleanup_s {
 
 
 typedef ngx_int_t (*ngx_http_post_subrequest_pt)(ngx_http_request_t *r,
-    void *data, ngx_int_t rc);
+        void *data, ngx_int_t rc);
 
-typedef struct {
+typedef struct
+{
     ngx_http_post_subrequest_pt       handler;
     void                             *data;
 } ngx_http_post_subrequest_t;
@@ -342,7 +351,8 @@ typedef struct {
 
 typedef struct ngx_http_postponed_request_s  ngx_http_postponed_request_t;
 
-struct ngx_http_postponed_request_s {
+struct ngx_http_postponed_request_s
+{
     ngx_http_request_t               *request;
     ngx_chain_t                      *out;
     ngx_http_postponed_request_t     *next;
@@ -351,7 +361,8 @@ struct ngx_http_postponed_request_s {
 
 typedef struct ngx_http_posted_request_s  ngx_http_posted_request_t;
 
-struct ngx_http_posted_request_s {
+struct ngx_http_posted_request_s
+{
     ngx_http_request_t               *request;
     ngx_http_posted_request_t        *next;
 };
@@ -361,7 +372,8 @@ typedef ngx_int_t (*ngx_http_handler_pt)(ngx_http_request_t *r);
 typedef void (*ngx_http_event_handler_pt)(ngx_http_request_t *r);
 
 
-struct ngx_http_request_s {
+struct ngx_http_request_s
+{
     uint32_t                          signature;         /* "HTTP" */
 
     ngx_connection_t                 *connection;
@@ -380,7 +392,7 @@ struct ngx_http_request_s {
 
     ngx_http_upstream_t              *upstream;
     ngx_array_t                      *upstream_states;
-                                         /* of ngx_http_upstream_state_t */
+    /* of ngx_http_upstream_state_t */
 
     ngx_pool_t                       *pool;
     ngx_buf_t                        *header_in;
@@ -444,103 +456,103 @@ struct ngx_http_request_s {
 
     ngx_http_cleanup_t               *cleanup;
 
-    unsigned                          count:16;
-    unsigned                          subrequests:8;
-    unsigned                          blocked:8;
+    unsigned                          count: 16;
+    unsigned                          subrequests: 8;
+    unsigned                          blocked: 8;
 
-    unsigned                          aio:1;
+    unsigned                          aio: 1;
 
-    unsigned                          http_state:4;
+    unsigned                          http_state: 4;
 
     /* URI with "/." and on Win32 with "//" */
-    unsigned                          complex_uri:1;
+    unsigned                          complex_uri: 1;
 
     /* URI with "%" */
-    unsigned                          quoted_uri:1;
+    unsigned                          quoted_uri: 1;
 
     /* URI with "+" */
-    unsigned                          plus_in_uri:1;
+    unsigned                          plus_in_uri: 1;
 
     /* URI with " " */
-    unsigned                          space_in_uri:1;
+    unsigned                          space_in_uri: 1;
 
-    unsigned                          invalid_header:1;
+    unsigned                          invalid_header: 1;
 
-    unsigned                          add_uri_to_alias:1;
-    unsigned                          valid_location:1;
-    unsigned                          valid_unparsed_uri:1;
-    unsigned                          uri_changed:1;
-    unsigned                          uri_changes:4;
+    unsigned                          add_uri_to_alias: 1;
+    unsigned                          valid_location: 1;
+    unsigned                          valid_unparsed_uri: 1;
+    unsigned                          uri_changed: 1;
+    unsigned                          uri_changes: 4;
 
-    unsigned                          request_body_in_single_buf:1;
-    unsigned                          request_body_in_file_only:1;
-    unsigned                          request_body_in_persistent_file:1;
-    unsigned                          request_body_in_clean_file:1;
-    unsigned                          request_body_file_group_access:1;
-    unsigned                          request_body_file_log_level:3;
-    unsigned                          request_body_no_buffering:1;
+    unsigned                          request_body_in_single_buf: 1;
+    unsigned                          request_body_in_file_only: 1;
+    unsigned                          request_body_in_persistent_file: 1;
+    unsigned                          request_body_in_clean_file: 1;
+    unsigned                          request_body_file_group_access: 1;
+    unsigned                          request_body_file_log_level: 3;
+    unsigned                          request_body_no_buffering: 1;
 
-    unsigned                          subrequest_in_memory:1;
-    unsigned                          waited:1;
+    unsigned                          subrequest_in_memory: 1;
+    unsigned                          waited: 1;
 
 #if (NGX_HTTP_CACHE)
-    unsigned                          cached:1;
+    unsigned                          cached: 1;
 #endif
 
 #if (NGX_HTTP_GZIP)
-    unsigned                          gzip_tested:1;
-    unsigned                          gzip_ok:1;
-    unsigned                          gzip_vary:1;
+    unsigned                          gzip_tested: 1;
+    unsigned                          gzip_ok: 1;
+    unsigned                          gzip_vary: 1;
 #endif
 
-    unsigned                          proxy:1;
-    unsigned                          bypass_cache:1;
-    unsigned                          no_cache:1;
+    unsigned                          proxy: 1;
+    unsigned                          bypass_cache: 1;
+    unsigned                          no_cache: 1;
 
     /*
      * instead of using the request context data in
      * ngx_http_limit_conn_module and ngx_http_limit_req_module
      * we use the single bits in the request structure
      */
-    unsigned                          limit_conn_set:1;
-    unsigned                          limit_req_set:1;
+    unsigned                          limit_conn_set: 1;
+    unsigned                          limit_req_set: 1;
 
 #if 0
-    unsigned                          cacheable:1;
+    unsigned                          cacheable: 1;
 #endif
 
-    unsigned                          pipeline:1;
-    unsigned                          chunked:1;
-    unsigned                          header_only:1;
-    unsigned                          keepalive:1;
-    unsigned                          lingering_close:1;
-    unsigned                          discard_body:1;
-    unsigned                          reading_body:1;
-    unsigned                          internal:1;
-    unsigned                          error_page:1;
-    unsigned                          filter_finalize:1;
-    unsigned                          post_action:1;
-    unsigned                          request_complete:1;
-    unsigned                          request_output:1;
-    unsigned                          header_sent:1;
-    unsigned                          expect_tested:1;
-    unsigned                          root_tested:1;
-    unsigned                          done:1;
-    unsigned                          logged:1;
+    unsigned                          pipeline: 1;
+    unsigned                          chunked: 1;
+    unsigned                          header_only: 1;
+    unsigned                          keepalive: 1;
+    unsigned                          lingering_close: 1;
+    unsigned                          discard_body: 1;
+    unsigned                          reading_body: 1;
+    unsigned                          internal: 1;
+    unsigned                          error_page: 1;
+    unsigned                          filter_finalize: 1;
+    unsigned                          post_action: 1;
+    unsigned                          request_complete: 1;
+    unsigned                          request_output: 1;
+    unsigned                          header_sent: 1;
+    unsigned                          expect_tested: 1;
+    unsigned                          root_tested: 1;
+    unsigned                          done: 1;
+    unsigned                          logged: 1;
 
-    unsigned                          buffered:4;
+    unsigned                          buffered: 4;
 
-    unsigned                          main_filter_need_in_memory:1;
-    unsigned                          filter_need_in_memory:1;
-    unsigned                          filter_need_temporary:1;
-    unsigned                          allow_ranges:1;
-    unsigned                          subrequest_ranges:1;
-    unsigned                          single_range:1;
-    unsigned                          disable_not_modified:1;
+    unsigned                          main_filter_need_in_memory: 1;
+    unsigned                          filter_need_in_memory: 1;
+    unsigned                          filter_need_temporary: 1;
+    unsigned                          allow_ranges: 1;
+    unsigned                          subrequest_ranges: 1;
+    unsigned                          single_range: 1;
+    unsigned                          disable_not_modified: 1;
 
 #if (NGX_STAT_STUB)
-    unsigned                          stat_reading:1;
-    unsigned                          stat_writing:1;
+    unsigned                          stat_reading: 1;
+    unsigned                          stat_writing: 1;
 #endif
 
     /* used to parse HTTP headers */
@@ -575,12 +587,13 @@ struct ngx_http_request_s {
     u_char                           *port_start;
     u_char                           *port_end;
 
-    unsigned                          http_minor:16;
-    unsigned                          http_major:16;
+    unsigned                          http_minor: 16;
+    unsigned                          http_major: 16;
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_http_posted_request_t         terminal_posted_request;
 } ngx_http_ephemeral_t;
 

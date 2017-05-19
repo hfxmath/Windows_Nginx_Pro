@@ -16,7 +16,8 @@
 
 typedef struct ngx_http_upstream_rr_peer_s   ngx_http_upstream_rr_peer_t;
 
-struct ngx_http_upstream_rr_peer_s {
+struct ngx_http_upstream_rr_peer_s
+{
     struct sockaddr                *sockaddr;
     socklen_t                       socklen;
     ngx_str_t                       name;
@@ -52,7 +53,8 @@ struct ngx_http_upstream_rr_peer_s {
 
 typedef struct ngx_http_upstream_rr_peers_s  ngx_http_upstream_rr_peers_t;
 
-struct ngx_http_upstream_rr_peers_s {
+struct ngx_http_upstream_rr_peers_s
+{
     ngx_uint_t                      number;
 
 #if (NGX_HTTP_UPSTREAM_ZONE)
@@ -63,8 +65,8 @@ struct ngx_http_upstream_rr_peers_s {
 
     ngx_uint_t                      total_weight;
 
-    unsigned                        single:1;
-    unsigned                        weighted:1;
+    unsigned                        single: 1;
+    unsigned                        weighted: 1;
 
     ngx_str_t                      *name;
 
@@ -118,7 +120,8 @@ struct ngx_http_upstream_rr_peers_s {
 #endif
 
 
-typedef struct {
+typedef struct
+{
     ngx_http_upstream_rr_peers_t   *peers;
     ngx_http_upstream_rr_peer_t    *current;
     uintptr_t                      *tried;
@@ -127,22 +130,22 @@ typedef struct {
 
 
 ngx_int_t ngx_http_upstream_init_round_robin(ngx_conf_t *cf,
-    ngx_http_upstream_srv_conf_t *us);
+        ngx_http_upstream_srv_conf_t *us);
 ngx_int_t ngx_http_upstream_init_round_robin_peer(ngx_http_request_t *r,
-    ngx_http_upstream_srv_conf_t *us);
+        ngx_http_upstream_srv_conf_t *us);
 ngx_int_t ngx_http_upstream_create_round_robin_peer(ngx_http_request_t *r,
-    ngx_http_upstream_resolved_t *ur);
+        ngx_http_upstream_resolved_t *ur);
 ngx_int_t ngx_http_upstream_get_round_robin_peer(ngx_peer_connection_t *pc,
-    void *data);
+        void *data);
 void ngx_http_upstream_free_round_robin_peer(ngx_peer_connection_t *pc,
-    void *data, ngx_uint_t state);
+        void *data, ngx_uint_t state);
 
 #if (NGX_HTTP_SSL)
 ngx_int_t
-    ngx_http_upstream_set_round_robin_peer_session(ngx_peer_connection_t *pc,
-    void *data);
+ngx_http_upstream_set_round_robin_peer_session(ngx_peer_connection_t *pc,
+        void *data);
 void ngx_http_upstream_save_round_robin_peer_session(ngx_peer_connection_t *pc,
-    void *data);
+        void *data);
 #endif
 
 

@@ -77,7 +77,8 @@ extern "C" {
 # define CAST_BLOCK      8
 # define CAST_KEY_LENGTH 16
 
-typedef struct cast_key_st {
+typedef struct cast_key_st
+{
     CAST_LONG data[32];
     int short_key;              /* Use reduced rounds for short key */
 } CAST_KEY;

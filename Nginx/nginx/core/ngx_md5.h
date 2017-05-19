@@ -43,7 +43,8 @@ typedef MD5_CTX  ngx_md5_t;
 #else /* !NGX_HAVE_MD5 */
 
 
-typedef struct {
+typedef struct
+{
     uint64_t  bytes;
     uint32_t  a, b, c, d;
     u_char    buffer[64];

@@ -158,7 +158,7 @@ extern "C" {
 # define SMIME_OLDMIME           0x400
 # define SMIME_CRLFEOL           0x800
 # define SMIME_STREAM            0x1000
-    struct X509_algor_st;
+struct X509_algor_st;
 DECLARE_STACK_OF(X509_ALGOR)
 
 # define DECLARE_ASN1_SET_OF(type)/* filled in by mkstack.pl */
@@ -169,7 +169,8 @@ DECLARE_STACK_OF(X509_ALGOR)
  * asn1_const_ctx are exactly the same.  Fortunately, as soon as the old ASN1
  * parsing macros are gone, we can throw this away as well...
  */
-typedef struct asn1_ctx_st {
+typedef struct asn1_ctx_st
+{
     unsigned char *p;           /* work char pointer */
     int eos;                    /* end of sequence read for indefinite
                                  * encoding */
@@ -184,7 +185,8 @@ typedef struct asn1_ctx_st {
     int line;                   /* used in error processing */
 } ASN1_CTX;
 
-typedef struct asn1_const_ctx_st {
+typedef struct asn1_const_ctx_st
+{
     const unsigned char *p;     /* work char pointer */
     int eos;                    /* end of sequence read for indefinite
                                  * encoding */
@@ -207,7 +209,8 @@ typedef struct asn1_const_ctx_st {
 # define ASN1_OBJECT_FLAG_CRITICAL        0x02/* critical x509v3 object id */
 # define ASN1_OBJECT_FLAG_DYNAMIC_STRINGS 0x04/* internal use */
 # define ASN1_OBJECT_FLAG_DYNAMIC_DATA    0x08/* internal use */
-typedef struct asn1_object_st {
+typedef struct asn1_object_st
+{
     const char *sn, *ln;
     int nid;
     int length;
@@ -236,7 +239,8 @@ typedef struct asn1_object_st {
  */
 # define ASN1_STRING_FLAG_MSTRING 0x040
 /* This is the base type that holds just about everything :-) */
-struct asn1_string_st {
+struct asn1_string_st
+{
     int length;
     int type;
     unsigned char *data;
@@ -254,7 +258,8 @@ struct asn1_string_st {
  * which can break signatures.
  */
 
-typedef struct ASN1_ENCODING_st {
+typedef struct ASN1_ENCODING_st
+{
     unsigned char *enc;         /* DER encoding */
     long len;                   /* Length of encoding */
     int modified;               /* set to 1 if 'enc' is invalid */
@@ -269,7 +274,8 @@ typedef struct ASN1_ENCODING_st {
  (B_ASN1_PRINTABLESTRING|B_ASN1_T61STRING|B_ASN1_BMPSTRING|B_ASN1_UTF8STRING)
 # define PKCS9STRING_TYPE (DIRSTRING_TYPE|B_ASN1_IA5STRING)
 
-typedef struct asn1_string_table_st {
+typedef struct asn1_string_table_st
+{
     int nid;
     long minsize;
     long maxsize;
@@ -521,9 +527,11 @@ DECLARE_ASN1_SET_OF(ASN1_INTEGER)
 
 DECLARE_STACK_OF(ASN1_GENERALSTRING)
 
-typedef struct asn1_type_st {
+typedef struct asn1_type_st
+{
     int type;
-    union {
+    union
+    {
         char *ptr;
         ASN1_BOOLEAN boolean;
         ASN1_STRING *asn1_string;
@@ -560,13 +568,15 @@ typedef STACK_OF(ASN1_TYPE) ASN1_SEQUENCE_ANY;
 DECLARE_ASN1_ENCODE_FUNCTIONS_const(ASN1_SEQUENCE_ANY, ASN1_SEQUENCE_ANY)
 DECLARE_ASN1_ENCODE_FUNCTIONS_const(ASN1_SEQUENCE_ANY, ASN1_SET_ANY)
 
-typedef struct NETSCAPE_X509_st {
+typedef struct NETSCAPE_X509_st
+{
     ASN1_OCTET_STRING *header;
     X509 *cert;
 } NETSCAPE_X509;
 
 /* This is used to contain a list of bit names */
-typedef struct BIT_STRING_BITNAME_st {
+typedef struct BIT_STRING_BITNAME_st
+{
     int bitnum;
     const char *lname;
     const char *sname;
@@ -769,7 +779,7 @@ typedef struct BIT_STRING_BITNAME_st {
                 (ASN1_UTF8STRING *)d2i_ASN1_type_bytes\
                 ((ASN1_STRING **)a,pp,l,B_ASN1_UTF8STRING)
 
-  /* for the is_set parameter to i2d_ASN1_SET */
+/* for the is_set parameter to i2d_ASN1_SET */
 # define IS_SEQUENCE     0
 # define IS_SET          1
 
@@ -800,10 +810,10 @@ int ASN1_STRING_copy(ASN1_STRING *dst, const ASN1_STRING *str);
 ASN1_STRING *ASN1_STRING_dup(const ASN1_STRING *a);
 ASN1_STRING *ASN1_STRING_type_new(int type);
 int ASN1_STRING_cmp(const ASN1_STRING *a, const ASN1_STRING *b);
-  /*
-   * Since this is used to store all sorts of things, via macros, for now,
-   * make its data void *
-   */
+/*
+ * Since this is used to store all sorts of things, via macros, for now,
+ * make its data void *
+ */
 int ASN1_STRING_set(ASN1_STRING *str, const void *data, int len);
 void ASN1_STRING_set0(ASN1_STRING *str, void *data, int len);
 int ASN1_STRING_length(const ASN1_STRING *x);
@@ -855,10 +865,10 @@ time_t ASN1_UTCTIME_get(const ASN1_UTCTIME *s);
 
 int ASN1_GENERALIZEDTIME_check(ASN1_GENERALIZEDTIME *a);
 ASN1_GENERALIZEDTIME *ASN1_GENERALIZEDTIME_set(ASN1_GENERALIZEDTIME *s,
-                                               time_t t);
+        time_t t);
 ASN1_GENERALIZEDTIME *ASN1_GENERALIZEDTIME_adj(ASN1_GENERALIZEDTIME *s,
-                                               time_t t, int offset_day,
-                                               long offset_sec);
+        time_t t, int offset_day,
+        long offset_sec);
 int ASN1_GENERALIZEDTIME_set_string(ASN1_GENERALIZEDTIME *s, const char *str);
 
 DECLARE_ASN1_FUNCTIONS(ASN1_OCTET_STRING)
@@ -896,7 +906,7 @@ ASN1_TIME *ASN1_TIME_adj(ASN1_TIME *s, time_t t,
                          int offset_day, long offset_sec);
 int ASN1_TIME_check(ASN1_TIME *t);
 ASN1_GENERALIZEDTIME *ASN1_TIME_to_generalizedtime(ASN1_TIME *t, ASN1_GENERALIZEDTIME
-                                                   **out);
+        **out);
 int ASN1_TIME_set_string(ASN1_TIME *s, const char *str);
 
 int i2d_ASN1_SET(STACK_OF(OPENSSL_BLOCK) *a, unsigned char **pp,
@@ -1057,8 +1067,8 @@ int ASN1_TYPE_get_int_octetstring(ASN1_TYPE *a, long *num,
                                   unsigned char *data, int max_len);
 
 STACK_OF(OPENSSL_BLOCK) *ASN1_seq_unpack(const unsigned char *buf, int len,
-                                         d2i_of_void *d2i,
-                                         void (*free_func) (OPENSSL_BLOCK));
+        d2i_of_void *d2i,
+        void (*free_func) (OPENSSL_BLOCK));
 unsigned char *ASN1_seq_pack(STACK_OF(OPENSSL_BLOCK) *safes, i2d_of_void *i2d,
                              unsigned char **buf, int *len);
 void *ASN1_unpack_string(ASN1_STRING *oct, d2i_of_void *d2i);

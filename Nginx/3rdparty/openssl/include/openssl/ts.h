@@ -105,7 +105,8 @@ MessageImprint ::= SEQUENCE  {
      hashedMessage                OCTET STRING  }
 */
 
-typedef struct TS_msg_imprint_st {
+typedef struct TS_msg_imprint_st
+{
     X509_ALGOR *hash_algo;
     ASN1_OCTET_STRING *hashed_msg;
 } TS_MSG_IMPRINT;
@@ -122,7 +123,8 @@ TimeStampReq ::= SEQUENCE  {
    extensions               [0] IMPLICIT Extensions    OPTIONAL  }
 */
 
-typedef struct TS_req_st {
+typedef struct TS_req_st
+{
     ASN1_INTEGER *version;
     TS_MSG_IMPRINT *msg_imprint;
     ASN1_OBJECT *policy_id;     /* OPTIONAL */
@@ -138,7 +140,8 @@ Accuracy ::= SEQUENCE {
                 micros     [1] INTEGER  (1..999) OPTIONAL  }
 */
 
-typedef struct TS_accuracy_st {
+typedef struct TS_accuracy_st
+{
     ASN1_INTEGER *seconds;
     ASN1_INTEGER *millis;
     ASN1_INTEGER *micros;
@@ -164,7 +167,8 @@ TSTInfo ::= SEQUENCE  {
     extensions                   [1] IMPLICIT Extensions  OPTIONAL   }
 */
 
-typedef struct TS_tst_info_st {
+typedef struct TS_tst_info_st
+{
     ASN1_INTEGER *version;
     ASN1_OBJECT *policy_id;
     TS_MSG_IMPRINT *msg_imprint;
@@ -212,7 +216,8 @@ PKIFreeText ::= SEQUENCE SIZE (1..MAX) OF UTF8String
 # define TS_INFO_ADD_INFO_NOT_AVAILABLE  17
 # define TS_INFO_SYSTEM_FAILURE          25
 
-typedef struct TS_status_info_st {
+typedef struct TS_status_info_st
+{
     ASN1_INTEGER *status;
     STACK_OF(ASN1_UTF8STRING) *text;
     ASN1_BIT_STRING *failure_info;
@@ -227,7 +232,8 @@ TimeStampResp ::= SEQUENCE  {
      timeStampToken          TimeStampToken     OPTIONAL }
 */
 
-typedef struct TS_resp_st {
+typedef struct TS_resp_st
+{
     TS_STATUS_INFO *status_info;
     PKCS7 *token;
     TS_TST_INFO *tst_info;
@@ -242,7 +248,8 @@ IssuerSerial ::= SEQUENCE {
         }
 */
 
-typedef struct ESS_issuer_serial {
+typedef struct ESS_issuer_serial
+{
     STACK_OF(GENERAL_NAME) *issuer;
     ASN1_INTEGER *serial;
 } ESS_ISSUER_SERIAL;
@@ -254,7 +261,8 @@ ESSCertID ::=  SEQUENCE {
 }
 */
 
-typedef struct ESS_cert_id {
+typedef struct ESS_cert_id
+{
     ASN1_OCTET_STRING *hash;    /* Always SHA-1 digest. */
     ESS_ISSUER_SERIAL *issuer_serial;
 } ESS_CERT_ID;
@@ -269,7 +277,8 @@ SigningCertificate ::=  SEQUENCE {
 }
 */
 
-typedef struct ESS_signing_cert {
+typedef struct ESS_signing_cert
+{
     STACK_OF(ESS_CERT_ID) *cert_ids;
     STACK_OF(POLICYINFO) *policy_info;
 } ESS_SIGNING_CERT;
@@ -341,8 +350,8 @@ ESS_ISSUER_SERIAL *ESS_ISSUER_SERIAL_new(void);
 void ESS_ISSUER_SERIAL_free(ESS_ISSUER_SERIAL *a);
 int i2d_ESS_ISSUER_SERIAL(const ESS_ISSUER_SERIAL *a, unsigned char **pp);
 ESS_ISSUER_SERIAL *d2i_ESS_ISSUER_SERIAL(ESS_ISSUER_SERIAL **a,
-                                         const unsigned char **pp,
-                                         long length);
+        const unsigned char **pp,
+        long length);
 ESS_ISSUER_SERIAL *ESS_ISSUER_SERIAL_dup(ESS_ISSUER_SERIAL *a);
 
 ESS_CERT_ID *ESS_CERT_ID_new(void);
@@ -495,7 +504,8 @@ typedef int (*TS_time_cb) (struct TS_resp_ctx *, void *, long *sec,
 typedef int (*TS_extension_cb) (struct TS_resp_ctx *, X509_EXTENSION *,
                                 void *);
 
-typedef struct TS_resp_ctx {
+typedef struct TS_resp_ctx
+{
     X509 *signer_cert;
     EVP_PKEY *signer_key;
     STACK_OF(X509) *certs;      /* Certs to include in signed data. */
@@ -561,7 +571,7 @@ int TS_RESP_CTX_set_accuracy(TS_RESP_CTX *ctx,
  * '3' msec, '6' usec, and so on. Default is 0.
  */
 int TS_RESP_CTX_set_clock_precision_digits(TS_RESP_CTX *ctx,
-                                           unsigned clock_precision_digits);
+        unsigned clock_precision_digits);
 /* At most we accept usec precision. */
 # define TS_MAX_CLOCK_PRECISION_DIGITS   6
 
@@ -654,7 +664,8 @@ int TS_RESP_verify_signature(PKCS7 *token, STACK_OF(X509) *certs,
                                  | TS_VFY_SIGNER        \
                                  | TS_VFY_TSA_NAME)
 
-typedef struct TS_verify_ctx {
+typedef struct TS_verify_ctx
+{
     /* Set this to the union of TS_VFY_... flags you want to carry out. */
     unsigned flags;
     /* Must be set only with TS_VFY_SIGNATURE. certs is optional. */

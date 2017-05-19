@@ -10,12 +10,14 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     ngx_array_t                    caches;  /* ngx_http_file_cache_t * */
 } ngx_http_fastcgi_main_conf_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_array_t                   *flushes;
     ngx_array_t                   *lengths;
     ngx_array_t                   *values;
@@ -24,7 +26,8 @@ typedef struct {
 } ngx_http_fastcgi_params_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_http_upstream_conf_t       upstream;
 
     ngx_str_t                      index;
@@ -53,7 +56,8 @@ typedef struct {
 } ngx_http_fastcgi_loc_conf_t;
 
 
-typedef enum {
+typedef enum
+{
     ngx_http_fastcgi_st_version = 0,
     ngx_http_fastcgi_st_type,
     ngx_http_fastcgi_st_request_id_hi,
@@ -67,13 +71,15 @@ typedef enum {
 } ngx_http_fastcgi_state_e;
 
 
-typedef struct {
+typedef struct
+{
     u_char                        *start;
     u_char                        *end;
 } ngx_http_fastcgi_split_part_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_http_fastcgi_state_e       state;
     u_char                        *pos;
     u_char                        *last;
@@ -84,9 +90,9 @@ typedef struct {
     ngx_chain_t                   *free;
     ngx_chain_t                   *busy;
 
-    unsigned                       fastcgi_stdout:1;
-    unsigned                       large_stderr:1;
-    unsigned                       header_sent:1;
+    unsigned                       fastcgi_stdout: 1;
+    unsigned                       large_stderr: 1;
+    unsigned                       header_sent: 1;
 
     ngx_array_t                   *split_parts;
 
@@ -109,7 +115,8 @@ typedef struct {
 #define NGX_HTTP_FASTCGI_DATA           8
 
 
-typedef struct {
+typedef struct
+{
     u_char  version;
     u_char  type;
     u_char  request_id_hi;
@@ -121,7 +128,8 @@ typedef struct {
 } ngx_http_fastcgi_header_t;
 
 
-typedef struct {
+typedef struct
+{
     u_char  role_hi;
     u_char  role_lo;
     u_char  flags;
@@ -129,7 +137,8 @@ typedef struct {
 } ngx_http_fastcgi_begin_request_t;
 
 
-typedef struct {
+typedef struct
+{
     u_char  version;
     u_char  type;
     u_char  request_id_hi;
@@ -137,7 +146,8 @@ typedef struct {
 } ngx_http_fastcgi_header_small_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_http_fastcgi_header_t         h0;
     ngx_http_fastcgi_begin_request_t  br;
     ngx_http_fastcgi_header_small_t   h1;
@@ -145,64 +155,65 @@ typedef struct {
 
 
 static ngx_int_t ngx_http_fastcgi_eval(ngx_http_request_t *r,
-    ngx_http_fastcgi_loc_conf_t *flcf);
+                                       ngx_http_fastcgi_loc_conf_t *flcf);
 #if (NGX_HTTP_CACHE)
 static ngx_int_t ngx_http_fastcgi_create_key(ngx_http_request_t *r);
 #endif
 static ngx_int_t ngx_http_fastcgi_create_request(ngx_http_request_t *r);
 static ngx_int_t ngx_http_fastcgi_reinit_request(ngx_http_request_t *r);
 static ngx_int_t ngx_http_fastcgi_body_output_filter(void *data,
-    ngx_chain_t *in);
+        ngx_chain_t *in);
 static ngx_int_t ngx_http_fastcgi_process_header(ngx_http_request_t *r);
 static ngx_int_t ngx_http_fastcgi_input_filter_init(void *data);
 static ngx_int_t ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p,
-    ngx_buf_t *buf);
+        ngx_buf_t *buf);
 static ngx_int_t ngx_http_fastcgi_non_buffered_filter(void *data,
-    ssize_t bytes);
+        ssize_t bytes);
 static ngx_int_t ngx_http_fastcgi_process_record(ngx_http_request_t *r,
-    ngx_http_fastcgi_ctx_t *f);
+        ngx_http_fastcgi_ctx_t *f);
 static void ngx_http_fastcgi_abort_request(ngx_http_request_t *r);
 static void ngx_http_fastcgi_finalize_request(ngx_http_request_t *r,
-    ngx_int_t rc);
+        ngx_int_t rc);
 
 static ngx_int_t ngx_http_fastcgi_add_variables(ngx_conf_t *cf);
 static void *ngx_http_fastcgi_create_main_conf(ngx_conf_t *cf);
 static void *ngx_http_fastcgi_create_loc_conf(ngx_conf_t *cf);
 static char *ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf,
-    void *parent, void *child);
+        void *parent, void *child);
 static ngx_int_t ngx_http_fastcgi_init_params(ngx_conf_t *cf,
-    ngx_http_fastcgi_loc_conf_t *conf, ngx_http_fastcgi_params_t *params,
-    ngx_keyval_t *default_params);
+        ngx_http_fastcgi_loc_conf_t *conf, ngx_http_fastcgi_params_t *params,
+        ngx_keyval_t *default_params);
 
 static ngx_int_t ngx_http_fastcgi_script_name_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data);
+        ngx_http_variable_value_t *v, uintptr_t data);
 static ngx_int_t ngx_http_fastcgi_path_info_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data);
+        ngx_http_variable_value_t *v, uintptr_t data);
 static ngx_http_fastcgi_ctx_t *ngx_http_fastcgi_split(ngx_http_request_t *r,
-    ngx_http_fastcgi_loc_conf_t *flcf);
+        ngx_http_fastcgi_loc_conf_t *flcf);
 
 static char *ngx_http_fastcgi_pass(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                   void *conf);
 static char *ngx_http_fastcgi_split_path_info(ngx_conf_t *cf,
-    ngx_command_t *cmd, void *conf);
+        ngx_command_t *cmd, void *conf);
 static char *ngx_http_fastcgi_store(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                    void *conf);
 #if (NGX_HTTP_CACHE)
 static char *ngx_http_fastcgi_cache(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                    void *conf);
 static char *ngx_http_fastcgi_cache_key(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                        void *conf);
 #endif
 
 static char *ngx_http_fastcgi_lowat_check(ngx_conf_t *cf, void *post,
-    void *data);
+        void *data);
 
 
 static ngx_conf_post_t  ngx_http_fastcgi_lowat_post =
-    { ngx_http_fastcgi_lowat_check };
+{ ngx_http_fastcgi_lowat_check };
 
 
-static ngx_conf_bitmask_t  ngx_http_fastcgi_next_upstream_masks[] = {
+static ngx_conf_bitmask_t  ngx_http_fastcgi_next_upstream_masks[] =
+{
     { ngx_string("error"), NGX_HTTP_UPSTREAM_FT_ERROR },
     { ngx_string("timeout"), NGX_HTTP_UPSTREAM_FT_TIMEOUT },
     { ngx_string("invalid_header"), NGX_HTTP_UPSTREAM_FT_INVALID_HEADER },
@@ -220,339 +231,432 @@ static ngx_conf_bitmask_t  ngx_http_fastcgi_next_upstream_masks[] = {
 ngx_module_t  ngx_http_fastcgi_module;
 
 
-static ngx_command_t  ngx_http_fastcgi_commands[] = {
+static ngx_command_t  ngx_http_fastcgi_commands[] =
+{
 
-    { ngx_string("fastcgi_pass"),
-      NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_TAKE1,
-      ngx_http_fastcgi_pass,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("fastcgi_pass"),
+        NGX_HTTP_LOC_CONF | NGX_HTTP_LIF_CONF | NGX_CONF_TAKE1,
+        ngx_http_fastcgi_pass,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("fastcgi_index"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_str_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, index),
-      NULL },
+    {
+        ngx_string("fastcgi_index"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_str_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, index),
+        NULL
+    },
 
-    { ngx_string("fastcgi_split_path_info"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_http_fastcgi_split_path_info,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("fastcgi_split_path_info"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_http_fastcgi_split_path_info,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("fastcgi_store"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_http_fastcgi_store,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("fastcgi_store"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_http_fastcgi_store,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("fastcgi_store_access"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE123,
-      ngx_conf_set_access_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.store_access),
-      NULL },
+    {
+        ngx_string("fastcgi_store_access"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE123,
+        ngx_conf_set_access_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.store_access),
+        NULL
+    },
 
-    { ngx_string("fastcgi_buffering"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.buffering),
-      NULL },
+    {
+        ngx_string("fastcgi_buffering"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.buffering),
+        NULL
+    },
 
-    { ngx_string("fastcgi_request_buffering"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.request_buffering),
-      NULL },
+    {
+        ngx_string("fastcgi_request_buffering"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.request_buffering),
+        NULL
+    },
 
-    { ngx_string("fastcgi_ignore_client_abort"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.ignore_client_abort),
-      NULL },
+    {
+        ngx_string("fastcgi_ignore_client_abort"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.ignore_client_abort),
+        NULL
+    },
 
-    { ngx_string("fastcgi_bind"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_http_upstream_bind_set_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.local),
-      NULL },
+    {
+        ngx_string("fastcgi_bind"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_http_upstream_bind_set_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.local),
+        NULL
+    },
 
-    { ngx_string("fastcgi_connect_timeout"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_msec_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.connect_timeout),
-      NULL },
+    {
+        ngx_string("fastcgi_connect_timeout"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_msec_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.connect_timeout),
+        NULL
+    },
 
-    { ngx_string("fastcgi_send_timeout"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_msec_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.send_timeout),
-      NULL },
+    {
+        ngx_string("fastcgi_send_timeout"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_msec_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.send_timeout),
+        NULL
+    },
 
-    { ngx_string("fastcgi_send_lowat"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.send_lowat),
-      &ngx_http_fastcgi_lowat_post },
+    {
+        ngx_string("fastcgi_send_lowat"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.send_lowat),
+        &ngx_http_fastcgi_lowat_post
+    },
 
-    { ngx_string("fastcgi_buffer_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.buffer_size),
-      NULL },
+    {
+        ngx_string("fastcgi_buffer_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.buffer_size),
+        NULL
+    },
 
-    { ngx_string("fastcgi_pass_request_headers"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.pass_request_headers),
-      NULL },
+    {
+        ngx_string("fastcgi_pass_request_headers"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.pass_request_headers),
+        NULL
+    },
 
-    { ngx_string("fastcgi_pass_request_body"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.pass_request_body),
-      NULL },
+    {
+        ngx_string("fastcgi_pass_request_body"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.pass_request_body),
+        NULL
+    },
 
-    { ngx_string("fastcgi_intercept_errors"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.intercept_errors),
-      NULL },
+    {
+        ngx_string("fastcgi_intercept_errors"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.intercept_errors),
+        NULL
+    },
 
-    { ngx_string("fastcgi_read_timeout"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_msec_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.read_timeout),
-      NULL },
+    {
+        ngx_string("fastcgi_read_timeout"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_msec_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.read_timeout),
+        NULL
+    },
 
-    { ngx_string("fastcgi_buffers"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE2,
-      ngx_conf_set_bufs_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.bufs),
-      NULL },
+    {
+        ngx_string("fastcgi_buffers"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE2,
+        ngx_conf_set_bufs_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.bufs),
+        NULL
+    },
 
-    { ngx_string("fastcgi_busy_buffers_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.busy_buffers_size_conf),
-      NULL },
+    {
+        ngx_string("fastcgi_busy_buffers_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.busy_buffers_size_conf),
+        NULL
+    },
 
-    { ngx_string("fastcgi_force_ranges"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.force_ranges),
-      NULL },
+    {
+        ngx_string("fastcgi_force_ranges"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.force_ranges),
+        NULL
+    },
 
-    { ngx_string("fastcgi_limit_rate"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.limit_rate),
-      NULL },
+    {
+        ngx_string("fastcgi_limit_rate"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.limit_rate),
+        NULL
+    },
 
 #if (NGX_HTTP_CACHE)
 
-    { ngx_string("fastcgi_cache"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_http_fastcgi_cache,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("fastcgi_cache"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_http_fastcgi_cache,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("fastcgi_cache_key"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_http_fastcgi_cache_key,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("fastcgi_cache_key"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_http_fastcgi_cache_key,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("fastcgi_cache_path"),
-      NGX_HTTP_MAIN_CONF|NGX_CONF_2MORE,
-      ngx_http_file_cache_set_slot,
-      NGX_HTTP_MAIN_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_main_conf_t, caches),
-      &ngx_http_fastcgi_module },
+    {
+        ngx_string("fastcgi_cache_path"),
+        NGX_HTTP_MAIN_CONF | NGX_CONF_2MORE,
+        ngx_http_file_cache_set_slot,
+        NGX_HTTP_MAIN_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_main_conf_t, caches),
+        &ngx_http_fastcgi_module
+    },
 
-    { ngx_string("fastcgi_cache_bypass"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
-      ngx_http_set_predicate_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_bypass),
-      NULL },
+    {
+        ngx_string("fastcgi_cache_bypass"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
+        ngx_http_set_predicate_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_bypass),
+        NULL
+    },
 
-    { ngx_string("fastcgi_no_cache"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
-      ngx_http_set_predicate_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.no_cache),
-      NULL },
+    {
+        ngx_string("fastcgi_no_cache"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
+        ngx_http_set_predicate_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.no_cache),
+        NULL
+    },
 
-    { ngx_string("fastcgi_cache_valid"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
-      ngx_http_file_cache_valid_set_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_valid),
-      NULL },
+    {
+        ngx_string("fastcgi_cache_valid"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
+        ngx_http_file_cache_valid_set_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_valid),
+        NULL
+    },
 
-    { ngx_string("fastcgi_cache_min_uses"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_num_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_min_uses),
-      NULL },
+    {
+        ngx_string("fastcgi_cache_min_uses"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_num_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_min_uses),
+        NULL
+    },
 
-    { ngx_string("fastcgi_cache_use_stale"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
-      ngx_conf_set_bitmask_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_use_stale),
-      &ngx_http_fastcgi_next_upstream_masks },
+    {
+        ngx_string("fastcgi_cache_use_stale"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
+        ngx_conf_set_bitmask_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_use_stale),
+        &ngx_http_fastcgi_next_upstream_masks
+    },
 
-    { ngx_string("fastcgi_cache_methods"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
-      ngx_conf_set_bitmask_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_methods),
-      &ngx_http_upstream_cache_method_mask },
+    {
+        ngx_string("fastcgi_cache_methods"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
+        ngx_conf_set_bitmask_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_methods),
+        &ngx_http_upstream_cache_method_mask
+    },
 
-    { ngx_string("fastcgi_cache_lock"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_lock),
-      NULL },
+    {
+        ngx_string("fastcgi_cache_lock"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_lock),
+        NULL
+    },
 
-    { ngx_string("fastcgi_cache_lock_timeout"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_msec_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_lock_timeout),
-      NULL },
+    {
+        ngx_string("fastcgi_cache_lock_timeout"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_msec_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_lock_timeout),
+        NULL
+    },
 
-    { ngx_string("fastcgi_cache_lock_age"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_msec_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_lock_age),
-      NULL },
+    {
+        ngx_string("fastcgi_cache_lock_age"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_msec_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_lock_age),
+        NULL
+    },
 
-    { ngx_string("fastcgi_cache_revalidate"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_revalidate),
-      NULL },
+    {
+        ngx_string("fastcgi_cache_revalidate"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.cache_revalidate),
+        NULL
+    },
 
 #endif
 
-    { ngx_string("fastcgi_temp_path"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1234,
-      ngx_conf_set_path_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.temp_path),
-      NULL },
+    {
+        ngx_string("fastcgi_temp_path"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1234,
+        ngx_conf_set_path_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.temp_path),
+        NULL },
 
-    { ngx_string("fastcgi_max_temp_file_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.max_temp_file_size_conf),
-      NULL },
+    {
+        ngx_string("fastcgi_max_temp_file_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.max_temp_file_size_conf),
+        NULL
+    },
 
-    { ngx_string("fastcgi_temp_file_write_size"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_size_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.temp_file_write_size_conf),
-      NULL },
+    {
+        ngx_string("fastcgi_temp_file_write_size"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_size_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.temp_file_write_size_conf),
+        NULL
+    },
 
-    { ngx_string("fastcgi_next_upstream"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
-      ngx_conf_set_bitmask_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.next_upstream),
-      &ngx_http_fastcgi_next_upstream_masks },
+    {
+        ngx_string("fastcgi_next_upstream"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
+        ngx_conf_set_bitmask_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.next_upstream),
+        &ngx_http_fastcgi_next_upstream_masks
+    },
 
-    { ngx_string("fastcgi_next_upstream_tries"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_num_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.next_upstream_tries),
-      NULL },
+    {
+        ngx_string("fastcgi_next_upstream_tries"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_num_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.next_upstream_tries),
+        NULL
+    },
 
-    { ngx_string("fastcgi_next_upstream_timeout"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_msec_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.next_upstream_timeout),
-      NULL },
+    {
+        ngx_string("fastcgi_next_upstream_timeout"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_msec_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.next_upstream_timeout),
+        NULL
+    },
 
-    { ngx_string("fastcgi_param"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE23,
-      ngx_http_upstream_param_set_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, params_source),
-      NULL },
+    {
+        ngx_string("fastcgi_param"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE23,
+        ngx_http_upstream_param_set_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, params_source),
+        NULL
+    },
 
-    { ngx_string("fastcgi_pass_header"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_str_array_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.pass_headers),
-      NULL },
+    {
+        ngx_string("fastcgi_pass_header"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_str_array_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.pass_headers),
+        NULL
+    },
 
-    { ngx_string("fastcgi_hide_header"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_str_array_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.hide_headers),
-      NULL },
+    {
+        ngx_string("fastcgi_hide_header"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_str_array_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.hide_headers),
+        NULL
+    },
 
-    { ngx_string("fastcgi_ignore_headers"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
-      ngx_conf_set_bitmask_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, upstream.ignore_headers),
-      &ngx_http_upstream_ignore_headers_masks },
+    {
+        ngx_string("fastcgi_ignore_headers"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
+        ngx_conf_set_bitmask_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, upstream.ignore_headers),
+        &ngx_http_upstream_ignore_headers_masks
+    },
 
-    { ngx_string("fastcgi_catch_stderr"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_str_array_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, catch_stderr),
-      NULL },
+    {
+        ngx_string("fastcgi_catch_stderr"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_str_array_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, catch_stderr),
+        NULL
+    },
 
-    { ngx_string("fastcgi_keep_conn"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_fastcgi_loc_conf_t, keep_conn),
-      NULL },
+    {
+        ngx_string("fastcgi_keep_conn"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_fastcgi_loc_conf_t, keep_conn),
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_http_module_t  ngx_http_fastcgi_module_ctx = {
+static ngx_http_module_t  ngx_http_fastcgi_module_ctx =
+{
     ngx_http_fastcgi_add_variables,        /* preconfiguration */
     NULL,                                  /* postconfiguration */
 
@@ -567,7 +671,8 @@ static ngx_http_module_t  ngx_http_fastcgi_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_fastcgi_module = {
+ngx_module_t  ngx_http_fastcgi_module =
+{
     NGX_MODULE_V1,
     &ngx_http_fastcgi_module_ctx,          /* module context */
     ngx_http_fastcgi_commands,             /* module directives */
@@ -583,44 +688,57 @@ ngx_module_t  ngx_http_fastcgi_module = {
 };
 
 
-static ngx_http_fastcgi_request_start_t  ngx_http_fastcgi_request_start = {
-    { 1,                                               /* version */
-      NGX_HTTP_FASTCGI_BEGIN_REQUEST,                  /* type */
-      0,                                               /* request_id_hi */
-      1,                                               /* request_id_lo */
-      0,                                               /* content_length_hi */
-      sizeof(ngx_http_fastcgi_begin_request_t),        /* content_length_lo */
-      0,                                               /* padding_length */
-      0 },                                             /* reserved */
+static ngx_http_fastcgi_request_start_t  ngx_http_fastcgi_request_start =
+{
+    {
+        1,                                               /* version */
+        NGX_HTTP_FASTCGI_BEGIN_REQUEST,                  /* type */
+        0,                                               /* request_id_hi */
+        1,                                               /* request_id_lo */
+        0,                                               /* content_length_hi */
+        sizeof(ngx_http_fastcgi_begin_request_t),        /* content_length_lo */
+        0,                                               /* padding_length */
+        0
+    },                                             /* reserved */
 
-    { 0,                                               /* role_hi */
-      NGX_HTTP_FASTCGI_RESPONDER,                      /* role_lo */
-      0, /* NGX_HTTP_FASTCGI_KEEP_CONN */              /* flags */
-      { 0, 0, 0, 0, 0 } },                             /* reserved[5] */
+    {
+        0,                                               /* role_hi */
+        NGX_HTTP_FASTCGI_RESPONDER,                      /* role_lo */
+        0, /* NGX_HTTP_FASTCGI_KEEP_CONN */              /* flags */
+        { 0, 0, 0, 0, 0 }
+    },                             /* reserved[5] */
 
-    { 1,                                               /* version */
-      NGX_HTTP_FASTCGI_PARAMS,                         /* type */
-      0,                                               /* request_id_hi */
-      1 },                                             /* request_id_lo */
+    {
+        1,                                               /* version */
+        NGX_HTTP_FASTCGI_PARAMS,                         /* type */
+        0,                                               /* request_id_hi */
+        1
+    },                                             /* request_id_lo */
 
 };
 
 
-static ngx_http_variable_t  ngx_http_fastcgi_vars[] = {
+static ngx_http_variable_t  ngx_http_fastcgi_vars[] =
+{
 
-    { ngx_string("fastcgi_script_name"), NULL,
-      ngx_http_fastcgi_script_name_variable, 0,
-      NGX_HTTP_VAR_NOCACHEABLE|NGX_HTTP_VAR_NOHASH, 0 },
+    {
+        ngx_string("fastcgi_script_name"), NULL,
+        ngx_http_fastcgi_script_name_variable, 0,
+        NGX_HTTP_VAR_NOCACHEABLE | NGX_HTTP_VAR_NOHASH, 0
+    },
 
-    { ngx_string("fastcgi_path_info"), NULL,
-      ngx_http_fastcgi_path_info_variable, 0,
-      NGX_HTTP_VAR_NOCACHEABLE|NGX_HTTP_VAR_NOHASH, 0 },
+    {
+        ngx_string("fastcgi_path_info"), NULL,
+        ngx_http_fastcgi_path_info_variable, 0,
+        NGX_HTTP_VAR_NOCACHEABLE | NGX_HTTP_VAR_NOHASH, 0
+    },
 
     { ngx_null_string, NULL, NULL, 0, 0, 0 }
 };
 
 
-static ngx_str_t  ngx_http_fastcgi_hide_headers[] = {
+static ngx_str_t  ngx_http_fastcgi_hide_headers[] =
+{
     ngx_string("Status"),
     ngx_string("X-Accel-Expires"),
     ngx_string("X-Accel-Redirect"),
@@ -633,9 +751,12 @@ static ngx_str_t  ngx_http_fastcgi_hide_headers[] = {
 
 #if (NGX_HTTP_CACHE)
 
-static ngx_keyval_t  ngx_http_fastcgi_cache_headers[] = {
-    { ngx_string("HTTP_IF_MODIFIED_SINCE"),
-      ngx_string("$upstream_cache_last_modified") },
+static ngx_keyval_t  ngx_http_fastcgi_cache_headers[] =
+{
+    {
+        ngx_string("HTTP_IF_MODIFIED_SINCE"),
+        ngx_string("$upstream_cache_last_modified")
+    },
     { ngx_string("HTTP_IF_UNMODIFIED_SINCE"), ngx_string("") },
     { ngx_string("HTTP_IF_NONE_MATCH"), ngx_string("$upstream_cache_etag") },
     { ngx_string("HTTP_IF_MATCH"), ngx_string("") },
@@ -647,7 +768,8 @@ static ngx_keyval_t  ngx_http_fastcgi_cache_headers[] = {
 #endif
 
 
-static ngx_path_init_t  ngx_http_fastcgi_temp_path = {
+static ngx_path_init_t  ngx_http_fastcgi_temp_path =
+{
     ngx_string(NGX_HTTP_FASTCGI_TEMP_PATH), { 1, 2, 0 }
 };
 
@@ -663,12 +785,14 @@ ngx_http_fastcgi_handler(ngx_http_request_t *r)
     ngx_http_fastcgi_main_conf_t  *fmcf;
 #endif
 
-    if (ngx_http_upstream_create(r) != NGX_OK) {
+    if (ngx_http_upstream_create(r) != NGX_OK)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
     f = ngx_pcalloc(r->pool, sizeof(ngx_http_fastcgi_ctx_t));
-    if (f == NULL) {
+    if (f == NULL)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -676,8 +800,10 @@ ngx_http_fastcgi_handler(ngx_http_request_t *r)
 
     flcf = ngx_http_get_module_loc_conf(r, ngx_http_fastcgi_module);
 
-    if (flcf->fastcgi_lengths) {
-        if (ngx_http_fastcgi_eval(r, flcf) != NGX_OK) {
+    if (flcf->fastcgi_lengths)
+    {
+        if (ngx_http_fastcgi_eval(r, flcf) != NGX_OK)
+        {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
         }
     }
@@ -706,7 +832,8 @@ ngx_http_fastcgi_handler(ngx_http_request_t *r)
     u->buffering = flcf->upstream.buffering;
 
     u->pipe = ngx_pcalloc(r->pool, sizeof(ngx_event_pipe_t));
-    if (u->pipe == NULL) {
+    if (u->pipe == NULL)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -718,14 +845,15 @@ ngx_http_fastcgi_handler(ngx_http_request_t *r)
     u->input_filter_ctx = r;
 
     if (!flcf->upstream.request_buffering
-        && flcf->upstream.pass_request_body)
+            && flcf->upstream.pass_request_body)
     {
         r->request_body_no_buffering = 1;
     }
 
     rc = ngx_http_read_client_request_body(r, ngx_http_upstream_init);
 
-    if (rc >= NGX_HTTP_SPECIAL_RESPONSE) {
+    if (rc >= NGX_HTTP_SPECIAL_RESPONSE)
+    {
         return rc;
     }
 
@@ -743,15 +871,17 @@ ngx_http_fastcgi_eval(ngx_http_request_t *r, ngx_http_fastcgi_loc_conf_t *flcf)
 
     if (ngx_http_script_run(r, &url.url, flcf->fastcgi_lengths->elts, 0,
                             flcf->fastcgi_values->elts)
-        == NULL)
+            == NULL)
     {
         return NGX_ERROR;
     }
 
     url.no_resolve = 1;
 
-    if (ngx_parse_url(r->pool, &url) != NGX_OK) {
-        if (url.err) {
+    if (ngx_parse_url(r->pool, &url) != NGX_OK)
+    {
+        if (url.err)
+        {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                           "%s in upstream \"%V\"", url.err, &url.url);
         }
@@ -762,17 +892,21 @@ ngx_http_fastcgi_eval(ngx_http_request_t *r, ngx_http_fastcgi_loc_conf_t *flcf)
     u = r->upstream;
 
     u->resolved = ngx_pcalloc(r->pool, sizeof(ngx_http_upstream_resolved_t));
-    if (u->resolved == NULL) {
+    if (u->resolved == NULL)
+    {
         return NGX_ERROR;
     }
 
-    if (url.addrs && url.addrs[0].sockaddr) {
+    if (url.addrs && url.addrs[0].sockaddr)
+    {
         u->resolved->sockaddr = url.addrs[0].sockaddr;
         u->resolved->socklen = url.addrs[0].socklen;
         u->resolved->naddrs = 1;
         u->resolved->host = url.addrs[0].name;
 
-    } else {
+    }
+    else
+    {
         u->resolved->host = url.host;
     }
 
@@ -792,13 +926,15 @@ ngx_http_fastcgi_create_key(ngx_http_request_t *r)
     ngx_http_fastcgi_loc_conf_t  *flcf;
 
     key = ngx_array_push(&r->cache->keys);
-    if (key == NULL) {
+    if (key == NULL)
+    {
         return NGX_ERROR;
     }
 
     flcf = ngx_http_get_module_loc_conf(r, ngx_http_fastcgi_module);
 
-    if (ngx_http_complex_value(r, &flcf->cache_key, key) != NGX_OK) {
+    if (ngx_http_complex_value(r, &flcf->cache_key, key) != NGX_OK)
+    {
         return NGX_ERROR;
     }
 
@@ -842,7 +978,8 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
     params = &flcf->params;
 #endif
 
-    if (params->lengths) {
+    if (params->lengths)
+    {
         ngx_memzero(&le, sizeof(ngx_http_script_engine_t));
 
         ngx_http_script_flush_no_cacheable_variables(r, params->flushes);
@@ -851,7 +988,8 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
         le.ip = params->lengths->elts;
         le.request = r;
 
-        while (*(uintptr_t *) le.ip) {
+        while (*(uintptr_t *) le.ip)
+        {
 
             lcode = *(ngx_http_script_len_code_pt *) le.ip;
             key_len = lcode(&le);
@@ -859,12 +997,14 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
             lcode = *(ngx_http_script_len_code_pt *) le.ip;
             skip_empty = lcode(&le);
 
-            for (val_len = 0; *(uintptr_t *) le.ip; val_len += lcode(&le)) {
+            for (val_len = 0; * (uintptr_t *) le.ip; val_len += lcode(&le))
+            {
                 lcode = *(ngx_http_script_len_code_pt *) le.ip;
             }
             le.ip += sizeof(uintptr_t);
 
-            if (skip_empty && val_len == 0) {
+            if (skip_empty && val_len == 0)
+            {
                 continue;
             }
 
@@ -872,22 +1012,26 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
         }
     }
 
-    if (flcf->upstream.pass_request_headers) {
+    if (flcf->upstream.pass_request_headers)
+    {
 
         allocated = 0;
         lowcase_key = NULL;
 
-        if (params->number) {
+        if (params->number)
+        {
             n = 0;
             part = &r->headers_in.headers.part;
 
-            while (part) {
+            while (part)
+            {
                 n += part->nelts;
                 part = part->next;
             }
 
             ignored = ngx_palloc(r->pool, n * sizeof(void *));
-            if (ignored == NULL) {
+            if (ignored == NULL)
+            {
                 return NGX_ERROR;
             }
         }
@@ -895,10 +1039,13 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
         part = &r->headers_in.headers.part;
         header = part->elts;
 
-        for (i = 0; /* void */; i++) {
+        for (i = 0; /* void */; i++)
+        {
 
-            if (i >= part->nelts) {
-                if (part->next == NULL) {
+            if (i >= part->nelts)
+            {
+                if (part->next == NULL)
+                {
                     break;
                 }
 
@@ -907,24 +1054,31 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
                 i = 0;
             }
 
-            if (params->number) {
-                if (allocated < header[i].key.len) {
+            if (params->number)
+            {
+                if (allocated < header[i].key.len)
+                {
                     allocated = header[i].key.len + 16;
                     lowcase_key = ngx_pnalloc(r->pool, allocated);
-                    if (lowcase_key == NULL) {
+                    if (lowcase_key == NULL)
+                    {
                         return NGX_ERROR;
                     }
                 }
 
                 hash = 0;
 
-                for (n = 0; n < header[i].key.len; n++) {
+                for (n = 0; n < header[i].key.len; n++)
+                {
                     ch = header[i].key.data[n];
 
-                    if (ch >= 'A' && ch <= 'Z') {
+                    if (ch >= 'A' && ch <= 'Z')
+                    {
                         ch |= 0x20;
 
-                    } else if (ch == '-') {
+                    }
+                    else if (ch == '-')
+                    {
                         ch = '_';
                     }
 
@@ -932,24 +1086,28 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
                     lowcase_key[n] = ch;
                 }
 
-                if (ngx_hash_find(&params->hash, hash, lowcase_key, n)) {
+                if (ngx_hash_find(&params->hash, hash, lowcase_key, n))
+                {
                     ignored[header_params++] = &header[i];
                     continue;
                 }
 
                 n += sizeof("HTTP_") - 1;
 
-            } else {
+            }
+            else
+            {
                 n = sizeof("HTTP_") - 1 + header[i].key.len;
             }
 
             len += ((n > 127) ? 4 : 1) + ((header[i].value.len > 127) ? 4 : 1)
-                + n + header[i].value.len;
+                   + n + header[i].value.len;
         }
     }
 
 
-    if (len > 65535) {
+    if (len > 65535)
+    {
         ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
                       "fastcgi request record is too big: %uz", len);
         return NGX_ERROR;
@@ -971,12 +1129,14 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
 
 
     b = ngx_create_temp_buf(r->pool, size);
-    if (b == NULL) {
+    if (b == NULL)
+    {
         return NGX_ERROR;
     }
 
     cl = ngx_alloc_chain_link(r->pool);
-    if (cl == NULL) {
+    if (cl == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -989,8 +1149,8 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
                sizeof(ngx_http_fastcgi_request_start_t));
 
     h = (ngx_http_fastcgi_header_t *)
-             (b->pos + sizeof(ngx_http_fastcgi_header_t)
-                     + sizeof(ngx_http_fastcgi_begin_request_t));
+        (b->pos + sizeof(ngx_http_fastcgi_header_t)
+         + sizeof(ngx_http_fastcgi_begin_request_t));
 
     h->content_length_hi = (u_char) ((len >> 8) & 0xff);
     h->content_length_lo = (u_char) (len & 0xff);
@@ -998,11 +1158,12 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
     h->reserved = 0;
 
     b->last = b->pos + sizeof(ngx_http_fastcgi_header_t)
-                     + sizeof(ngx_http_fastcgi_begin_request_t)
-                     + sizeof(ngx_http_fastcgi_header_t);
+              + sizeof(ngx_http_fastcgi_begin_request_t)
+              + sizeof(ngx_http_fastcgi_header_t);
 
 
-    if (params->lengths) {
+    if (params->lengths)
+    {
         ngx_memzero(&e, sizeof(ngx_http_script_engine_t));
 
         e.ip = params->values->elts;
@@ -1012,7 +1173,8 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
 
         le.ip = params->lengths->elts;
 
-        while (*(uintptr_t *) le.ip) {
+        while (*(uintptr_t *) le.ip)
+        {
 
             lcode = *(ngx_http_script_len_code_pt *) le.ip;
             key_len = (u_char) lcode(&le);
@@ -1020,15 +1182,18 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
             lcode = *(ngx_http_script_len_code_pt *) le.ip;
             skip_empty = lcode(&le);
 
-            for (val_len = 0; *(uintptr_t *) le.ip; val_len += lcode(&le)) {
+            for (val_len = 0; * (uintptr_t *) le.ip; val_len += lcode(&le))
+            {
                 lcode = *(ngx_http_script_len_code_pt *) le.ip;
             }
             le.ip += sizeof(uintptr_t);
 
-            if (skip_empty && val_len == 0) {
+            if (skip_empty && val_len == 0)
+            {
                 e.skip = 1;
 
-                while (*(uintptr_t *) e.ip) {
+                while (*(uintptr_t *) e.ip)
+                {
                     code = *(ngx_http_script_code_pt *) e.ip;
                     code((ngx_http_script_engine_t *) &e);
                 }
@@ -1041,17 +1206,21 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
 
             *e.pos++ = (u_char) key_len;
 
-            if (val_len > 127) {
+            if (val_len > 127)
+            {
                 *e.pos++ = (u_char) (((val_len >> 24) & 0x7f) | 0x80);
                 *e.pos++ = (u_char) ((val_len >> 16) & 0xff);
                 *e.pos++ = (u_char) ((val_len >> 8) & 0xff);
                 *e.pos++ = (u_char) (val_len & 0xff);
 
-            } else {
+            }
+            else
+            {
                 *e.pos++ = (u_char) val_len;
             }
 
-            while (*(uintptr_t *) e.ip) {
+            while (*(uintptr_t *) e.ip)
+            {
                 code = *(ngx_http_script_code_pt *) e.ip;
                 code((ngx_http_script_engine_t *) &e);
             }
@@ -1067,15 +1236,19 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
     }
 
 
-    if (flcf->upstream.pass_request_headers) {
+    if (flcf->upstream.pass_request_headers)
+    {
 
         part = &r->headers_in.headers.part;
         header = part->elts;
 
-        for (i = 0; /* void */; i++) {
+        for (i = 0; /* void */; i++)
+        {
 
-            if (i >= part->nelts) {
-                if (part->next == NULL) {
+            if (i >= part->nelts)
+            {
+                if (part->next == NULL)
+                {
                     break;
                 }
 
@@ -1084,43 +1257,55 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
                 i = 0;
             }
 
-            for (n = 0; n < header_params; n++) {
-                if (&header[i] == ignored[n]) {
+            for (n = 0; n < header_params; n++)
+            {
+                if (&header[i] == ignored[n])
+                {
                     goto next;
                 }
             }
 
             key_len = sizeof("HTTP_") - 1 + header[i].key.len;
-            if (key_len > 127) {
+            if (key_len > 127)
+            {
                 *b->last++ = (u_char) (((key_len >> 24) & 0x7f) | 0x80);
                 *b->last++ = (u_char) ((key_len >> 16) & 0xff);
                 *b->last++ = (u_char) ((key_len >> 8) & 0xff);
                 *b->last++ = (u_char) (key_len & 0xff);
 
-            } else {
+            }
+            else
+            {
                 *b->last++ = (u_char) key_len;
             }
 
             val_len = header[i].value.len;
-            if (val_len > 127) {
+            if (val_len > 127)
+            {
                 *b->last++ = (u_char) (((val_len >> 24) & 0x7f) | 0x80);
                 *b->last++ = (u_char) ((val_len >> 16) & 0xff);
                 *b->last++ = (u_char) ((val_len >> 8) & 0xff);
                 *b->last++ = (u_char) (val_len & 0xff);
 
-            } else {
+            }
+            else
+            {
                 *b->last++ = (u_char) val_len;
             }
 
             b->last = ngx_cpymem(b->last, "HTTP_", sizeof("HTTP_") - 1);
 
-            for (n = 0; n < header[i].key.len; n++) {
+            for (n = 0; n < header[i].key.len; n++)
+            {
                 ch = header[i].key.data[n];
 
-                if (ch >= 'a' && ch <= 'z') {
+                if (ch >= 'a' && ch <= 'z')
+                {
                     ch &= ~0x20;
 
-                } else if (ch == '-') {
+                }
+                else if (ch == '-')
+                {
                     ch = '_';
                 }
 
@@ -1133,14 +1318,15 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
                            "fastcgi param: \"%*s: %*s\"",
                            key_len, b->last - (key_len + val_len),
                            val_len, b->last - val_len);
-        next:
+next:
 
             continue;
         }
     }
 
 
-    if (padding) {
+    if (padding)
+    {
         ngx_memzero(b->last, padding);
         b->last += padding;
     }
@@ -1158,14 +1344,17 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
     h->padding_length = 0;
     h->reserved = 0;
 
-    if (r->request_body_no_buffering) {
+    if (r->request_body_no_buffering)
+    {
 
         u->request_bufs = cl;
 
         u->output.output_filter = ngx_http_fastcgi_body_output_filter;
         u->output.filter_ctx = r;
 
-    } else if (flcf->upstream.pass_request_body) {
+    }
+    else if (flcf->upstream.pass_request_body)
+    {
 
         body = u->request_bufs;
         u->request_bufs = cl;
@@ -1175,35 +1364,44 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
         pos = NULL;
 #endif
 
-        while (body) {
+        while (body)
+        {
 
-            if (ngx_buf_special(body->buf)) {
+            if (ngx_buf_special(body->buf))
+            {
                 body = body->next;
                 continue;
             }
 
-            if (body->buf->in_file) {
+            if (body->buf->in_file)
+            {
                 file_pos = body->buf->file_pos;
 
-            } else {
+            }
+            else
+            {
                 pos = body->buf->pos;
             }
 
             next = 0;
 
-            do {
+            do
+            {
                 b = ngx_alloc_buf(r->pool);
-                if (b == NULL) {
+                if (b == NULL)
+                {
                     return NGX_ERROR;
                 }
 
                 ngx_memcpy(b, body->buf, sizeof(ngx_buf_t));
 
-                if (body->buf->in_file) {
+                if (body->buf->in_file)
+                {
                     b->file_pos = file_pos;
                     file_pos += 32 * 1024;
 
-                    if (file_pos >= body->buf->file_last) {
+                    if (file_pos >= body->buf->file_last)
+                    {
                         file_pos = body->buf->file_last;
                         next = 1;
                     }
@@ -1211,12 +1409,15 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
                     b->file_last = file_pos;
                     len = (ngx_uint_t) (file_pos - b->file_pos);
 
-                } else {
+                }
+                else
+                {
                     b->pos = pos;
                     b->start = pos;
                     pos += 32 * 1024;
 
-                    if (pos >= body->buf->last) {
+                    if (pos >= body->buf->last)
+                    {
                         pos = body->buf->last;
                         next = 1;
                     }
@@ -1241,7 +1442,8 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
                 h->reserved = 0;
 
                 cl->next = ngx_alloc_chain_link(r->pool);
-                if (cl->next == NULL) {
+                if (cl->next == NULL)
+                {
                     return NGX_ERROR;
                 }
 
@@ -1251,33 +1453,40 @@ ngx_http_fastcgi_create_request(ngx_http_request_t *r)
                 b = ngx_create_temp_buf(r->pool,
                                         sizeof(ngx_http_fastcgi_header_t)
                                         + padding);
-                if (b == NULL) {
+                if (b == NULL)
+                {
                     return NGX_ERROR;
                 }
 
-                if (padding) {
+                if (padding)
+                {
                     ngx_memzero(b->last, padding);
                     b->last += padding;
                 }
 
                 cl->next = ngx_alloc_chain_link(r->pool);
-                if (cl->next == NULL) {
+                if (cl->next == NULL)
+                {
                     return NGX_ERROR;
                 }
 
                 cl = cl->next;
                 cl->buf = b;
 
-            } while (!next);
+            }
+            while (!next);
 
             body = body->next;
         }
 
-    } else {
+    }
+    else
+    {
         u->request_bufs = cl;
     }
 
-    if (!r->request_body_no_buffering) {
+    if (!r->request_body_no_buffering)
+    {
         h = (ngx_http_fastcgi_header_t *) cl->buf->last;
         cl->buf->last += sizeof(ngx_http_fastcgi_header_t);
 
@@ -1304,7 +1513,8 @@ ngx_http_fastcgi_reinit_request(ngx_http_request_t *r)
 
     f = ngx_http_get_module_ctx(r, ngx_http_fastcgi_module);
 
-    if (f == NULL) {
+    if (f == NULL)
+    {
         return NGX_OK;
     }
 
@@ -1312,7 +1522,8 @@ ngx_http_fastcgi_reinit_request(ngx_http_request_t *r)
     f->fastcgi_stdout = 0;
     f->large_stderr = 0;
 
-    if (f->split_parts) {
+    if (f->split_parts)
+    {
         f->split_parts->nelts = 0;
     }
 
@@ -1342,7 +1553,8 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
 
     f = ngx_http_get_module_ctx(r, ngx_http_fastcgi_module);
 
-    if (in == NULL) {
+    if (in == NULL)
+    {
         out = in;
         goto out;
     }
@@ -1350,7 +1562,8 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
     out = NULL;
     ll = &out;
 
-    if (!f->header_sent) {
+    if (!f->header_sent)
+    {
         /* first buffer contains headers, pass it unmodified */
 
         ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
@@ -1359,7 +1572,8 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
         f->header_sent = 1;
 
         tl = ngx_alloc_chain_link(r->pool);
-        if (tl == NULL) {
+        if (tl == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -1369,14 +1583,16 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
 
         in = in->next;
 
-        if (in == NULL) {
+        if (in == NULL)
+        {
             tl->next = NULL;
             goto out;
         }
     }
 
     cl = ngx_chain_get_free_buf(r->pool, &f->free);
-    if (cl == NULL) {
+    if (cl == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -1385,12 +1601,14 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
     b->tag = (ngx_buf_tag_t) &ngx_http_fastcgi_body_output_filter;
     b->temporary = 1;
 
-    if (b->start == NULL) {
+    if (b->start == NULL)
+    {
         /* reserve space for maximum possible padding, 7 bytes */
 
         b->start = ngx_palloc(r->pool,
                               sizeof(ngx_http_fastcgi_header_t) + 7);
-        if (b->start == NULL) {
+        if (b->start == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -1410,7 +1628,8 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
     pos = NULL;
 #endif
 
-    while (in) {
+    while (in)
+    {
 
         ngx_log_debug7(NGX_LOG_DEBUG_EVENT, r->connection->log, 0,
                        "fastcgi output in  l:%d f:%d %p, pos %p, size: %z "
@@ -1422,27 +1641,34 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
                        in->buf->file_pos,
                        in->buf->file_last - in->buf->file_pos);
 
-        if (in->buf->last_buf) {
+        if (in->buf->last_buf)
+        {
             last = 1;
         }
 
-        if (ngx_buf_special(in->buf)) {
+        if (ngx_buf_special(in->buf))
+        {
             in = in->next;
             continue;
         }
 
-        if (in->buf->in_file) {
+        if (in->buf->in_file)
+        {
             file_pos = in->buf->file_pos;
 
-        } else {
+        }
+        else
+        {
             pos = in->buf->pos;
         }
 
         next = 0;
 
-        do {
+        do
+        {
             tl = ngx_chain_get_free_buf(r->pool, &f->free);
-            if (tl == NULL) {
+            if (tl == NULL)
+            {
                 return NGX_ERROR;
             }
 
@@ -1458,11 +1684,13 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
 
             b->start = start;
 
-            if (in->buf->in_file) {
+            if (in->buf->in_file)
+            {
                 b->file_pos = file_pos;
                 file_pos += 32 * 1024;
 
-                if (file_pos >= in->buf->file_last) {
+                if (file_pos >= in->buf->file_last)
+                {
                     file_pos = in->buf->file_last;
                     next = 1;
                 }
@@ -1470,11 +1698,14 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
                 b->file_last = file_pos;
                 len = (ngx_uint_t) (file_pos - b->file_pos);
 
-            } else {
+            }
+            else
+            {
                 b->pos = pos;
                 pos += 32 * 1024;
 
-                if (pos >= in->buf->last) {
+                if (pos >= in->buf->last)
+                {
                     pos = in->buf->last;
                     next = 1;
                 }
@@ -1509,7 +1740,8 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
             cl = tl;
 
             tl = ngx_chain_get_free_buf(r->pool, &f->free);
-            if (tl == NULL) {
+            if (tl == NULL)
+            {
                 return NGX_ERROR;
             }
 
@@ -1518,12 +1750,14 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
             b->tag = (ngx_buf_tag_t) &ngx_http_fastcgi_body_output_filter;
             b->temporary = 1;
 
-            if (b->start == NULL) {
+            if (b->start == NULL)
+            {
                 /* reserve space for maximum possible padding, 7 bytes */
 
                 b->start = ngx_palloc(r->pool,
                                       sizeof(ngx_http_fastcgi_header_t) + 7);
-                if (b->start == NULL) {
+                if (b->start == NULL)
+                {
                     return NGX_ERROR;
                 }
 
@@ -1533,7 +1767,8 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
                 b->end = b->start + sizeof(ngx_http_fastcgi_header_t) + 7;
             }
 
-            if (padding) {
+            if (padding)
+            {
                 ngx_memzero(b->last, padding);
                 b->last += padding;
             }
@@ -1541,12 +1776,14 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
             cl->next = tl;
             cl = tl;
 
-        } while (!next);
+        }
+        while (!next);
 
         in = in->next;
     }
 
-    if (last) {
+    if (last)
+    {
         h = (ngx_http_fastcgi_header_t *) cl->buf->last;
         cl->buf->last += sizeof(ngx_http_fastcgi_header_t);
 
@@ -1561,7 +1798,9 @@ ngx_http_fastcgi_body_output_filter(void *data, ngx_chain_t *in)
 
         cl->buf->last_buf = 1;
 
-    } else if (padding == 0) {
+    }
+    else if (padding == 0)
+    {
         /* TODO: do not allocate buffers instead */
         cl->buf->temporary = 0;
         cl->buf->sync = 1;
@@ -1573,7 +1812,8 @@ out:
 
 #if (NGX_DEBUG)
 
-    for (cl = out; cl; cl = cl->next) {
+    for (cl = out; cl; cl = cl->next)
+    {
         ngx_log_debug7(NGX_LOG_DEBUG_EVENT, r->connection->log, 0,
                        "fastcgi output out l:%d f:%d %p, pos %p, size: %z "
                        "file: %O, size: %O",
@@ -1590,14 +1830,17 @@ out:
     rc = ngx_chain_writer(&r->upstream->writer, out);
 
     ngx_chain_update_chains(r->pool, &f->free, &f->busy, &out,
-                         (ngx_buf_tag_t) &ngx_http_fastcgi_body_output_filter);
+                            (ngx_buf_tag_t) &ngx_http_fastcgi_body_output_filter);
 
-    for (cl = f->free; cl; cl = cl->next) {
+    for (cl = f->free; cl; cl = cl->next)
+    {
 
         /* mark original buffers as sent */
 
-        if (cl->buf->shadow) {
-            if (cl->buf->last_shadow) {
+        if (cl->buf->shadow)
+        {
+            if (cl->buf->last_shadow)
+            {
                 b = cl->buf->shadow;
                 b->pos = b->last;
             }
@@ -1634,9 +1877,11 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
 
     u = r->upstream;
 
-    for ( ;; ) {
+    for ( ;; )
+    {
 
-        if (f->state < ngx_http_fastcgi_st_data) {
+        if (f->state < ngx_http_fastcgi_st_data)
+        {
 
             f->pos = u->buffer.pos;
             f->last = u->buffer.last;
@@ -1646,16 +1891,18 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
             u->buffer.pos = f->pos;
             u->buffer.last = f->last;
 
-            if (rc == NGX_AGAIN) {
+            if (rc == NGX_AGAIN)
+            {
                 return NGX_AGAIN;
             }
 
-            if (rc == NGX_ERROR) {
+            if (rc == NGX_ERROR)
+            {
                 return NGX_HTTP_UPSTREAM_INVALID_HEADER;
             }
 
             if (f->type != NGX_HTTP_FASTCGI_STDOUT
-                && f->type != NGX_HTTP_FASTCGI_STDERR)
+                    && f->type != NGX_HTTP_FASTCGI_STDERR)
             {
                 ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                               "upstream sent unexpected FastCGI record: %ui",
@@ -1664,7 +1911,8 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
                 return NGX_HTTP_UPSTREAM_INVALID_HEADER;
             }
 
-            if (f->type == NGX_HTTP_FASTCGI_STDOUT && f->length == 0) {
+            if (f->type == NGX_HTTP_FASTCGI_STDOUT && f->length == 0)
+            {
                 ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                               "upstream prematurely closed FastCGI stdout");
 
@@ -1672,16 +1920,19 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
             }
         }
 
-        if (f->state == ngx_http_fastcgi_st_padding) {
+        if (f->state == ngx_http_fastcgi_st_padding)
+        {
 
-            if (u->buffer.pos + f->padding < u->buffer.last) {
+            if (u->buffer.pos + f->padding < u->buffer.last)
+            {
                 f->state = ngx_http_fastcgi_st_version;
                 u->buffer.pos += f->padding;
 
                 continue;
             }
 
-            if (u->buffer.pos + f->padding == u->buffer.last) {
+            if (u->buffer.pos + f->padding == u->buffer.last)
+            {
                 f->state = ngx_http_fastcgi_st_version;
                 u->buffer.pos = u->buffer.last;
 
@@ -1697,23 +1948,30 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
 
         /* f->state == ngx_http_fastcgi_st_data */
 
-        if (f->type == NGX_HTTP_FASTCGI_STDERR) {
+        if (f->type == NGX_HTTP_FASTCGI_STDERR)
+        {
 
-            if (f->length) {
+            if (f->length)
+            {
                 msg = u->buffer.pos;
 
-                if (u->buffer.pos + f->length <= u->buffer.last) {
+                if (u->buffer.pos + f->length <= u->buffer.last)
+                {
                     u->buffer.pos += f->length;
                     f->length = 0;
                     f->state = ngx_http_fastcgi_st_padding;
 
-                } else {
+                }
+                else
+                {
                     f->length -= u->buffer.last - u->buffer.pos;
                     u->buffer.pos = u->buffer.last;
                 }
 
-                for (p = u->buffer.pos - 1; msg < p; p--) {
-                    if (*p != LF && *p != CR && *p != '.' && *p != ' ') {
+                for (p = u->buffer.pos - 1; msg < p; p--)
+                {
+                    if (*p != LF && *p != CR && *p != '.' && *p != ' ')
+                    {
                         break;
                     }
                 }
@@ -1725,22 +1983,26 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
 
                 flcf = ngx_http_get_module_loc_conf(r, ngx_http_fastcgi_module);
 
-                if (flcf->catch_stderr) {
+                if (flcf->catch_stderr)
+                {
                     pattern = flcf->catch_stderr->elts;
 
-                    for (i = 0; i < flcf->catch_stderr->nelts; i++) {
+                    for (i = 0; i < flcf->catch_stderr->nelts; i++)
+                    {
                         if (ngx_strnstr(msg, (char *) pattern[i].data,
                                         p - msg)
-                            != NULL)
+                                != NULL)
                         {
                             return NGX_HTTP_UPSTREAM_INVALID_HEADER;
                         }
                     }
                 }
 
-                if (u->buffer.pos == u->buffer.last) {
+                if (u->buffer.pos == u->buffer.last)
+                {
 
-                    if (!f->fastcgi_stdout) {
+                    if (!f->fastcgi_stdout)
+                    {
 
                         /*
                          * the special handling the large number
@@ -1748,10 +2010,13 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
                          */
 
 #if (NGX_HTTP_CACHE)
-                        if (r->cache) {
+                        if (r->cache)
+                        {
                             u->buffer.pos = u->buffer.start
-                                                     + r->cache->header_start;
-                        } else {
+                                            + r->cache->header_start;
+                        }
+                        else
+                        {
                             u->buffer.pos = u->buffer.start;
                         }
 #else
@@ -1764,7 +2029,9 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
                     return NGX_AGAIN;
                 }
 
-            } else {
+            }
+            else
+            {
                 f->state = ngx_http_fastcgi_st_padding;
             }
 
@@ -1776,7 +2043,8 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
 
 #if (NGX_HTTP_CACHE)
 
-        if (f->large_stderr && r->cache) {
+        if (f->large_stderr && r->cache)
+        {
             ssize_t                     len;
             ngx_http_fastcgi_header_t  *fh;
 
@@ -1792,7 +2060,8 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
              * if there is no enough place for the record header.
              */
 
-            if (len >= 0) {
+            if (len >= 0)
+            {
                 fh = (ngx_http_fastcgi_header_t *) start;
                 fh->version = 1;
                 fh->type = NGX_HTTP_FASTCGI_STDERR;
@@ -1803,7 +2072,9 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
                 fh->padding_length = 0;
                 fh->reserved = 0;
 
-            } else {
+            }
+            else
+            {
                 r->cache->header_start += u->buffer.pos - start
                                           - sizeof(ngx_http_fastcgi_header_t);
             }
@@ -1817,7 +2088,8 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
 
         start = u->buffer.pos;
 
-        if (u->buffer.pos + f->length < u->buffer.last) {
+        if (u->buffer.pos + f->length < u->buffer.last)
+        {
 
             /*
              * set u->buffer.last to the end of the FastCGI record data
@@ -1827,11 +2099,14 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
             last = u->buffer.last;
             u->buffer.last = u->buffer.pos + f->length;
 
-        } else {
+        }
+        else
+        {
             last = NULL;
         }
 
-        for ( ;; ) {
+        for ( ;; )
+        {
 
             part_start = u->buffer.pos;
             part_end = u->buffer.last;
@@ -1841,36 +2116,43 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
             ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                            "http fastcgi parser: %i", rc);
 
-            if (rc == NGX_AGAIN) {
+            if (rc == NGX_AGAIN)
+            {
                 break;
             }
 
-            if (rc == NGX_OK) {
+            if (rc == NGX_OK)
+            {
 
                 /* a header line has been parsed successfully */
 
                 h = ngx_list_push(&u->headers_in.headers);
-                if (h == NULL) {
+                if (h == NULL)
+                {
                     return NGX_ERROR;
                 }
 
-                if (f->split_parts && f->split_parts->nelts) {
+                if (f->split_parts && f->split_parts->nelts)
+                {
 
                     part = f->split_parts->elts;
                     size = u->buffer.pos - part_start;
 
-                    for (i = 0; i < f->split_parts->nelts; i++) {
+                    for (i = 0; i < f->split_parts->nelts; i++)
+                    {
                         size += part[i].end - part[i].start;
                     }
 
                     p = ngx_pnalloc(r->pool, size);
-                    if (p == NULL) {
+                    if (p == NULL)
+                    {
                         return NGX_ERROR;
                     }
 
                     buf.pos = p;
 
-                    for (i = 0; i < f->split_parts->nelts; i++) {
+                    for (i = 0; i < f->split_parts->nelts; i++)
+                    {
                         p = ngx_cpymem(p, part[i].start,
                                        part[i].end - part[i].start);
                     }
@@ -1883,7 +2165,8 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
 
                     rc = ngx_http_parse_header_line(r, &buf, 1);
 
-                    if (rc != NGX_OK) {
+                    if (rc != NGX_OK)
+                    {
                         ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
                                       "invalid header after joining "
                                       "FastCGI records");
@@ -1899,11 +2182,14 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
                     h->value.data[h->value.len] = '\0';
 
                     h->lowcase_key = ngx_pnalloc(r->pool, h->key.len);
-                    if (h->lowcase_key == NULL) {
+                    if (h->lowcase_key == NULL)
+                    {
                         return NGX_ERROR;
                     }
 
-                } else {
+                }
+                else
+                {
 
                     h->key.len = r->header_name_end - r->header_name_start;
                     h->value.len = r->header_end - r->header_start;
@@ -1911,7 +2197,8 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
                     h->key.data = ngx_pnalloc(r->pool,
                                               h->key.len + 1 + h->value.len + 1
                                               + h->key.len);
-                    if (h->key.data == NULL) {
+                    if (h->key.data == NULL)
+                    {
                         return NGX_ERROR;
                     }
 
@@ -1927,17 +2214,21 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
 
                 h->hash = r->header_hash;
 
-                if (h->key.len == r->lowcase_index) {
+                if (h->key.len == r->lowcase_index)
+                {
                     ngx_memcpy(h->lowcase_key, r->lowcase_header, h->key.len);
 
-                } else {
+                }
+                else
+                {
                     ngx_strlow(h->lowcase_key, h->key.data, h->key.len);
                 }
 
                 hh = ngx_hash_find(&umcf->headers_in_hash, h->hash,
                                    h->lowcase_key, h->key.len);
 
-                if (hh && hh->handler(r, h, hh->offset) != NGX_OK) {
+                if (hh && hh->handler(r, h, hh->offset) != NGX_OK)
+                {
                     return NGX_ERROR;
                 }
 
@@ -1945,7 +2236,8 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
                                "http fastcgi header: \"%V: %V\"",
                                &h->key, &h->value);
 
-                if (u->buffer.pos < u->buffer.last) {
+                if (u->buffer.pos < u->buffer.last)
+                {
                     continue;
                 }
 
@@ -1954,19 +2246,22 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
                 break;
             }
 
-            if (rc == NGX_HTTP_PARSE_HEADER_DONE) {
+            if (rc == NGX_HTTP_PARSE_HEADER_DONE)
+            {
 
                 /* a whole header has been parsed successfully */
 
                 ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                                "http fastcgi header done");
 
-                if (u->headers_in.status) {
+                if (u->headers_in.status)
+                {
                     status_line = &u->headers_in.status->value;
 
                     status = ngx_atoi(status_line->data, 3);
 
-                    if (status == NGX_ERROR) {
+                    if (status == NGX_ERROR)
+                    {
                         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                                       "upstream sent invalid status \"%V\"",
                                       status_line);
@@ -1976,17 +2271,22 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
                     u->headers_in.status_n = status;
                     u->headers_in.status_line = *status_line;
 
-                } else if (u->headers_in.location) {
+                }
+                else if (u->headers_in.location)
+                {
                     u->headers_in.status_n = 302;
                     ngx_str_set(&u->headers_in.status_line,
                                 "302 Moved Temporarily");
 
-                } else {
+                }
+                else
+                {
                     u->headers_in.status_n = 200;
                     ngx_str_set(&u->headers_in.status_line, "200 OK");
                 }
 
-                if (u->state && u->state->status == 0) {
+                if (u->state && u->state->status == 0)
+                {
                     u->state->status = u->headers_in.status_n;
                 }
 
@@ -2001,21 +2301,25 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
             return NGX_HTTP_UPSTREAM_INVALID_HEADER;
         }
 
-        if (last) {
+        if (last)
+        {
             u->buffer.last = last;
         }
 
         f->length -= u->buffer.pos - start;
 
-        if (f->length == 0) {
+        if (f->length == 0)
+        {
             f->state = ngx_http_fastcgi_st_padding;
         }
 
-        if (rc == NGX_HTTP_PARSE_HEADER_DONE) {
+        if (rc == NGX_HTTP_PARSE_HEADER_DONE)
+        {
             return NGX_OK;
         }
 
-        if (rc == NGX_OK) {
+        if (rc == NGX_OK)
+        {
             continue;
         }
 
@@ -2024,23 +2328,27 @@ ngx_http_fastcgi_process_header(ngx_http_request_t *r)
         ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                        "upstream split a header line in FastCGI records");
 
-        if (f->split_parts == NULL) {
+        if (f->split_parts == NULL)
+        {
             f->split_parts = ngx_array_create(r->pool, 1,
-                                        sizeof(ngx_http_fastcgi_split_part_t));
-            if (f->split_parts == NULL) {
+                                              sizeof(ngx_http_fastcgi_split_part_t));
+            if (f->split_parts == NULL)
+            {
                 return NGX_ERROR;
             }
         }
 
         part = ngx_array_push(f->split_parts);
-        if (part == NULL) {
+        if (part == NULL)
+        {
             return NGX_ERROR;
         }
 
         part->start = part_start;
         part->end = part_end;
 
-        if (u->buffer.pos < u->buffer.last) {
+        if (u->buffer.pos < u->buffer.last)
+        {
             continue;
         }
 
@@ -2075,7 +2383,8 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
     ngx_http_fastcgi_ctx_t       *f;
     ngx_http_fastcgi_loc_conf_t  *flcf;
 
-    if (buf->pos == buf->last) {
+    if (buf->pos == buf->last)
+    {
         return NGX_OK;
     }
 
@@ -2089,23 +2398,29 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
     f->pos = buf->pos;
     f->last = buf->last;
 
-    for ( ;; ) {
-        if (f->state < ngx_http_fastcgi_st_data) {
+    for ( ;; )
+    {
+        if (f->state < ngx_http_fastcgi_st_data)
+        {
 
             rc = ngx_http_fastcgi_process_record(r, f);
 
-            if (rc == NGX_AGAIN) {
+            if (rc == NGX_AGAIN)
+            {
                 break;
             }
 
-            if (rc == NGX_ERROR) {
+            if (rc == NGX_ERROR)
+            {
                 return NGX_ERROR;
             }
 
-            if (f->type == NGX_HTTP_FASTCGI_STDOUT && f->length == 0) {
+            if (f->type == NGX_HTTP_FASTCGI_STDOUT && f->length == 0)
+            {
                 f->state = ngx_http_fastcgi_st_padding;
 
-                if (!flcf->keep_conn) {
+                if (!flcf->keep_conn)
+                {
                     p->upstream_done = 1;
                 }
 
@@ -2115,12 +2430,14 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
                 continue;
             }
 
-            if (f->type == NGX_HTTP_FASTCGI_END_REQUEST) {
+            if (f->type == NGX_HTTP_FASTCGI_END_REQUEST)
+            {
 
                 ngx_log_debug0(NGX_LOG_DEBUG_HTTP, p->log, 0,
                                "http fastcgi sent end request");
 
-                if (!flcf->keep_conn) {
+                if (!flcf->keep_conn)
+                {
                     p->upstream_done = 1;
                     break;
                 }
@@ -2130,16 +2447,20 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
         }
 
 
-        if (f->state == ngx_http_fastcgi_st_padding) {
+        if (f->state == ngx_http_fastcgi_st_padding)
+        {
 
-            if (f->type == NGX_HTTP_FASTCGI_END_REQUEST) {
+            if (f->type == NGX_HTTP_FASTCGI_END_REQUEST)
+            {
 
-                if (f->pos + f->padding < f->last) {
+                if (f->pos + f->padding < f->last)
+                {
                     p->upstream_done = 1;
                     break;
                 }
 
-                if (f->pos + f->padding == f->last) {
+                if (f->pos + f->padding == f->last)
+                {
                     p->upstream_done = 1;
                     r->upstream->keepalive = 1;
                     break;
@@ -2150,14 +2471,16 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
                 break;
             }
 
-            if (f->pos + f->padding < f->last) {
+            if (f->pos + f->padding < f->last)
+            {
                 f->state = ngx_http_fastcgi_st_version;
                 f->pos += f->padding;
 
                 continue;
             }
 
-            if (f->pos + f->padding == f->last) {
+            if (f->pos + f->padding == f->last)
+            {
                 f->state = ngx_http_fastcgi_st_version;
 
                 break;
@@ -2171,28 +2494,36 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
 
         /* f->state == ngx_http_fastcgi_st_data */
 
-        if (f->type == NGX_HTTP_FASTCGI_STDERR) {
+        if (f->type == NGX_HTTP_FASTCGI_STDERR)
+        {
 
-            if (f->length) {
+            if (f->length)
+            {
 
-                if (f->pos == f->last) {
+                if (f->pos == f->last)
+                {
                     break;
                 }
 
                 msg = f->pos;
 
-                if (f->pos + f->length <= f->last) {
+                if (f->pos + f->length <= f->last)
+                {
                     f->pos += f->length;
                     f->length = 0;
                     f->state = ngx_http_fastcgi_st_padding;
 
-                } else {
+                }
+                else
+                {
                     f->length -= f->last - f->pos;
                     f->pos = f->last;
                 }
 
-                for (m = f->pos - 1; msg < m; m--) {
-                    if (*m != LF && *m != CR && *m != '.' && *m != ' ') {
+                for (m = f->pos - 1; msg < m; m--)
+                {
+                    if (*m != LF && *m != CR && *m != '.' && *m != ' ')
+                    {
                         break;
                     }
                 }
@@ -2201,16 +2532,20 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
                               "FastCGI sent in stderr: \"%*s\"",
                               m + 1 - msg, msg);
 
-            } else {
+            }
+            else
+            {
                 f->state = ngx_http_fastcgi_st_padding;
             }
 
             continue;
         }
 
-        if (f->type == NGX_HTTP_FASTCGI_END_REQUEST) {
+        if (f->type == NGX_HTTP_FASTCGI_END_REQUEST)
+        {
 
-            if (f->pos + f->length <= f->last) {
+            if (f->pos + f->length <= f->last)
+            {
                 f->state = ngx_http_fastcgi_st_padding;
                 f->pos += f->length;
 
@@ -2225,12 +2560,14 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
 
         /* f->type == NGX_HTTP_FASTCGI_STDOUT */
 
-        if (f->pos == f->last) {
+        if (f->pos == f->last)
+        {
             break;
         }
 
         cl = ngx_chain_get_free_buf(p->pool, &p->free);
-        if (cl == NULL) {
+        if (cl == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -2248,9 +2585,12 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
         *prev = b;
         prev = &b->shadow;
 
-        if (p->in) {
+        if (p->in)
+        {
             *p->last_in = cl;
-        } else {
+        }
+        else
+        {
             p->in = cl;
         }
         p->last_in = &cl->next;
@@ -2261,7 +2601,8 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
         ngx_log_debug2(NGX_LOG_DEBUG_EVENT, p->log, 0,
                        "input buf #%d %p", b->num, b->pos);
 
-        if (f->pos + f->length <= f->last) {
+        if (f->pos + f->length <= f->last)
+        {
             f->state = ngx_http_fastcgi_st_padding;
             f->pos += f->length;
             b->last = f->pos;
@@ -2277,24 +2618,31 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
 
     }
 
-    if (flcf->keep_conn) {
+    if (flcf->keep_conn)
+    {
 
         /* set p->length, minimal amount of data we want to see */
 
-        if (f->state < ngx_http_fastcgi_st_data) {
+        if (f->state < ngx_http_fastcgi_st_data)
+        {
             p->length = 1;
 
-        } else if (f->state == ngx_http_fastcgi_st_padding) {
+        }
+        else if (f->state == ngx_http_fastcgi_st_padding)
+        {
             p->length = f->padding;
 
-        } else {
+        }
+        else
+        {
             /* ngx_http_fastcgi_st_data */
 
             p->length = f->length;
         }
     }
 
-    if (b) {
+    if (b)
+    {
         b->shadow = buf;
         b->last_shadow = 1;
 
@@ -2306,7 +2654,8 @@ ngx_http_fastcgi_input_filter(ngx_event_pipe_t *p, ngx_buf_t *buf)
 
     /* there is no data record in the buf, add it to free chain */
 
-    if (ngx_event_pipe_add_free_buf(p, buf) != NGX_OK) {
+    if (ngx_event_pipe_add_free_buf(p, buf) != NGX_OK)
+    {
         return NGX_ERROR;
     }
 
@@ -2334,27 +2683,33 @@ ngx_http_fastcgi_non_buffered_filter(void *data, ssize_t bytes)
     buf->pos = buf->last;
     buf->last += bytes;
 
-    for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next) {
+    for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next)
+    {
         ll = &cl->next;
     }
 
     f->pos = buf->pos;
     f->last = buf->last;
 
-    for ( ;; ) {
-        if (f->state < ngx_http_fastcgi_st_data) {
+    for ( ;; )
+    {
+        if (f->state < ngx_http_fastcgi_st_data)
+        {
 
             rc = ngx_http_fastcgi_process_record(r, f);
 
-            if (rc == NGX_AGAIN) {
+            if (rc == NGX_AGAIN)
+            {
                 break;
             }
 
-            if (rc == NGX_ERROR) {
+            if (rc == NGX_ERROR)
+            {
                 return NGX_ERROR;
             }
 
-            if (f->type == NGX_HTTP_FASTCGI_STDOUT && f->length == 0) {
+            if (f->type == NGX_HTTP_FASTCGI_STDOUT && f->length == 0)
+            {
                 f->state = ngx_http_fastcgi_st_padding;
 
                 ngx_log_debug0(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
@@ -2364,16 +2719,20 @@ ngx_http_fastcgi_non_buffered_filter(void *data, ssize_t bytes)
             }
         }
 
-        if (f->state == ngx_http_fastcgi_st_padding) {
+        if (f->state == ngx_http_fastcgi_st_padding)
+        {
 
-            if (f->type == NGX_HTTP_FASTCGI_END_REQUEST) {
+            if (f->type == NGX_HTTP_FASTCGI_END_REQUEST)
+            {
 
-                if (f->pos + f->padding < f->last) {
+                if (f->pos + f->padding < f->last)
+                {
                     u->length = 0;
                     break;
                 }
 
-                if (f->pos + f->padding == f->last) {
+                if (f->pos + f->padding == f->last)
+                {
                     u->length = 0;
                     u->keepalive = 1;
                     break;
@@ -2384,14 +2743,16 @@ ngx_http_fastcgi_non_buffered_filter(void *data, ssize_t bytes)
                 break;
             }
 
-            if (f->pos + f->padding < f->last) {
+            if (f->pos + f->padding < f->last)
+            {
                 f->state = ngx_http_fastcgi_st_version;
                 f->pos += f->padding;
 
                 continue;
             }
 
-            if (f->pos + f->padding == f->last) {
+            if (f->pos + f->padding == f->last)
+            {
                 f->state = ngx_http_fastcgi_st_version;
 
                 break;
@@ -2405,28 +2766,36 @@ ngx_http_fastcgi_non_buffered_filter(void *data, ssize_t bytes)
 
         /* f->state == ngx_http_fastcgi_st_data */
 
-        if (f->type == NGX_HTTP_FASTCGI_STDERR) {
+        if (f->type == NGX_HTTP_FASTCGI_STDERR)
+        {
 
-            if (f->length) {
+            if (f->length)
+            {
 
-                if (f->pos == f->last) {
+                if (f->pos == f->last)
+                {
                     break;
                 }
 
                 msg = f->pos;
 
-                if (f->pos + f->length <= f->last) {
+                if (f->pos + f->length <= f->last)
+                {
                     f->pos += f->length;
                     f->length = 0;
                     f->state = ngx_http_fastcgi_st_padding;
 
-                } else {
+                }
+                else
+                {
                     f->length -= f->last - f->pos;
                     f->pos = f->last;
                 }
 
-                for (m = f->pos - 1; msg < m; m--) {
-                    if (*m != LF && *m != CR && *m != '.' && *m != ' ') {
+                for (m = f->pos - 1; msg < m; m--)
+                {
+                    if (*m != LF && *m != CR && *m != '.' && *m != ' ')
+                    {
                         break;
                     }
                 }
@@ -2435,16 +2804,20 @@ ngx_http_fastcgi_non_buffered_filter(void *data, ssize_t bytes)
                               "FastCGI sent in stderr: \"%*s\"",
                               m + 1 - msg, msg);
 
-            } else {
+            }
+            else
+            {
                 f->state = ngx_http_fastcgi_st_padding;
             }
 
             continue;
         }
 
-        if (f->type == NGX_HTTP_FASTCGI_END_REQUEST) {
+        if (f->type == NGX_HTTP_FASTCGI_END_REQUEST)
+        {
 
-            if (f->pos + f->length <= f->last) {
+            if (f->pos + f->length <= f->last)
+            {
                 f->state = ngx_http_fastcgi_st_padding;
                 f->pos += f->length;
 
@@ -2459,12 +2832,14 @@ ngx_http_fastcgi_non_buffered_filter(void *data, ssize_t bytes)
 
         /* f->type == NGX_HTTP_FASTCGI_STDOUT */
 
-        if (f->pos == f->last) {
+        if (f->pos == f->last)
+        {
             break;
         }
 
         cl = ngx_chain_get_free_buf(r->pool, &u->free_bufs);
-        if (cl == NULL) {
+        if (cl == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -2482,7 +2857,8 @@ ngx_http_fastcgi_non_buffered_filter(void *data, ssize_t bytes)
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                        "http fastcgi output buf %p", b->pos);
 
-        if (f->pos + f->length <= f->last) {
+        if (f->pos + f->length <= f->last)
+        {
             f->state = ngx_http_fastcgi_st_padding;
             f->pos += f->length;
             b->last = f->pos;
@@ -2498,22 +2874,26 @@ ngx_http_fastcgi_non_buffered_filter(void *data, ssize_t bytes)
 
     /* provide continuous buffer for subrequests in memory */
 
-    if (r->subrequest_in_memory) {
+    if (r->subrequest_in_memory)
+    {
 
         cl = u->out_bufs;
 
-        if (cl) {
+        if (cl)
+        {
             buf->pos = cl->buf->pos;
         }
 
         buf->last = buf->pos;
 
-        for (cl = u->out_bufs; cl; cl = cl->next) {
+        for (cl = u->out_bufs; cl; cl = cl->next)
+        {
             ngx_log_debug3(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                            "http fastcgi in memory %p-%p %O",
                            cl->buf->pos, cl->buf->last, ngx_buf_size(cl->buf));
 
-            if (buf->last == cl->buf->pos) {
+            if (buf->last == cl->buf->pos)
+            {
                 buf->last = cl->buf->last;
                 continue;
             }
@@ -2532,24 +2912,27 @@ ngx_http_fastcgi_non_buffered_filter(void *data, ssize_t bytes)
 
 static ngx_int_t
 ngx_http_fastcgi_process_record(ngx_http_request_t *r,
-    ngx_http_fastcgi_ctx_t *f)
+                                ngx_http_fastcgi_ctx_t *f)
 {
     u_char                     ch, *p;
     ngx_http_fastcgi_state_e   state;
 
     state = f->state;
 
-    for (p = f->pos; p < f->last; p++) {
+    for (p = f->pos; p < f->last; p++)
+    {
 
         ch = *p;
 
         ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                        "http fastcgi record byte: %02Xd", ch);
 
-        switch (state) {
+        switch (state)
+        {
 
         case ngx_http_fastcgi_st_version:
-            if (ch != 1) {
+            if (ch != 1)
+            {
                 ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                               "upstream sent unsupported FastCGI "
                               "protocol version: %d", ch);
@@ -2559,7 +2942,8 @@ ngx_http_fastcgi_process_record(ngx_http_request_t *r,
             break;
 
         case ngx_http_fastcgi_st_type:
-            switch (ch) {
+            switch (ch)
+            {
             case NGX_HTTP_FASTCGI_STDOUT:
             case NGX_HTTP_FASTCGI_STDERR:
             case NGX_HTTP_FASTCGI_END_REQUEST:
@@ -2578,7 +2962,8 @@ ngx_http_fastcgi_process_record(ngx_http_request_t *r,
         /* we support the single request per connection */
 
         case ngx_http_fastcgi_st_request_id_hi:
-            if (ch != 0) {
+            if (ch != 0)
+            {
                 ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                               "upstream sent unexpected FastCGI "
                               "request id high byte: %d", ch);
@@ -2588,7 +2973,8 @@ ngx_http_fastcgi_process_record(ngx_http_request_t *r,
             break;
 
         case ngx_http_fastcgi_st_request_id_lo:
-            if (ch != 1) {
+            if (ch != 1)
+            {
                 ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                               "upstream sent unexpected FastCGI "
                               "request id low byte: %d", ch);
@@ -2661,9 +3047,11 @@ ngx_http_fastcgi_add_variables(ngx_conf_t *cf)
 {
     ngx_http_variable_t  *var, *v;
 
-    for (v = ngx_http_fastcgi_vars; v->name.len; v++) {
+    for (v = ngx_http_fastcgi_vars; v->name.len; v++)
+    {
         var = ngx_http_add_variable(cf, &v->name, v->flags);
-        if (var == NULL) {
+        if (var == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -2681,14 +3069,15 @@ ngx_http_fastcgi_create_main_conf(ngx_conf_t *cf)
     ngx_http_fastcgi_main_conf_t  *conf;
 
     conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_fastcgi_main_conf_t));
-    if (conf == NULL) {
+    if (conf == NULL)
+    {
         return NULL;
     }
 
 #if (NGX_HTTP_CACHE)
     if (ngx_array_init(&conf->caches, cf->pool, 4,
                        sizeof(ngx_http_file_cache_t *))
-        != NGX_OK)
+            != NGX_OK)
     {
         return NULL;
     }
@@ -2704,7 +3093,8 @@ ngx_http_fastcgi_create_loc_conf(ngx_conf_t *cf)
     ngx_http_fastcgi_loc_conf_t  *conf;
 
     conf = ngx_pcalloc(cf->pool, sizeof(ngx_http_fastcgi_loc_conf_t));
-    if (conf == NULL) {
+    if (conf == NULL)
+    {
         return NULL;
     }
 
@@ -2798,19 +3188,22 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 
 #if (NGX_HTTP_CACHE)
 
-    if (conf->upstream.store > 0) {
+    if (conf->upstream.store > 0)
+    {
         conf->upstream.cache = 0;
     }
 
-    if (conf->upstream.cache > 0) {
+    if (conf->upstream.cache > 0)
+    {
         conf->upstream.store = 0;
     }
 
 #endif
 
-    if (conf->upstream.store == NGX_CONF_UNSET) {
+    if (conf->upstream.store == NGX_CONF_UNSET)
+    {
         ngx_conf_merge_value(conf->upstream.store,
-                              prev->upstream.store, 0);
+                             prev->upstream.store, 0);
 
         conf->upstream.store_lengths = prev->upstream.store_lengths;
         conf->upstream.store_values = prev->upstream.store_values;
@@ -2823,19 +3216,19 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
                               prev->upstream.next_upstream_tries, 0);
 
     ngx_conf_merge_value(conf->upstream.buffering,
-                              prev->upstream.buffering, 1);
+                         prev->upstream.buffering, 1);
 
     ngx_conf_merge_value(conf->upstream.request_buffering,
-                              prev->upstream.request_buffering, 1);
+                         prev->upstream.request_buffering, 1);
 
     ngx_conf_merge_value(conf->upstream.ignore_client_abort,
-                              prev->upstream.ignore_client_abort, 0);
+                         prev->upstream.ignore_client_abort, 0);
 
     ngx_conf_merge_value(conf->upstream.force_ranges,
-                              prev->upstream.force_ranges, 0);
+                         prev->upstream.force_ranges, 0);
 
     ngx_conf_merge_ptr_value(conf->upstream.local,
-                              prev->upstream.local, NULL);
+                             prev->upstream.local, NULL);
 
     ngx_conf_merge_msec_value(conf->upstream.connect_timeout,
                               prev->upstream.connect_timeout, 60000);
@@ -2863,7 +3256,8 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_bufs_value(conf->upstream.bufs, prev->upstream.bufs,
                               8, ngx_pagesize);
 
-    if (conf->upstream.bufs.num < 2) {
+    if (conf->upstream.bufs.num < 2)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "there must be at least 2 \"fastcgi_buffers\"");
         return NGX_CONF_ERROR;
@@ -2871,7 +3265,8 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 
 
     size = conf->upstream.buffer_size;
-    if (size < conf->upstream.bufs.size) {
+    if (size < conf->upstream.bufs.size)
+    {
         size = conf->upstream.bufs.size;
     }
 
@@ -2880,28 +3275,32 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
                               prev->upstream.busy_buffers_size_conf,
                               NGX_CONF_UNSET_SIZE);
 
-    if (conf->upstream.busy_buffers_size_conf == NGX_CONF_UNSET_SIZE) {
+    if (conf->upstream.busy_buffers_size_conf == NGX_CONF_UNSET_SIZE)
+    {
         conf->upstream.busy_buffers_size = 2 * size;
-    } else {
+    }
+    else
+    {
         conf->upstream.busy_buffers_size =
-                                         conf->upstream.busy_buffers_size_conf;
+            conf->upstream.busy_buffers_size_conf;
     }
 
-    if (conf->upstream.busy_buffers_size < size) {
+    if (conf->upstream.busy_buffers_size < size)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-             "\"fastcgi_busy_buffers_size\" must be equal to or greater than "
-             "the maximum of the value of \"fastcgi_buffer_size\" and "
-             "one of the \"fastcgi_buffers\"");
+                           "\"fastcgi_busy_buffers_size\" must be equal to or greater than "
+                           "the maximum of the value of \"fastcgi_buffer_size\" and "
+                           "one of the \"fastcgi_buffers\"");
 
         return NGX_CONF_ERROR;
     }
 
     if (conf->upstream.busy_buffers_size
-        > (conf->upstream.bufs.num - 1) * conf->upstream.bufs.size)
+            > (conf->upstream.bufs.num - 1) * conf->upstream.bufs.size)
     {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-             "\"fastcgi_busy_buffers_size\" must be less than "
-             "the size of all \"fastcgi_buffers\" minus one buffer");
+                           "\"fastcgi_busy_buffers_size\" must be less than "
+                           "the size of all \"fastcgi_buffers\" minus one buffer");
 
         return NGX_CONF_ERROR;
     }
@@ -2911,18 +3310,22 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
                               prev->upstream.temp_file_write_size_conf,
                               NGX_CONF_UNSET_SIZE);
 
-    if (conf->upstream.temp_file_write_size_conf == NGX_CONF_UNSET_SIZE) {
+    if (conf->upstream.temp_file_write_size_conf == NGX_CONF_UNSET_SIZE)
+    {
         conf->upstream.temp_file_write_size = 2 * size;
-    } else {
+    }
+    else
+    {
         conf->upstream.temp_file_write_size =
-                                      conf->upstream.temp_file_write_size_conf;
+            conf->upstream.temp_file_write_size_conf;
     }
 
-    if (conf->upstream.temp_file_write_size < size) {
+    if (conf->upstream.temp_file_write_size < size)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-             "\"fastcgi_temp_file_write_size\" must be equal to or greater "
-             "than the maximum of the value of \"fastcgi_buffer_size\" and "
-             "one of the \"fastcgi_buffers\"");
+                           "\"fastcgi_temp_file_write_size\" must be equal to or greater "
+                           "than the maximum of the value of \"fastcgi_buffer_size\" and "
+                           "one of the \"fastcgi_buffers\"");
 
         return NGX_CONF_ERROR;
     }
@@ -2932,61 +3335,67 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
                               prev->upstream.max_temp_file_size_conf,
                               NGX_CONF_UNSET_SIZE);
 
-    if (conf->upstream.max_temp_file_size_conf == NGX_CONF_UNSET_SIZE) {
+    if (conf->upstream.max_temp_file_size_conf == NGX_CONF_UNSET_SIZE)
+    {
         conf->upstream.max_temp_file_size = 1024 * 1024 * 1024;
-    } else {
+    }
+    else
+    {
         conf->upstream.max_temp_file_size =
-                                        conf->upstream.max_temp_file_size_conf;
+            conf->upstream.max_temp_file_size_conf;
     }
 
     if (conf->upstream.max_temp_file_size != 0
-        && conf->upstream.max_temp_file_size < size)
+            && conf->upstream.max_temp_file_size < size)
     {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-             "\"fastcgi_max_temp_file_size\" must be equal to zero to disable "
-             "temporary files usage or must be equal to or greater than "
-             "the maximum of the value of \"fastcgi_buffer_size\" and "
-             "one of the \"fastcgi_buffers\"");
+                           "\"fastcgi_max_temp_file_size\" must be equal to zero to disable "
+                           "temporary files usage or must be equal to or greater than "
+                           "the maximum of the value of \"fastcgi_buffer_size\" and "
+                           "one of the \"fastcgi_buffers\"");
 
         return NGX_CONF_ERROR;
     }
 
 
     ngx_conf_merge_bitmask_value(conf->upstream.ignore_headers,
-                              prev->upstream.ignore_headers,
-                              NGX_CONF_BITMASK_SET);
+                                 prev->upstream.ignore_headers,
+                                 NGX_CONF_BITMASK_SET);
 
 
     ngx_conf_merge_bitmask_value(conf->upstream.next_upstream,
-                              prev->upstream.next_upstream,
-                              (NGX_CONF_BITMASK_SET
-                               |NGX_HTTP_UPSTREAM_FT_ERROR
-                               |NGX_HTTP_UPSTREAM_FT_TIMEOUT));
+                                 prev->upstream.next_upstream,
+                                 (NGX_CONF_BITMASK_SET
+                                  | NGX_HTTP_UPSTREAM_FT_ERROR
+                                  | NGX_HTTP_UPSTREAM_FT_TIMEOUT));
 
-    if (conf->upstream.next_upstream & NGX_HTTP_UPSTREAM_FT_OFF) {
+    if (conf->upstream.next_upstream & NGX_HTTP_UPSTREAM_FT_OFF)
+    {
         conf->upstream.next_upstream = NGX_CONF_BITMASK_SET
-                                       |NGX_HTTP_UPSTREAM_FT_OFF;
+                                       | NGX_HTTP_UPSTREAM_FT_OFF;
     }
 
     if (ngx_conf_merge_path_value(cf, &conf->upstream.temp_path,
-                              prev->upstream.temp_path,
-                              &ngx_http_fastcgi_temp_path)
-        != NGX_OK)
+                                  prev->upstream.temp_path,
+                                  &ngx_http_fastcgi_temp_path)
+            != NGX_OK)
     {
         return NGX_CONF_ERROR;
     }
 
 #if (NGX_HTTP_CACHE)
 
-    if (conf->upstream.cache == NGX_CONF_UNSET) {
+    if (conf->upstream.cache == NGX_CONF_UNSET)
+    {
         ngx_conf_merge_value(conf->upstream.cache,
-                              prev->upstream.cache, 0);
+                             prev->upstream.cache, 0);
 
         conf->upstream.cache_zone = prev->upstream.cache_zone;
         conf->upstream.cache_value = prev->upstream.cache_value;
     }
 
-    if (conf->upstream.cache_zone && conf->upstream.cache_zone->data == NULL) {
+    if (conf->upstream.cache_zone && conf->upstream.cache_zone->data == NULL)
+    {
         ngx_shm_zone_t  *shm_zone;
 
         shm_zone = conf->upstream.cache_zone;
@@ -3002,24 +3411,27 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
                               prev->upstream.cache_min_uses, 1);
 
     ngx_conf_merge_bitmask_value(conf->upstream.cache_use_stale,
-                              prev->upstream.cache_use_stale,
-                              (NGX_CONF_BITMASK_SET
-                               |NGX_HTTP_UPSTREAM_FT_OFF));
+                                 prev->upstream.cache_use_stale,
+                                 (NGX_CONF_BITMASK_SET
+                                  | NGX_HTTP_UPSTREAM_FT_OFF));
 
-    if (conf->upstream.cache_use_stale & NGX_HTTP_UPSTREAM_FT_OFF) {
+    if (conf->upstream.cache_use_stale & NGX_HTTP_UPSTREAM_FT_OFF)
+    {
         conf->upstream.cache_use_stale = NGX_CONF_BITMASK_SET
-                                         |NGX_HTTP_UPSTREAM_FT_OFF;
+                                         | NGX_HTTP_UPSTREAM_FT_OFF;
     }
 
-    if (conf->upstream.cache_use_stale & NGX_HTTP_UPSTREAM_FT_ERROR) {
+    if (conf->upstream.cache_use_stale & NGX_HTTP_UPSTREAM_FT_ERROR)
+    {
         conf->upstream.cache_use_stale |= NGX_HTTP_UPSTREAM_FT_NOLIVE;
     }
 
-    if (conf->upstream.cache_methods == 0) {
+    if (conf->upstream.cache_methods == 0)
+    {
         conf->upstream.cache_methods = prev->upstream.cache_methods;
     }
 
-    conf->upstream.cache_methods |= NGX_HTTP_GET|NGX_HTTP_HEAD;
+    conf->upstream.cache_methods |= NGX_HTTP_GET | NGX_HTTP_HEAD;
 
     ngx_conf_merge_ptr_value(conf->upstream.cache_bypass,
                              prev->upstream.cache_bypass, NULL);
@@ -3030,17 +3442,19 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_conf_merge_ptr_value(conf->upstream.cache_valid,
                              prev->upstream.cache_valid, NULL);
 
-    if (conf->cache_key.value.data == NULL) {
+    if (conf->cache_key.value.data == NULL)
+    {
         conf->cache_key = prev->cache_key;
     }
 
-    if (conf->upstream.cache && conf->cache_key.value.data == NULL) {
+    if (conf->upstream.cache && conf->cache_key.value.data == NULL)
+    {
         ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
                            "no \"fastcgi_cache_key\" for \"fastcgi_cache\"");
     }
 
     ngx_conf_merge_value(conf->upstream.cache_lock,
-                              prev->upstream.cache_lock, 0);
+                         prev->upstream.cache_lock, 0);
 
     ngx_conf_merge_msec_value(conf->upstream.cache_lock_timeout,
                               prev->upstream.cache_lock_timeout, 5000);
@@ -3049,17 +3463,17 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
                               prev->upstream.cache_lock_age, 5000);
 
     ngx_conf_merge_value(conf->upstream.cache_revalidate,
-                              prev->upstream.cache_revalidate, 0);
+                         prev->upstream.cache_revalidate, 0);
 
 #endif
 
     ngx_conf_merge_value(conf->upstream.pass_request_headers,
-                              prev->upstream.pass_request_headers, 1);
+                         prev->upstream.pass_request_headers, 1);
     ngx_conf_merge_value(conf->upstream.pass_request_body,
-                              prev->upstream.pass_request_body, 1);
+                         prev->upstream.pass_request_body, 1);
 
     ngx_conf_merge_value(conf->upstream.intercept_errors,
-                              prev->upstream.intercept_errors, 0);
+                         prev->upstream.intercept_errors, 0);
 
     ngx_conf_merge_ptr_value(conf->catch_stderr, prev->catch_stderr, NULL);
 
@@ -3073,8 +3487,8 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     hash.name = "fastcgi_hide_headers_hash";
 
     if (ngx_http_upstream_hide_headers_hash(cf, &conf->upstream,
-             &prev->upstream, ngx_http_fastcgi_hide_headers, &hash)
-        != NGX_OK)
+                                            &prev->upstream, ngx_http_fastcgi_hide_headers, &hash)
+            != NGX_OK)
     {
         return NGX_CONF_ERROR;
     }
@@ -3082,7 +3496,7 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     clcf = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
 
     if (clcf->noname
-        && conf->upstream.upstream == NULL && conf->fastcgi_lengths == NULL)
+            && conf->upstream.upstream == NULL && conf->fastcgi_lengths == NULL)
     {
         conf->upstream.upstream = prev->upstream.upstream;
         conf->fastcgi_lengths = prev->fastcgi_lengths;
@@ -3090,19 +3504,21 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     }
 
     if (clcf->lmt_excpt && clcf->handler == NULL
-        && (conf->upstream.upstream || conf->fastcgi_lengths))
+            && (conf->upstream.upstream || conf->fastcgi_lengths))
     {
         clcf->handler = ngx_http_fastcgi_handler;
     }
 
 #if (NGX_PCRE)
-    if (conf->split_regex == NULL) {
+    if (conf->split_regex == NULL)
+    {
         conf->split_regex = prev->split_regex;
         conf->split_name = prev->split_name;
     }
 #endif
 
-    if (conf->params_source == NULL) {
+    if (conf->params_source == NULL)
+    {
         conf->params = prev->params;
 #if (NGX_HTTP_CACHE)
         conf->params_cache = prev->params_cache;
@@ -3111,16 +3527,19 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     }
 
     rc = ngx_http_fastcgi_init_params(cf, conf, &conf->params, NULL);
-    if (rc != NGX_OK) {
+    if (rc != NGX_OK)
+    {
         return NGX_CONF_ERROR;
     }
 
 #if (NGX_HTTP_CACHE)
 
-    if (conf->upstream.cache) {
+    if (conf->upstream.cache)
+    {
         rc = ngx_http_fastcgi_init_params(cf, conf, &conf->params_cache,
                                           ngx_http_fastcgi_cache_headers);
-        if (rc != NGX_OK) {
+        if (rc != NGX_OK)
+        {
             return NGX_CONF_ERROR;
         }
     }
@@ -3133,7 +3552,7 @@ ngx_http_fastcgi_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 
 static ngx_int_t
 ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
-    ngx_http_fastcgi_params_t *params, ngx_keyval_t *default_params)
+                             ngx_http_fastcgi_params_t *params, ngx_keyval_t *default_params)
 {
     u_char                       *p;
     size_t                        size;
@@ -3147,52 +3566,62 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
     ngx_http_script_compile_t     sc;
     ngx_http_script_copy_code_t  *copy;
 
-    if (params->hash.buckets) {
+    if (params->hash.buckets)
+    {
         return NGX_OK;
     }
 
-    if (conf->params_source == NULL && default_params == NULL) {
+    if (conf->params_source == NULL && default_params == NULL)
+    {
         params->hash.buckets = (void *) 1;
         return NGX_OK;
     }
 
     params->lengths = ngx_array_create(cf->pool, 64, 1);
-    if (params->lengths == NULL) {
-        return NGX_ERROR;
-    }
-
-    params->values = ngx_array_create(cf->pool, 512, 1);
-    if (params->values == NULL) {
-        return NGX_ERROR;
-    }
-
-    if (ngx_array_init(&headers_names, cf->temp_pool, 4, sizeof(ngx_hash_key_t))
-        != NGX_OK)
+    if (params->lengths == NULL)
     {
         return NGX_ERROR;
     }
 
-    if (conf->params_source) {
+    params->values = ngx_array_create(cf->pool, 512, 1);
+    if (params->values == NULL)
+    {
+        return NGX_ERROR;
+    }
+
+    if (ngx_array_init(&headers_names, cf->temp_pool, 4, sizeof(ngx_hash_key_t))
+            != NGX_OK)
+    {
+        return NGX_ERROR;
+    }
+
+    if (conf->params_source)
+    {
         src = conf->params_source->elts;
         nsrc = conf->params_source->nelts;
 
-    } else {
+    }
+    else
+    {
         src = NULL;
         nsrc = 0;
     }
 
-    if (default_params) {
+    if (default_params)
+    {
         if (ngx_array_init(&params_merged, cf->temp_pool, 4,
                            sizeof(ngx_http_upstream_param_t))
-            != NGX_OK)
+                != NGX_OK)
         {
             return NGX_ERROR;
         }
 
-        for (i = 0; i < nsrc; i++) {
+        for (i = 0; i < nsrc; i++)
+        {
 
             s = ngx_array_push(&params_merged);
-            if (s == NULL) {
+            if (s == NULL)
+            {
                 return NGX_ERROR;
             }
 
@@ -3201,19 +3630,23 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
 
         h = default_params;
 
-        while (h->key.len) {
+        while (h->key.len)
+        {
 
             src = params_merged.elts;
             nsrc = params_merged.nelts;
 
-            for (i = 0; i < nsrc; i++) {
-                if (ngx_strcasecmp(h->key.data, src[i].key.data) == 0) {
+            for (i = 0; i < nsrc; i++)
+            {
+                if (ngx_strcasecmp(h->key.data, src[i].key.data) == 0)
+                {
                     goto next;
                 }
             }
 
             s = ngx_array_push(&params_merged);
-            if (s == NULL) {
+            if (s == NULL)
+            {
                 return NGX_ERROR;
             }
 
@@ -3221,7 +3654,7 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
             s->value = h->value;
             s->skip_empty = 1;
 
-        next:
+next:
 
             h++;
         }
@@ -3230,13 +3663,15 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
         nsrc = params_merged.nelts;
     }
 
-    for (i = 0; i < nsrc; i++) {
+    for (i = 0; i < nsrc; i++)
+    {
 
         if (src[i].key.len > sizeof("HTTP_") - 1
-            && ngx_strncmp(src[i].key.data, "HTTP_", sizeof("HTTP_") - 1) == 0)
+                && ngx_strncmp(src[i].key.data, "HTTP_", sizeof("HTTP_") - 1) == 0)
         {
             hk = ngx_array_push(&headers_names);
-            if (hk == NULL) {
+            if (hk == NULL)
+            {
                 return NGX_ERROR;
             }
 
@@ -3245,14 +3680,16 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
             hk->key_hash = ngx_hash_key_lc(hk->key.data, hk->key.len);
             hk->value = (void *) 1;
 
-            if (src[i].value.len == 0) {
+            if (src[i].value.len == 0)
+            {
                 continue;
             }
         }
 
         copy = ngx_array_push_n(params->lengths,
                                 sizeof(ngx_http_script_copy_code_t));
-        if (copy == NULL) {
+        if (copy == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -3261,7 +3698,8 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
 
         copy = ngx_array_push_n(params->lengths,
                                 sizeof(ngx_http_script_copy_code_t));
-        if (copy == NULL) {
+        if (copy == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -3274,7 +3712,8 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
                & ~(sizeof(uintptr_t) - 1);
 
         copy = ngx_array_push_n(params->values, size);
-        if (copy == NULL) {
+        if (copy == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -3293,12 +3732,14 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
         sc.lengths = &params->lengths;
         sc.values = &params->values;
 
-        if (ngx_http_script_compile(&sc) != NGX_OK) {
+        if (ngx_http_script_compile(&sc) != NGX_OK)
+        {
             return NGX_ERROR;
         }
 
         code = ngx_array_push_n(params->lengths, sizeof(uintptr_t));
-        if (code == NULL) {
+        if (code == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -3306,7 +3747,8 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
 
 
         code = ngx_array_push_n(params->values, sizeof(uintptr_t));
-        if (code == NULL) {
+        if (code == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -3314,7 +3756,8 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
     }
 
     code = ngx_array_push_n(params->lengths, sizeof(uintptr_t));
-    if (code == NULL) {
+    if (code == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -3336,7 +3779,7 @@ ngx_http_fastcgi_init_params(ngx_conf_t *cf, ngx_http_fastcgi_loc_conf_t *conf,
 
 static ngx_int_t
 ngx_http_fastcgi_script_name_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data)
+                                      ngx_http_variable_value_t *v, uintptr_t data)
 {
     u_char                       *p;
     ngx_http_fastcgi_ctx_t       *f;
@@ -3346,12 +3789,13 @@ ngx_http_fastcgi_script_name_variable(ngx_http_request_t *r,
 
     f = ngx_http_fastcgi_split(r, flcf);
 
-    if (f == NULL) {
+    if (f == NULL)
+    {
         return NGX_ERROR;
     }
 
     if (f->script_name.len == 0
-        || f->script_name.data[f->script_name.len - 1] != '/')
+            || f->script_name.data[f->script_name.len - 1] != '/')
     {
         v->len = f->script_name.len;
         v->valid = 1;
@@ -3365,7 +3809,8 @@ ngx_http_fastcgi_script_name_variable(ngx_http_request_t *r,
     v->len = f->script_name.len + flcf->index.len;
 
     v->data = ngx_pnalloc(r->pool, v->len);
-    if (v->data == NULL) {
+    if (v->data == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -3378,7 +3823,7 @@ ngx_http_fastcgi_script_name_variable(ngx_http_request_t *r,
 
 static ngx_int_t
 ngx_http_fastcgi_path_info_variable(ngx_http_request_t *r,
-    ngx_http_variable_value_t *v, uintptr_t data)
+                                    ngx_http_variable_value_t *v, uintptr_t data)
 {
     ngx_http_fastcgi_ctx_t       *f;
     ngx_http_fastcgi_loc_conf_t  *flcf;
@@ -3387,7 +3832,8 @@ ngx_http_fastcgi_path_info_variable(ngx_http_request_t *r,
 
     f = ngx_http_fastcgi_split(r, flcf);
 
-    if (f == NULL) {
+    if (f == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -3411,27 +3857,32 @@ ngx_http_fastcgi_split(ngx_http_request_t *r, ngx_http_fastcgi_loc_conf_t *flcf)
 
     f = ngx_http_get_module_ctx(r, ngx_http_fastcgi_module);
 
-    if (f == NULL) {
+    if (f == NULL)
+    {
         f = ngx_pcalloc(r->pool, sizeof(ngx_http_fastcgi_ctx_t));
-        if (f == NULL) {
+        if (f == NULL)
+        {
             return NULL;
         }
 
         ngx_http_set_ctx(r, f, ngx_http_fastcgi_module);
     }
 
-    if (f->script_name.len) {
+    if (f->script_name.len)
+    {
         return f;
     }
 
-    if (flcf->split_regex == NULL) {
+    if (flcf->split_regex == NULL)
+    {
         f->script_name = r->uri;
         return f;
     }
 
     n = ngx_regex_exec(flcf->split_regex, &r->uri, captures, (1 + 2) * 3);
 
-    if (n >= 0) { /* match */
+    if (n >= 0)   /* match */
+    {
         f->script_name.len = captures[3] - captures[2];
         f->script_name.data = r->uri.data + captures[2];
 
@@ -3441,7 +3892,8 @@ ngx_http_fastcgi_split(ngx_http_request_t *r, ngx_http_fastcgi_loc_conf_t *flcf)
         return f;
     }
 
-    if (n == NGX_REGEX_NO_MATCHED) {
+    if (n == NGX_REGEX_NO_MATCHED)
+    {
         f->script_name = r->uri;
         return f;
     }
@@ -3455,9 +3907,11 @@ ngx_http_fastcgi_split(ngx_http_request_t *r, ngx_http_fastcgi_loc_conf_t *flcf)
 
     f = ngx_http_get_module_ctx(r, ngx_http_fastcgi_module);
 
-    if (f == NULL) {
+    if (f == NULL)
+    {
         f = ngx_pcalloc(r->pool, sizeof(ngx_http_fastcgi_ctx_t));
-        if (f == NULL) {
+        if (f == NULL)
+        {
             return NULL;
         }
 
@@ -3483,7 +3937,8 @@ ngx_http_fastcgi_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_http_core_loc_conf_t   *clcf;
     ngx_http_script_compile_t   sc;
 
-    if (flcf->upstream.upstream || flcf->fastcgi_lengths) {
+    if (flcf->upstream.upstream || flcf->fastcgi_lengths)
+    {
         return "is duplicate";
     }
 
@@ -3491,7 +3946,8 @@ ngx_http_fastcgi_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     clcf->handler = ngx_http_fastcgi_handler;
 
-    if (clcf->name.data[clcf->name.len - 1] == '/') {
+    if (clcf->name.data[clcf->name.len - 1] == '/')
+    {
         clcf->auto_redirect = 1;
     }
 
@@ -3501,7 +3957,8 @@ ngx_http_fastcgi_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     n = ngx_http_script_variables_count(url);
 
-    if (n) {
+    if (n)
+    {
 
         ngx_memzero(&sc, sizeof(ngx_http_script_compile_t));
 
@@ -3513,7 +3970,8 @@ ngx_http_fastcgi_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         sc.complete_lengths = 1;
         sc.complete_values = 1;
 
-        if (ngx_http_script_compile(&sc) != NGX_OK) {
+        if (ngx_http_script_compile(&sc) != NGX_OK)
+        {
             return NGX_CONF_ERROR;
         }
 
@@ -3526,7 +3984,8 @@ ngx_http_fastcgi_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     u.no_resolve = 1;
 
     flcf->upstream.upstream = ngx_http_upstream_add(cf, &u, 0);
-    if (flcf->upstream.upstream == NULL) {
+    if (flcf->upstream.upstream == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -3555,12 +4014,14 @@ ngx_http_fastcgi_split_path_info(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     rc.err.len = NGX_MAX_CONF_ERRSTR;
     rc.err.data = errstr;
 
-    if (ngx_regex_compile(&rc) != NGX_OK) {
+    if (ngx_regex_compile(&rc) != NGX_OK)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "%V", &rc.err);
         return NGX_CONF_ERROR;
     }
 
-    if (rc.captures != 2) {
+    if (rc.captures != 2)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "pattern \"%V\" must have 2 captures", &value[1]);
         return NGX_CONF_ERROR;
@@ -3588,26 +4049,30 @@ ngx_http_fastcgi_store(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_str_t                  *value;
     ngx_http_script_compile_t   sc;
 
-    if (flcf->upstream.store != NGX_CONF_UNSET) {
+    if (flcf->upstream.store != NGX_CONF_UNSET)
+    {
         return "is duplicate";
     }
 
     value = cf->args->elts;
 
-    if (ngx_strcmp(value[1].data, "off") == 0) {
+    if (ngx_strcmp(value[1].data, "off") == 0)
+    {
         flcf->upstream.store = 0;
         return NGX_CONF_OK;
     }
 
 #if (NGX_HTTP_CACHE)
-    if (flcf->upstream.cache > 0) {
+    if (flcf->upstream.cache > 0)
+    {
         return "is incompatible with \"fastcgi_cache\"";
     }
 #endif
 
     flcf->upstream.store = 1;
 
-    if (ngx_strcmp(value[1].data, "on") == 0) {
+    if (ngx_strcmp(value[1].data, "on") == 0)
+    {
         return NGX_CONF_OK;
     }
 
@@ -3624,7 +4089,8 @@ ngx_http_fastcgi_store(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     sc.complete_lengths = 1;
     sc.complete_values = 1;
 
-    if (ngx_http_script_compile(&sc) != NGX_OK) {
+    if (ngx_http_script_compile(&sc) != NGX_OK)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -3645,16 +4111,19 @@ ngx_http_fastcgi_cache(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     value = cf->args->elts;
 
-    if (flcf->upstream.cache != NGX_CONF_UNSET) {
+    if (flcf->upstream.cache != NGX_CONF_UNSET)
+    {
         return "is duplicate";
     }
 
-    if (ngx_strcmp(value[1].data, "off") == 0) {
+    if (ngx_strcmp(value[1].data, "off") == 0)
+    {
         flcf->upstream.cache = 0;
         return NGX_CONF_OK;
     }
 
-    if (flcf->upstream.store > 0) {
+    if (flcf->upstream.store > 0)
+    {
         return "is incompatible with \"fastcgi_store\"";
     }
 
@@ -3666,15 +4135,18 @@ ngx_http_fastcgi_cache(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ccv.value = &value[1];
     ccv.complex_value = &cv;
 
-    if (ngx_http_compile_complex_value(&ccv) != NGX_OK) {
+    if (ngx_http_compile_complex_value(&ccv) != NGX_OK)
+    {
         return NGX_CONF_ERROR;
     }
 
-    if (cv.lengths != NULL) {
+    if (cv.lengths != NULL)
+    {
 
         flcf->upstream.cache_value = ngx_palloc(cf->pool,
-                                             sizeof(ngx_http_complex_value_t));
-        if (flcf->upstream.cache_value == NULL) {
+                                                sizeof(ngx_http_complex_value_t));
+        if (flcf->upstream.cache_value == NULL)
+        {
             return NGX_CONF_ERROR;
         }
 
@@ -3684,8 +4156,9 @@ ngx_http_fastcgi_cache(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
     flcf->upstream.cache_zone = ngx_shared_memory_add(cf, &value[1], 0,
-                                                      &ngx_http_fastcgi_module);
-    if (flcf->upstream.cache_zone == NULL) {
+                                &ngx_http_fastcgi_module);
+    if (flcf->upstream.cache_zone == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -3703,7 +4176,8 @@ ngx_http_fastcgi_cache_key(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     value = cf->args->elts;
 
-    if (flcf->cache_key.value.data) {
+    if (flcf->cache_key.value.data)
+    {
         return "is duplicate";
     }
 
@@ -3713,7 +4187,8 @@ ngx_http_fastcgi_cache_key(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ccv.value = &value[1];
     ccv.complex_value = &flcf->cache_key;
 
-    if (ngx_http_compile_complex_value(&ccv) != NGX_OK) {
+    if (ngx_http_compile_complex_value(&ccv) != NGX_OK)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -3729,7 +4204,8 @@ ngx_http_fastcgi_lowat_check(ngx_conf_t *cf, void *post, void *data)
 #if (NGX_FREEBSD)
     ssize_t *np = data;
 
-    if ((u_long) *np >= ngx_freebsd_net_inet_tcp_sendspace) {
+    if ((u_long) *np >= ngx_freebsd_net_inet_tcp_sendspace)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "\"fastcgi_send_lowat\" must be less than %d "
                            "(sysctl net.inet.tcp.sendspace)",

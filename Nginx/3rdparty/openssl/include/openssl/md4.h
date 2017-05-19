@@ -97,7 +97,8 @@ extern "C" {
 # define MD4_LBLOCK      (MD4_CBLOCK/4)
 # define MD4_DIGEST_LENGTH 16
 
-typedef struct MD4state_st {
+typedef struct MD4state_st
+{
     MD4_LONG A, B, C, D;
     MD4_LONG Nl, Nh;
     MD4_LONG data[MD4_LBLOCK];

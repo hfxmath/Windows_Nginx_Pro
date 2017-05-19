@@ -13,13 +13,13 @@
 
 static char *ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_stream_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
-    ngx_stream_listen_t *listen);
+                                      ngx_stream_listen_t *listen);
 static char *ngx_stream_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports);
 static ngx_int_t ngx_stream_add_addrs(ngx_conf_t *cf, ngx_stream_port_t *stport,
-    ngx_stream_conf_addr_t *addr);
+                                      ngx_stream_conf_addr_t *addr);
 #if (NGX_HAVE_INET6)
 static ngx_int_t ngx_stream_add_addrs6(ngx_conf_t *cf,
-    ngx_stream_port_t *stport, ngx_stream_conf_addr_t *addr);
+                                       ngx_stream_port_t *stport, ngx_stream_conf_addr_t *addr);
 #endif
 static ngx_int_t ngx_stream_cmp_conf_addrs(const void *one, const void *two);
 
@@ -27,27 +27,32 @@ static ngx_int_t ngx_stream_cmp_conf_addrs(const void *one, const void *two);
 ngx_uint_t  ngx_stream_max_module;
 
 
-static ngx_command_t  ngx_stream_commands[] = {
+static ngx_command_t  ngx_stream_commands[] =
+{
 
-    { ngx_string("stream"),
-      NGX_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
-      ngx_stream_block,
-      0,
-      0,
-      NULL },
+    {
+        ngx_string("stream"),
+        NGX_MAIN_CONF | NGX_CONF_BLOCK | NGX_CONF_NOARGS,
+        ngx_stream_block,
+        0,
+        0,
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_core_module_t  ngx_stream_module_ctx = {
+static ngx_core_module_t  ngx_stream_module_ctx =
+{
     ngx_string("stream"),
     NULL,
     NULL
 };
 
 
-ngx_module_t  ngx_stream_module = {
+ngx_module_t  ngx_stream_module =
+{
     NGX_MODULE_V1,
     &ngx_stream_module_ctx,                /* module context */
     ngx_stream_commands,                   /* module directives */
@@ -76,14 +81,16 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_stream_core_srv_conf_t   **cscfp;
     ngx_stream_core_main_conf_t   *cmcf;
 
-    if (*(ngx_stream_conf_ctx_t **) conf) {
+    if (*(ngx_stream_conf_ctx_t **) conf)
+    {
         return "is duplicate";
     }
 
     /* the main stream context */
 
     ctx = ngx_pcalloc(cf->pool, sizeof(ngx_stream_conf_ctx_t));
-    if (ctx == NULL) {
+    if (ctx == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -98,7 +105,8 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     ctx->main_conf = ngx_pcalloc(cf->pool,
                                  sizeof(void *) * ngx_stream_max_module);
-    if (ctx->main_conf == NULL) {
+    if (ctx->main_conf == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -110,7 +118,8 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     ctx->srv_conf = ngx_pcalloc(cf->pool,
                                 sizeof(void *) * ngx_stream_max_module);
-    if (ctx->srv_conf == NULL) {
+    if (ctx->srv_conf == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -119,24 +128,30 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
      * create the main_conf's and the null srv_conf's of the all stream modules
      */
 
-    for (m = 0; cf->cycle->modules[m]; m++) {
-        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE) {
+    for (m = 0; cf->cycle->modules[m]; m++)
+    {
+        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE)
+        {
             continue;
         }
 
         module = cf->cycle->modules[m]->ctx;
         mi = cf->cycle->modules[m]->ctx_index;
 
-        if (module->create_main_conf) {
+        if (module->create_main_conf)
+        {
             ctx->main_conf[mi] = module->create_main_conf(cf);
-            if (ctx->main_conf[mi] == NULL) {
+            if (ctx->main_conf[mi] == NULL)
+            {
                 return NGX_CONF_ERROR;
             }
         }
 
-        if (module->create_srv_conf) {
+        if (module->create_srv_conf)
+        {
             ctx->srv_conf[mi] = module->create_srv_conf(cf);
-            if (ctx->srv_conf[mi] == NULL) {
+            if (ctx->srv_conf[mi] == NULL)
+            {
                 return NGX_CONF_ERROR;
             }
         }
@@ -152,7 +167,8 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     cf->cmd_type = NGX_STREAM_MAIN_CONF;
     rv = ngx_conf_parse(cf, NULL);
 
-    if (rv != NGX_CONF_OK) {
+    if (rv != NGX_CONF_OK)
+    {
         *cf = pcf;
         return rv;
     }
@@ -163,8 +179,10 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     cmcf = ctx->main_conf[ngx_stream_core_module.ctx_index];
     cscfp = cmcf->servers.elts;
 
-    for (m = 0; cf->cycle->modules[m]; m++) {
-        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE) {
+    for (m = 0; cf->cycle->modules[m]; m++)
+    {
+        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE)
+        {
             continue;
         }
 
@@ -175,25 +193,30 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
         cf->ctx = ctx;
 
-        if (module->init_main_conf) {
+        if (module->init_main_conf)
+        {
             rv = module->init_main_conf(cf, ctx->main_conf[mi]);
-            if (rv != NGX_CONF_OK) {
+            if (rv != NGX_CONF_OK)
+            {
                 *cf = pcf;
                 return rv;
             }
         }
 
-        for (s = 0; s < cmcf->servers.nelts; s++) {
+        for (s = 0; s < cmcf->servers.nelts; s++)
+        {
 
             /* merge the server{}s' srv_conf's */
 
             cf->ctx = cscfp[s]->ctx;
 
-            if (module->merge_srv_conf) {
+            if (module->merge_srv_conf)
+            {
                 rv = module->merge_srv_conf(cf,
                                             ctx->srv_conf[mi],
                                             cscfp[s]->ctx->srv_conf[mi]);
-                if (rv != NGX_CONF_OK) {
+                if (rv != NGX_CONF_OK)
+                {
                     *cf = pcf;
                     return rv;
                 }
@@ -201,15 +224,19 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         }
     }
 
-    for (m = 0; cf->cycle->modules[m]; m++) {
-        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE) {
+    for (m = 0; cf->cycle->modules[m]; m++)
+    {
+        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE)
+        {
             continue;
         }
 
         module = cf->cycle->modules[m]->ctx;
 
-        if (module->postconfiguration) {
-            if (module->postconfiguration(cf) != NGX_OK) {
+        if (module->postconfiguration)
+        {
+            if (module->postconfiguration(cf) != NGX_OK)
+            {
                 return NGX_CONF_ERROR;
             }
         }
@@ -219,15 +246,17 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
     if (ngx_array_init(&ports, cf->temp_pool, 4, sizeof(ngx_stream_conf_port_t))
-        != NGX_OK)
+            != NGX_OK)
     {
         return NGX_CONF_ERROR;
     }
 
     listen = cmcf->listen.elts;
 
-    for (i = 0; i < cmcf->listen.nelts; i++) {
-        if (ngx_stream_add_ports(cf, &ports, &listen[i]) != NGX_OK) {
+    for (i = 0; i < cmcf->listen.nelts; i++)
+    {
+        if (ngx_stream_add_ports(cf, &ports, &listen[i]) != NGX_OK)
+        {
             return NGX_CONF_ERROR;
         }
     }
@@ -238,7 +267,7 @@ ngx_stream_block(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 static ngx_int_t
 ngx_stream_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
-    ngx_stream_listen_t *listen)
+                     ngx_stream_listen_t *listen)
 {
     in_port_t                p;
     ngx_uint_t               i;
@@ -252,7 +281,8 @@ ngx_stream_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
 
     sa = &listen->u.sockaddr;
 
-    switch (sa->sa_family) {
+    switch (sa->sa_family)
+    {
 
 #if (NGX_HAVE_INET6)
     case AF_INET6:
@@ -274,11 +304,12 @@ ngx_stream_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
     }
 
     port = ports->elts;
-    for (i = 0; i < ports->nelts; i++) {
+    for (i = 0; i < ports->nelts; i++)
+    {
 
         if (p == port[i].port
-            && listen->type == port[i].type
-            && sa->sa_family == port[i].family)
+                && listen->type == port[i].type
+                && sa->sa_family == port[i].family)
         {
             /* a port is already in the port list */
 
@@ -290,7 +321,8 @@ ngx_stream_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
     /* add a port to the port list */
 
     port = ngx_array_push(ports);
-    if (port == NULL) {
+    if (port == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -300,7 +332,7 @@ ngx_stream_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
 
     if (ngx_array_init(&port->addrs, cf->temp_pool, 2,
                        sizeof(ngx_stream_conf_addr_t))
-        != NGX_OK)
+            != NGX_OK)
     {
         return NGX_ERROR;
     }
@@ -308,7 +340,8 @@ ngx_stream_add_ports(ngx_conf_t *cf, ngx_array_t *ports,
 found:
 
     addr = ngx_array_push(&port->addrs);
-    if (addr == NULL) {
+    if (addr == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -329,7 +362,8 @@ ngx_stream_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
     ngx_stream_core_srv_conf_t  *cscf;
 
     port = ports->elts;
-    for (p = 0; p < ports->nelts; p++) {
+    for (p = 0; p < ports->nelts; p++)
+    {
 
         ngx_sort(port[p].addrs.elts, (size_t) port[p].addrs.nelts,
                  sizeof(ngx_stream_conf_addr_t), ngx_stream_cmp_conf_addrs);
@@ -342,26 +376,32 @@ ngx_stream_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
          * to the "*:port" only and ignore the other bindings
          */
 
-        if (addr[last - 1].opt.wildcard) {
+        if (addr[last - 1].opt.wildcard)
+        {
             addr[last - 1].opt.bind = 1;
             bind_wildcard = 1;
 
-        } else {
+        }
+        else
+        {
             bind_wildcard = 0;
         }
 
         i = 0;
 
-        while (i < last) {
+        while (i < last)
+        {
 
-            if (bind_wildcard && !addr[i].opt.bind) {
+            if (bind_wildcard && !addr[i].opt.bind)
+            {
                 i++;
                 continue;
             }
 
             ls = ngx_create_listening(cf, &addr[i].opt.u.sockaddr,
                                       addr[i].opt.socklen);
-            if (ls == NULL) {
+            if (ls == NULL)
+            {
                 return NGX_CONF_ERROR;
             }
 
@@ -396,7 +436,8 @@ ngx_stream_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
 #endif
 
             stport = ngx_palloc(cf->pool, sizeof(ngx_stream_port_t));
-            if (stport == NULL) {
+            if (stport == NULL)
+            {
                 return NGX_CONF_ERROR;
             }
 
@@ -404,22 +445,26 @@ ngx_stream_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
 
             stport->naddrs = i + 1;
 
-            switch (ls->sockaddr->sa_family) {
+            switch (ls->sockaddr->sa_family)
+            {
 #if (NGX_HAVE_INET6)
             case AF_INET6:
-                if (ngx_stream_add_addrs6(cf, stport, addr) != NGX_OK) {
+                if (ngx_stream_add_addrs6(cf, stport, addr) != NGX_OK)
+                {
                     return NGX_CONF_ERROR;
                 }
                 break;
 #endif
             default: /* AF_INET */
-                if (ngx_stream_add_addrs(cf, stport, addr) != NGX_OK) {
+                if (ngx_stream_add_addrs(cf, stport, addr) != NGX_OK)
+                {
                     return NGX_CONF_ERROR;
                 }
                 break;
             }
 
-            if (ngx_clone_listening(cf, ls) != NGX_OK) {
+            if (ngx_clone_listening(cf, ls) != NGX_OK)
+            {
                 return NGX_CONF_ERROR;
             }
 
@@ -434,7 +479,7 @@ ngx_stream_optimize_servers(ngx_conf_t *cf, ngx_array_t *ports)
 
 static ngx_int_t
 ngx_stream_add_addrs(ngx_conf_t *cf, ngx_stream_port_t *stport,
-    ngx_stream_conf_addr_t *addr)
+                     ngx_stream_conf_addr_t *addr)
 {
     u_char                *p;
     size_t                 len;
@@ -445,13 +490,15 @@ ngx_stream_add_addrs(ngx_conf_t *cf, ngx_stream_port_t *stport,
 
     stport->addrs = ngx_pcalloc(cf->pool,
                                 stport->naddrs * sizeof(ngx_stream_in_addr_t));
-    if (stport->addrs == NULL) {
+    if (stport->addrs == NULL)
+    {
         return NGX_ERROR;
     }
 
     addrs = stport->addrs;
 
-    for (i = 0; i < stport->naddrs; i++) {
+    for (i = 0; i < stport->naddrs; i++)
+    {
 
         sin = &addr[i].opt.u.sockaddr_in;
         addrs[i].addr = sin->sin_addr.s_addr;
@@ -465,7 +512,8 @@ ngx_stream_add_addrs(ngx_conf_t *cf, ngx_stream_port_t *stport,
                             NGX_SOCKADDR_STRLEN, 1);
 
         p = ngx_pnalloc(cf->pool, len);
-        if (p == NULL) {
+        if (p == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -483,7 +531,7 @@ ngx_stream_add_addrs(ngx_conf_t *cf, ngx_stream_port_t *stport,
 
 static ngx_int_t
 ngx_stream_add_addrs6(ngx_conf_t *cf, ngx_stream_port_t *stport,
-    ngx_stream_conf_addr_t *addr)
+                      ngx_stream_conf_addr_t *addr)
 {
     u_char                 *p;
     size_t                  len;
@@ -494,13 +542,15 @@ ngx_stream_add_addrs6(ngx_conf_t *cf, ngx_stream_port_t *stport,
 
     stport->addrs = ngx_pcalloc(cf->pool,
                                 stport->naddrs * sizeof(ngx_stream_in6_addr_t));
-    if (stport->addrs == NULL) {
+    if (stport->addrs == NULL)
+    {
         return NGX_ERROR;
     }
 
     addrs6 = stport->addrs;
 
-    for (i = 0; i < stport->naddrs; i++) {
+    for (i = 0; i < stport->naddrs; i++)
+    {
 
         sin6 = &addr[i].opt.u.sockaddr_in6;
         addrs6[i].addr6 = sin6->sin6_addr;
@@ -514,7 +564,8 @@ ngx_stream_add_addrs6(ngx_conf_t *cf, ngx_stream_port_t *stport,
                             NGX_SOCKADDR_STRLEN, 1);
 
         p = ngx_pnalloc(cf->pool, len);
-        if (p == NULL) {
+        if (p == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -538,22 +589,26 @@ ngx_stream_cmp_conf_addrs(const void *one, const void *two)
     first = (ngx_stream_conf_addr_t *) one;
     second = (ngx_stream_conf_addr_t *) two;
 
-    if (first->opt.wildcard) {
+    if (first->opt.wildcard)
+    {
         /* a wildcard must be the last resort, shift it to the end */
         return 1;
     }
 
-    if (second->opt.wildcard) {
+    if (second->opt.wildcard)
+    {
         /* a wildcard must be the last resort, shift it to the end */
         return -1;
     }
 
-    if (first->opt.bind && !second->opt.bind) {
+    if (first->opt.bind && !second->opt.bind)
+    {
         /* shift explicit bind()ed addresses to the start */
         return -1;
     }
 
-    if (!first->opt.bind && second->opt.bind) {
+    if (!first->opt.bind && second->opt.bind)
+    {
         /* shift explicit bind()ed addresses to the start */
         return 1;
     }

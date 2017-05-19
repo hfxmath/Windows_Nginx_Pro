@@ -15,7 +15,8 @@
 
 typedef struct ngx_queue_s  ngx_queue_t;
 
-struct ngx_queue_s {
+struct ngx_queue_s
+{
     ngx_queue_t  *prev;
     ngx_queue_t  *next;
 };
@@ -106,7 +107,7 @@ struct ngx_queue_s {
 
 ngx_queue_t *ngx_queue_middle(ngx_queue_t *queue);
 void ngx_queue_sort(ngx_queue_t *queue,
-    ngx_int_t (*cmp)(const ngx_queue_t *, const ngx_queue_t *));
+                    ngx_int_t (*cmp)(const ngx_queue_t *, const ngx_queue_t *));
 
 
 #endif /* _NGX_QUEUE_H_INCLUDED_ */

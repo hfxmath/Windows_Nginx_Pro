@@ -13,7 +13,8 @@
 #include <ngx_core.h>
 
 
-typedef struct {
+typedef struct
+{
     time_t      sec;
     ngx_uint_t  msec;
     ngx_int_t   gmtoff;

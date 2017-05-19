@@ -74,7 +74,8 @@
 extern "C" {
 #endif
 
-typedef struct rc2_key_st {
+typedef struct rc2_key_st
+{
     RC2_INT data[64];
 } RC2_KEY;
 

@@ -11,27 +11,31 @@
 
 
 static char *ngx_stream_upstream_zone(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                      void *conf);
 static ngx_int_t ngx_stream_upstream_init_zone(ngx_shm_zone_t *shm_zone,
-    void *data);
+        void *data);
 static ngx_stream_upstream_rr_peers_t *ngx_stream_upstream_zone_copy_peers(
     ngx_slab_pool_t *shpool, ngx_stream_upstream_srv_conf_t *uscf);
 
 
-static ngx_command_t  ngx_stream_upstream_zone_commands[] = {
+static ngx_command_t  ngx_stream_upstream_zone_commands[] =
+{
 
-    { ngx_string("zone"),
-      NGX_STREAM_UPS_CONF|NGX_CONF_TAKE12,
-      ngx_stream_upstream_zone,
-      0,
-      0,
-      NULL },
+    {
+        ngx_string("zone"),
+        NGX_STREAM_UPS_CONF | NGX_CONF_TAKE12,
+        ngx_stream_upstream_zone,
+        0,
+        0,
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_stream_module_t  ngx_stream_upstream_zone_module_ctx = {
+static ngx_stream_module_t  ngx_stream_upstream_zone_module_ctx =
+{
     NULL,                                  /* postconfiguration */
 
     NULL,                                  /* create main configuration */
@@ -42,7 +46,8 @@ static ngx_stream_module_t  ngx_stream_upstream_zone_module_ctx = {
 };
 
 
-ngx_module_t  ngx_stream_upstream_zone_module = {
+ngx_module_t  ngx_stream_upstream_zone_module =
+{
     NGX_MODULE_V1,
     &ngx_stream_upstream_zone_module_ctx,  /* module context */
     ngx_stream_upstream_zone_commands,     /* module directives */
@@ -71,34 +76,41 @@ ngx_stream_upstream_zone(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     value = cf->args->elts;
 
-    if (!value[1].len) {
+    if (!value[1].len)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "invalid zone name \"%V\"", &value[1]);
         return NGX_CONF_ERROR;
     }
 
-    if (cf->args->nelts == 3) {
+    if (cf->args->nelts == 3)
+    {
         size = ngx_parse_size(&value[2]);
 
-        if (size == NGX_ERROR) {
+        if (size == NGX_ERROR)
+        {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                                "invalid zone size \"%V\"", &value[2]);
             return NGX_CONF_ERROR;
         }
 
-        if (size < (ssize_t) (8 * ngx_pagesize)) {
+        if (size < (ssize_t) (8 * ngx_pagesize))
+        {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                                "zone \"%V\" is too small", &value[1]);
             return NGX_CONF_ERROR;
         }
 
-    } else {
+    }
+    else
+    {
         size = 0;
     }
 
     uscf->shm_zone = ngx_shared_memory_add(cf, &value[1], size,
                                            &ngx_stream_upstream_module);
-    if (uscf->shm_zone == NULL) {
+    if (uscf->shm_zone == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -125,13 +137,16 @@ ngx_stream_upstream_init_zone(ngx_shm_zone_t *shm_zone, void *data)
     umcf = shm_zone->data;
     uscfp = umcf->upstreams.elts;
 
-    if (shm_zone->shm.exists) {
+    if (shm_zone->shm.exists)
+    {
         peers = shpool->data;
 
-        for (i = 0; i < umcf->upstreams.nelts; i++) {
+        for (i = 0; i < umcf->upstreams.nelts; i++)
+        {
             uscf = uscfp[i];
 
-            if (uscf->shm_zone != shm_zone) {
+            if (uscf->shm_zone != shm_zone)
+            {
                 continue;
             }
 
@@ -145,7 +160,8 @@ ngx_stream_upstream_init_zone(ngx_shm_zone_t *shm_zone, void *data)
     len = sizeof(" in upstream zone \"\"") + shm_zone->shm.name.len;
 
     shpool->log_ctx = ngx_slab_alloc(shpool, len);
-    if (shpool->log_ctx == NULL) {
+    if (shpool->log_ctx == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -157,15 +173,18 @@ ngx_stream_upstream_init_zone(ngx_shm_zone_t *shm_zone, void *data)
 
     peersp = (ngx_stream_upstream_rr_peers_t **) (void *) &shpool->data;
 
-    for (i = 0; i < umcf->upstreams.nelts; i++) {
+    for (i = 0; i < umcf->upstreams.nelts; i++)
+    {
         uscf = uscfp[i];
 
-        if (uscf->shm_zone != shm_zone) {
+        if (uscf->shm_zone != shm_zone)
+        {
             continue;
         }
 
         peers = ngx_stream_upstream_zone_copy_peers(shpool, uscf);
-        if (peers == NULL) {
+        if (peers == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -179,13 +198,14 @@ ngx_stream_upstream_init_zone(ngx_shm_zone_t *shm_zone, void *data)
 
 static ngx_stream_upstream_rr_peers_t *
 ngx_stream_upstream_zone_copy_peers(ngx_slab_pool_t *shpool,
-    ngx_stream_upstream_srv_conf_t *uscf)
+                                    ngx_stream_upstream_srv_conf_t *uscf)
 {
     ngx_stream_upstream_rr_peer_t   *peer, **peerp;
     ngx_stream_upstream_rr_peers_t  *peers, *backup;
 
     peers = ngx_slab_alloc(shpool, sizeof(ngx_stream_upstream_rr_peers_t));
-    if (peers == NULL) {
+    if (peers == NULL)
+    {
         return NULL;
     }
 
@@ -193,11 +213,13 @@ ngx_stream_upstream_zone_copy_peers(ngx_slab_pool_t *shpool,
 
     peers->shpool = shpool;
 
-    for (peerp = &peers->peer; *peerp; peerp = &peer->next) {
+    for (peerp = &peers->peer; *peerp; peerp = &peer->next)
+    {
         /* pool is unlocked */
         peer = ngx_slab_calloc_locked(shpool,
                                       sizeof(ngx_stream_upstream_rr_peer_t));
-        if (peer == NULL) {
+        if (peer == NULL)
+        {
             return NULL;
         }
 
@@ -206,12 +228,14 @@ ngx_stream_upstream_zone_copy_peers(ngx_slab_pool_t *shpool,
         *peerp = peer;
     }
 
-    if (peers->next == NULL) {
+    if (peers->next == NULL)
+    {
         goto done;
     }
 
     backup = ngx_slab_alloc(shpool, sizeof(ngx_stream_upstream_rr_peers_t));
-    if (backup == NULL) {
+    if (backup == NULL)
+    {
         return NULL;
     }
 
@@ -219,11 +243,13 @@ ngx_stream_upstream_zone_copy_peers(ngx_slab_pool_t *shpool,
 
     backup->shpool = shpool;
 
-    for (peerp = &backup->peer; *peerp; peerp = &peer->next) {
+    for (peerp = &backup->peer; *peerp; peerp = &peer->next)
+    {
         /* pool is unlocked */
         peer = ngx_slab_calloc_locked(shpool,
                                       sizeof(ngx_stream_upstream_rr_peer_t));
-        if (peer == NULL) {
+        if (peer == NULL)
+        {
             return NULL;
         }
 

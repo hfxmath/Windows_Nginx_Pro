@@ -15,23 +15,27 @@ static ngx_int_t ngx_stream_upstream_init_least_conn_peer(
 static ngx_int_t ngx_stream_upstream_get_least_conn_peer(
     ngx_peer_connection_t *pc, void *data);
 static char *ngx_stream_upstream_least_conn(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+        void *conf);
 
 
-static ngx_command_t  ngx_stream_upstream_least_conn_commands[] = {
+static ngx_command_t  ngx_stream_upstream_least_conn_commands[] =
+{
 
-    { ngx_string("least_conn"),
-      NGX_STREAM_UPS_CONF|NGX_CONF_NOARGS,
-      ngx_stream_upstream_least_conn,
-      0,
-      0,
-      NULL },
+    {
+        ngx_string("least_conn"),
+        NGX_STREAM_UPS_CONF | NGX_CONF_NOARGS,
+        ngx_stream_upstream_least_conn,
+        0,
+        0,
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_stream_module_t  ngx_stream_upstream_least_conn_module_ctx = {
+static ngx_stream_module_t  ngx_stream_upstream_least_conn_module_ctx =
+{
     NULL,                                    /* postconfiguration */
 
     NULL,                                    /* create main configuration */
@@ -42,7 +46,8 @@ static ngx_stream_module_t  ngx_stream_upstream_least_conn_module_ctx = {
 };
 
 
-ngx_module_t  ngx_stream_upstream_least_conn_module = {
+ngx_module_t  ngx_stream_upstream_least_conn_module =
+{
     NGX_MODULE_V1,
     &ngx_stream_upstream_least_conn_module_ctx, /* module context */
     ngx_stream_upstream_least_conn_commands, /* module directives */
@@ -60,12 +65,13 @@ ngx_module_t  ngx_stream_upstream_least_conn_module = {
 
 static ngx_int_t
 ngx_stream_upstream_init_least_conn(ngx_conf_t *cf,
-    ngx_stream_upstream_srv_conf_t *us)
+                                    ngx_stream_upstream_srv_conf_t *us)
 {
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, cf->log, 0,
                    "init least conn");
 
-    if (ngx_stream_upstream_init_round_robin(cf, us) != NGX_OK) {
+    if (ngx_stream_upstream_init_round_robin(cf, us) != NGX_OK)
+    {
         return NGX_ERROR;
     }
 
@@ -77,12 +83,13 @@ ngx_stream_upstream_init_least_conn(ngx_conf_t *cf,
 
 static ngx_int_t
 ngx_stream_upstream_init_least_conn_peer(ngx_stream_session_t *s,
-    ngx_stream_upstream_srv_conf_t *us)
+        ngx_stream_upstream_srv_conf_t *us)
 {
     ngx_log_debug0(NGX_LOG_DEBUG_STREAM, s->connection->log, 0,
                    "init least conn peer");
 
-    if (ngx_stream_upstream_init_round_robin_peer(s, us) != NGX_OK) {
+    if (ngx_stream_upstream_init_round_robin_peer(s, us) != NGX_OK)
+    {
         return NGX_ERROR;
     }
 
@@ -107,7 +114,8 @@ ngx_stream_upstream_get_least_conn_peer(ngx_peer_connection_t *pc, void *data)
     ngx_log_debug1(NGX_LOG_DEBUG_STREAM, pc->log, 0,
                    "get least conn peer, try: %ui", pc->tries);
 
-    if (rrp->peers->single) {
+    if (rrp->peers->single)
+    {
         return ngx_stream_upstream_get_round_robin_peer(pc, rrp);
     }
 
@@ -128,24 +136,26 @@ ngx_stream_upstream_get_least_conn_peer(ngx_peer_connection_t *pc, void *data)
 #endif
 
     for (peer = peers->peer, i = 0;
-         peer;
-         peer = peer->next, i++)
+            peer;
+            peer = peer->next, i++)
     {
 
         n = i / (8 * sizeof(uintptr_t));
         m = (uintptr_t) 1 << i % (8 * sizeof(uintptr_t));
 
-        if (rrp->tried[n] & m) {
+        if (rrp->tried[n] & m)
+        {
             continue;
         }
 
-        if (peer->down) {
+        if (peer->down)
+        {
             continue;
         }
 
         if (peer->max_fails
-            && peer->fails >= peer->max_fails
-            && now - peer->checked <= peer->fail_timeout)
+                && peer->fails >= peer->max_fails
+                && now - peer->checked <= peer->fail_timeout)
         {
             continue;
         }
@@ -157,50 +167,57 @@ ngx_stream_upstream_get_least_conn_peer(ngx_peer_connection_t *pc, void *data)
          */
 
         if (best == NULL
-            || peer->conns * best->weight < best->conns * peer->weight)
+                || peer->conns * best->weight < best->conns * peer->weight)
         {
             best = peer;
             many = 0;
             p = i;
 
-        } else if (peer->conns * best->weight == best->conns * peer->weight) {
+        }
+        else if (peer->conns * best->weight == best->conns * peer->weight)
+        {
             many = 1;
         }
     }
 
-    if (best == NULL) {
+    if (best == NULL)
+    {
         ngx_log_debug0(NGX_LOG_DEBUG_STREAM, pc->log, 0,
                        "get least conn peer, no peer found");
 
         goto failed;
     }
 
-    if (many) {
+    if (many)
+    {
         ngx_log_debug0(NGX_LOG_DEBUG_STREAM, pc->log, 0,
                        "get least conn peer, many");
 
         for (peer = best, i = p;
-             peer;
-             peer = peer->next, i++)
+                peer;
+                peer = peer->next, i++)
         {
             n = i / (8 * sizeof(uintptr_t));
             m = (uintptr_t) 1 << i % (8 * sizeof(uintptr_t));
 
-            if (rrp->tried[n] & m) {
+            if (rrp->tried[n] & m)
+            {
                 continue;
             }
 
-            if (peer->down) {
+            if (peer->down)
+            {
                 continue;
             }
 
-            if (peer->conns * best->weight != best->conns * peer->weight) {
+            if (peer->conns * best->weight != best->conns * peer->weight)
+            {
                 continue;
             }
 
             if (peer->max_fails
-                && peer->fails >= peer->max_fails
-                && now - peer->checked <= peer->fail_timeout)
+                    && peer->fails >= peer->max_fails
+                    && now - peer->checked <= peer->fail_timeout)
             {
                 continue;
             }
@@ -208,11 +225,13 @@ ngx_stream_upstream_get_least_conn_peer(ngx_peer_connection_t *pc, void *data)
             peer->current_weight += peer->effective_weight;
             total += peer->effective_weight;
 
-            if (peer->effective_weight < peer->weight) {
+            if (peer->effective_weight < peer->weight)
+            {
                 peer->effective_weight++;
             }
 
-            if (peer->current_weight > best->current_weight) {
+            if (peer->current_weight > best->current_weight)
+            {
                 best = peer;
                 p = i;
             }
@@ -221,7 +240,8 @@ ngx_stream_upstream_get_least_conn_peer(ngx_peer_connection_t *pc, void *data)
 
     best->current_weight -= total;
 
-    if (now - best->checked > best->fail_timeout) {
+    if (now - best->checked > best->fail_timeout)
+    {
         best->checked = now;
     }
 
@@ -244,16 +264,18 @@ ngx_stream_upstream_get_least_conn_peer(ngx_peer_connection_t *pc, void *data)
 
 failed:
 
-    if (peers->next) {
+    if (peers->next)
+    {
         ngx_log_debug0(NGX_LOG_DEBUG_STREAM, pc->log, 0,
                        "get least conn peer, backup servers");
 
         rrp->peers = peers->next;
 
         n = (rrp->peers->number + (8 * sizeof(uintptr_t) - 1))
-                / (8 * sizeof(uintptr_t));
+            / (8 * sizeof(uintptr_t));
 
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < n; i++)
+        {
             rrp->tried[i] = 0;
         }
 
@@ -261,7 +283,8 @@ failed:
 
         rc = ngx_stream_upstream_get_least_conn_peer(pc, rrp);
 
-        if (rc != NGX_BUSY) {
+        if (rc != NGX_BUSY)
+        {
             return rc;
         }
 
@@ -270,7 +293,8 @@ failed:
 
     /* all peers failed, mark them as live for quick recovery */
 
-    for (peer = peers->peer; peer; peer = peer->next) {
+    for (peer = peers->peer; peer; peer = peer->next)
+    {
         peer->fails = 0;
     }
 
@@ -289,7 +313,8 @@ ngx_stream_upstream_least_conn(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     uscf = ngx_stream_conf_get_module_srv_conf(cf, ngx_stream_upstream_module);
 
-    if (uscf->peer.init_upstream) {
+    if (uscf->peer.init_upstream)
+    {
         ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
                            "load balancing method redefined");
     }
@@ -297,11 +322,11 @@ ngx_stream_upstream_least_conn(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     uscf->peer.init_upstream = ngx_stream_upstream_init_least_conn;
 
     uscf->flags = NGX_STREAM_UPSTREAM_CREATE
-                  |NGX_STREAM_UPSTREAM_WEIGHT
-                  |NGX_STREAM_UPSTREAM_MAX_FAILS
-                  |NGX_STREAM_UPSTREAM_FAIL_TIMEOUT
-                  |NGX_STREAM_UPSTREAM_DOWN
-                  |NGX_STREAM_UPSTREAM_BACKUP;
+                  | NGX_STREAM_UPSTREAM_WEIGHT
+                  | NGX_STREAM_UPSTREAM_MAX_FAILS
+                  | NGX_STREAM_UPSTREAM_FAIL_TIMEOUT
+                  | NGX_STREAM_UPSTREAM_DOWN
+                  | NGX_STREAM_UPSTREAM_BACKUP;
 
     return NGX_CONF_OK;
 }

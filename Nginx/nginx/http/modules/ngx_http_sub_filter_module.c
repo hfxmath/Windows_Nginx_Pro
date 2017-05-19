@@ -10,19 +10,22 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     ngx_http_complex_value_t   match;
     ngx_http_complex_value_t   value;
 } ngx_http_sub_pair_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                  match;
     ngx_http_complex_value_t  *value;
 } ngx_http_sub_match_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_uint_t                 min_match_len;
     ngx_uint_t                 max_match_len;
 
@@ -31,7 +34,8 @@ typedef struct {
 } ngx_http_sub_tables_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_uint_t                 dynamic; /* unsigned dynamic:1; */
 
     ngx_array_t               *pairs;
@@ -48,7 +52,8 @@ typedef struct {
 } ngx_http_sub_loc_conf_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                  saved;
     ngx_str_t                  looked;
 
@@ -81,56 +86,66 @@ static ngx_uint_t ngx_http_sub_cmp_index;
 
 
 static ngx_int_t ngx_http_sub_output(ngx_http_request_t *r,
-    ngx_http_sub_ctx_t *ctx);
+                                     ngx_http_sub_ctx_t *ctx);
 static ngx_int_t ngx_http_sub_parse(ngx_http_request_t *r,
-    ngx_http_sub_ctx_t *ctx);
+                                    ngx_http_sub_ctx_t *ctx);
 
-static char * ngx_http_sub_filter(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+static char *ngx_http_sub_filter(ngx_conf_t *cf, ngx_command_t *cmd,
+                                 void *conf);
 static void *ngx_http_sub_create_conf(ngx_conf_t *cf);
 static char *ngx_http_sub_merge_conf(ngx_conf_t *cf,
-    void *parent, void *child);
+                                     void *parent, void *child);
 static void ngx_http_sub_init_tables(ngx_http_sub_tables_t *tables,
-    ngx_http_sub_match_t *match, ngx_uint_t n);
+                                     ngx_http_sub_match_t *match, ngx_uint_t n);
 static ngx_int_t ngx_http_sub_cmp_matches(const void *one, const void *two);
 static ngx_int_t ngx_http_sub_filter_init(ngx_conf_t *cf);
 
 
-static ngx_command_t  ngx_http_sub_filter_commands[] = {
+static ngx_command_t  ngx_http_sub_filter_commands[] =
+{
 
-    { ngx_string("sub_filter"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE2,
-      ngx_http_sub_filter,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("sub_filter"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE2,
+        ngx_http_sub_filter,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("sub_filter_types"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
-      ngx_http_types_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_sub_loc_conf_t, types_keys),
-      &ngx_http_html_default_types[0] },
+    {
+        ngx_string("sub_filter_types"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_1MORE,
+        ngx_http_types_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_sub_loc_conf_t, types_keys),
+        &ngx_http_html_default_types[0]
+    },
 
-    { ngx_string("sub_filter_once"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_sub_loc_conf_t, once),
-      NULL },
+    {
+        ngx_string("sub_filter_once"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_sub_loc_conf_t, once),
+        NULL
+    },
 
-    { ngx_string("sub_filter_last_modified"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_sub_loc_conf_t, last_modified),
-      NULL },
+    {
+        ngx_string("sub_filter_last_modified"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_sub_loc_conf_t, last_modified),
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_http_module_t  ngx_http_sub_filter_module_ctx = {
+static ngx_http_module_t  ngx_http_sub_filter_module_ctx =
+{
     NULL,                                  /* preconfiguration */
     ngx_http_sub_filter_init,              /* postconfiguration */
 
@@ -145,7 +160,8 @@ static ngx_http_module_t  ngx_http_sub_filter_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_sub_filter_module = {
+ngx_module_t  ngx_http_sub_filter_module =
+{
     NGX_MODULE_V1,
     &ngx_http_sub_filter_module_ctx,       /* module context */
     ngx_http_sub_filter_commands,          /* module directives */
@@ -178,46 +194,55 @@ ngx_http_sub_header_filter(ngx_http_request_t *r)
     slcf = ngx_http_get_module_loc_conf(r, ngx_http_sub_filter_module);
 
     if (slcf->pairs == NULL
-        || r->headers_out.content_length_n == 0
-        || ngx_http_test_content_type(r, &slcf->types) == NULL)
+            || r->headers_out.content_length_n == 0
+            || ngx_http_test_content_type(r, &slcf->types) == NULL)
     {
         return ngx_http_next_header_filter(r);
     }
 
     ctx = ngx_pcalloc(r->pool, sizeof(ngx_http_sub_ctx_t));
-    if (ctx == NULL) {
+    if (ctx == NULL)
+    {
         return NGX_ERROR;
     }
 
-    if (slcf->dynamic == 0) {
+    if (slcf->dynamic == 0)
+    {
         ctx->tables = slcf->tables;
         ctx->matches = slcf->matches;
 
-    } else {
+    }
+    else
+    {
         pairs = slcf->pairs->elts;
         n = slcf->pairs->nelts;
 
         matches = ngx_pcalloc(r->pool, sizeof(ngx_http_sub_match_t) * n);
-        if (matches == NULL) {
+        if (matches == NULL)
+        {
             return NGX_ERROR;
         }
 
         j = 0;
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < n; i++)
+        {
             matches[j].value = &pairs[i].value;
 
-            if (pairs[i].match.lengths == NULL) {
+            if (pairs[i].match.lengths == NULL)
+            {
                 matches[j].match = pairs[i].match.value;
                 j++;
                 continue;
             }
 
             m = &matches[j].match;
-            if (ngx_http_complex_value(r, &pairs[i].match, m) != NGX_OK) {
+            if (ngx_http_complex_value(r, &pairs[i].match, m) != NGX_OK)
+            {
                 return NGX_ERROR;
             }
 
-            if (m->len == 0) {
+            if (m->len == 0)
+            {
                 continue;
             }
 
@@ -225,12 +250,14 @@ ngx_http_sub_header_filter(ngx_http_request_t *r)
             j++;
         }
 
-        if (j == 0) {
+        if (j == 0)
+        {
             return ngx_http_next_header_filter(r);
         }
 
         ctx->matches = ngx_palloc(r->pool, sizeof(ngx_array_t));
-        if (ctx->matches == NULL) {
+        if (ctx->matches == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -238,7 +265,8 @@ ngx_http_sub_header_filter(ngx_http_request_t *r)
         ctx->matches->nelts = j;
 
         ctx->tables = ngx_palloc(r->pool, sizeof(ngx_http_sub_tables_t));
-        if (ctx->tables == NULL) {
+        if (ctx->tables == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -249,12 +277,14 @@ ngx_http_sub_header_filter(ngx_http_request_t *r)
     ngx_http_set_ctx(r, ctx, ngx_http_sub_filter_module);
 
     ctx->saved.data = ngx_pnalloc(r->pool, ctx->tables->max_match_len - 1);
-    if (ctx->saved.data == NULL) {
+    if (ctx->saved.data == NULL)
+    {
         return NGX_ERROR;
     }
 
     ctx->looked.data = ngx_pnalloc(r->pool, ctx->tables->max_match_len - 1);
-    if (ctx->looked.data == NULL) {
+    if (ctx->looked.data == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -263,14 +293,18 @@ ngx_http_sub_header_filter(ngx_http_request_t *r)
 
     r->filter_need_in_memory = 1;
 
-    if (r == r->main) {
+    if (r == r->main)
+    {
         ngx_http_clear_content_length(r);
 
-        if (!slcf->last_modified) {
+        if (!slcf->last_modified)
+        {
             ngx_http_clear_last_modified(r);
             ngx_http_clear_etag(r);
 
-        } else {
+        }
+        else
+        {
             ngx_http_weak_etag(r);
         }
     }
@@ -292,22 +326,26 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_sub_filter_module);
 
-    if (ctx == NULL) {
-        return ngx_http_next_body_filter(r, in);
-    }
-
-    if ((in == NULL
-         && ctx->buf == NULL
-         && ctx->in == NULL
-         && ctx->busy == NULL))
+    if (ctx == NULL)
     {
         return ngx_http_next_body_filter(r, in);
     }
 
-    if (ctx->once && (ctx->buf == NULL || ctx->in == NULL)) {
+    if ((in == NULL
+            && ctx->buf == NULL
+            && ctx->in == NULL
+            && ctx->busy == NULL))
+    {
+        return ngx_http_next_body_filter(r, in);
+    }
 
-        if (ctx->busy) {
-            if (ngx_http_sub_output(r, ctx) == NGX_ERROR) {
+    if (ctx->once && (ctx->buf == NULL || ctx->in == NULL))
+    {
+
+        if (ctx->busy)
+        {
+            if (ngx_http_sub_output(r, ctx) == NGX_ERROR)
+            {
                 return NGX_ERROR;
             }
         }
@@ -317,8 +355,10 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
     /* add the incoming chain to the chain ctx->in */
 
-    if (in) {
-        if (ngx_chain_add_copy(r->pool, &ctx->in, in) != NGX_OK) {
+    if (in)
+    {
+        if (ngx_chain_add_copy(r->pool, &ctx->in, in) != NGX_OK)
+        {
             return NGX_ERROR;
         }
     }
@@ -326,9 +366,11 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                    "http sub filter \"%V\"", &r->uri);
 
-    while (ctx->in || ctx->buf) {
+    while (ctx->in || ctx->buf)
+    {
 
-        if (ctx->buf == NULL) {
+        if (ctx->buf == NULL)
+        {
             ctx->buf = ctx->in->buf;
             ctx->in = ctx->in->next;
             ctx->pos = ctx->buf->pos;
@@ -336,7 +378,8 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
         b = NULL;
 
-        while (ctx->pos < ctx->buf->last) {
+        while (ctx->pos < ctx->buf->last)
+        {
 
             rc = ngx_http_sub_parse(r, ctx);
 
@@ -344,17 +387,20 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
                            "parse: %i, looked: \"%V\" %p-%p",
                            rc, &ctx->looked, ctx->copy_start, ctx->copy_end);
 
-            if (rc == NGX_ERROR) {
+            if (rc == NGX_ERROR)
+            {
                 return rc;
             }
 
-            if (ctx->saved.len) {
+            if (ctx->saved.len)
+            {
 
                 ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                                "saved: \"%V\"", &ctx->saved);
 
                 cl = ngx_chain_get_free_buf(r->pool, &ctx->free);
-                if (cl == NULL) {
+                if (cl == NULL)
+                {
                     return NGX_ERROR;
                 }
 
@@ -363,7 +409,8 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
                 ngx_memzero(b, sizeof(ngx_buf_t));
 
                 b->pos = ngx_pnalloc(r->pool, ctx->saved.len);
-                if (b->pos == NULL) {
+                if (b->pos == NULL)
+                {
                     return NGX_ERROR;
                 }
 
@@ -377,10 +424,12 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
                 ctx->saved.len = 0;
             }
 
-            if (ctx->copy_start != ctx->copy_end) {
+            if (ctx->copy_start != ctx->copy_end)
+            {
 
                 cl = ngx_chain_get_free_buf(r->pool, &ctx->free);
-                if (cl == NULL) {
+                if (cl == NULL)
+                {
                     return NGX_ERROR;
                 }
 
@@ -395,7 +444,8 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
                 b->last_in_chain = 0;
                 b->recycled = 0;
 
-                if (b->in_file) {
+                if (b->in_file)
+                {
                     b->file_last = b->file_pos + (b->last - ctx->buf->pos);
                     b->file_pos += b->pos - ctx->buf->pos;
                 }
@@ -404,7 +454,8 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
                 ctx->last_out = &cl->next;
             }
 
-            if (rc == NGX_AGAIN) {
+            if (rc == NGX_AGAIN)
+            {
                 continue;
             }
 
@@ -412,7 +463,8 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
             /* rc == NGX_OK */
 
             cl = ngx_chain_get_free_buf(r->pool, &ctx->free);
-            if (cl == NULL) {
+            if (cl == NULL)
+            {
                 return NGX_ERROR;
             }
 
@@ -422,32 +474,38 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
             slcf = ngx_http_get_module_loc_conf(r, ngx_http_sub_filter_module);
 
-            if (ctx->sub == NULL) {
+            if (ctx->sub == NULL)
+            {
                 ctx->sub = ngx_pcalloc(r->pool, sizeof(ngx_str_t)
-                                                * ctx->matches->nelts);
-                if (ctx->sub == NULL) {
+                                       * ctx->matches->nelts);
+                if (ctx->sub == NULL)
+                {
                     return NGX_ERROR;
                 }
             }
 
             sub = &ctx->sub[ctx->index];
 
-            if (sub->data == NULL) {
+            if (sub->data == NULL)
+            {
                 match = ctx->matches->elts;
 
                 if (ngx_http_complex_value(r, match[ctx->index].value, sub)
-                    != NGX_OK)
+                        != NGX_OK)
                 {
                     return NGX_ERROR;
                 }
             }
 
-            if (sub->len) {
+            if (sub->len)
+            {
                 b->memory = 1;
                 b->pos = sub->data;
                 b->last = sub->data + sub->len;
 
-            } else {
+            }
+            else
+            {
                 b->sync = 1;
             }
 
@@ -461,10 +519,11 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         }
 
         if (ctx->looked.len
-            && (ctx->buf->last_buf || ctx->buf->last_in_chain))
+                && (ctx->buf->last_buf || ctx->buf->last_in_chain))
         {
             cl = ngx_chain_get_free_buf(r->pool, &ctx->free);
-            if (cl == NULL) {
+            if (cl == NULL)
+            {
                 return NGX_ERROR;
             }
 
@@ -483,11 +542,13 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         }
 
         if (ctx->buf->last_buf || ctx->buf->flush || ctx->buf->sync
-            || ngx_buf_in_memory(ctx->buf))
+                || ngx_buf_in_memory(ctx->buf))
         {
-            if (b == NULL) {
+            if (b == NULL)
+            {
                 cl = ngx_chain_get_free_buf(r->pool, &ctx->free);
-                if (cl == NULL) {
+                if (cl == NULL)
+                {
                     return NGX_ERROR;
                 }
 
@@ -512,7 +573,8 @@ ngx_http_sub_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         ctx->buf = NULL;
     }
 
-    if (ctx->out == NULL && ctx->busy == NULL) {
+    if (ctx->out == NULL && ctx->busy == NULL)
+    {
         return NGX_OK;
     }
 
@@ -529,10 +591,12 @@ ngx_http_sub_output(ngx_http_request_t *r, ngx_http_sub_ctx_t *ctx)
 
 #if 1
     b = NULL;
-    for (cl = ctx->out; cl; cl = cl->next) {
+    for (cl = ctx->out; cl; cl = cl->next)
+    {
         ngx_log_debug2(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
                        "sub out: %p %p", cl->buf, cl->buf->pos);
-        if (cl->buf == b) {
+        if (cl->buf == b)
+        {
             ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
                           "the same buf was used in sub");
             ngx_debug_point();
@@ -544,33 +608,43 @@ ngx_http_sub_output(ngx_http_request_t *r, ngx_http_sub_ctx_t *ctx)
 
     rc = ngx_http_next_body_filter(r, ctx->out);
 
-    if (ctx->busy == NULL) {
+    if (ctx->busy == NULL)
+    {
         ctx->busy = ctx->out;
 
-    } else {
-        for (cl = ctx->busy; cl->next; cl = cl->next) { /* void */ }
+    }
+    else
+    {
+        for (cl = ctx->busy; cl->next; cl = cl->next)
+        {
+            /* void */
+        }
         cl->next = ctx->out;
     }
 
     ctx->out = NULL;
     ctx->last_out = &ctx->out;
 
-    while (ctx->busy) {
+    while (ctx->busy)
+    {
 
         cl = ctx->busy;
         b = cl->buf;
 
-        if (ngx_buf_size(b) != 0) {
+        if (ngx_buf_size(b) != 0)
+        {
             break;
         }
 
-        if (b->shadow) {
+        if (b->shadow)
+        {
             b->shadow->pos = b->shadow->last;
         }
 
         ctx->busy = cl->next;
 
-        if (ngx_buf_in_memory(b) || b->in_file) {
+        if (ngx_buf_in_memory(b) || b->in_file)
+        {
             /* add data bufs only to the free buf chain */
 
             cl->next = ctx->free;
@@ -578,10 +652,13 @@ ngx_http_sub_output(ngx_http_request_t *r, ngx_http_sub_ctx_t *ctx)
         }
     }
 
-    if (ctx->in || ctx->buf) {
+    if (ctx->in || ctx->buf)
+    {
         r->buffered |= NGX_HTTP_SUB_BUFFERED;
 
-    } else {
+    }
+    else
+    {
         r->buffered &= ~NGX_HTTP_SUB_BUFFERED;
     }
 
@@ -606,21 +683,24 @@ ngx_http_sub_parse(ngx_http_request_t *r, ngx_http_sub_ctx_t *ctx)
     offset = ctx->offset;
     end = ctx->buf->last - ctx->pos;
 
-    if (ctx->once) {
+    if (ctx->once)
+    {
         /* sets start and next to end */
         offset = end + (ngx_int_t) tables->min_match_len - 1;
         goto again;
     }
 
-    while (offset < end) {
+    while (offset < end)
+    {
 
         c = offset < 0 ? ctx->looked.data[ctx->looked.len + offset]
-                       : ctx->pos[offset];
+            : ctx->pos[offset];
 
         c = ngx_tolower(c);
 
         shift = tables->shift[c];
-        if (shift > 0) {
+        if (shift > 0)
+        {
             offset += shift;
             continue;
         }
@@ -633,9 +713,11 @@ ngx_http_sub_parse(ngx_http_request_t *r, ngx_http_sub_ctx_t *ctx)
         i = ngx_max(tables->index[c], ctx->index);
         j = tables->index[c + 1];
 
-        while (i != j) {
+        while (i != j)
+        {
 
-            if (slcf->once && ctx->sub && ctx->sub[i].data) {
+            if (slcf->once && ctx->sub && ctx->sub[i].data)
+            {
                 goto next;
             }
 
@@ -644,15 +726,20 @@ ngx_http_sub_parse(ngx_http_request_t *r, ngx_http_sub_ctx_t *ctx)
             pat = m->data;
             pat_end = m->data + m->len;
 
-            if (start >= 0) {
+            if (start >= 0)
+            {
                 p = ctx->pos + start;
 
-            } else {
+            }
+            else
+            {
                 last = ctx->looked.data + ctx->looked.len;
                 p = last + start;
 
-                while (p < last && pat < pat_end) {
-                    if (ngx_tolower(*p) != *pat) {
+                while (p < last && pat < pat_end)
+                {
+                    if (ngx_tolower(*p) != *pat)
+                    {
                         goto next;
                     }
 
@@ -663,8 +750,10 @@ ngx_http_sub_parse(ngx_http_request_t *r, ngx_http_sub_ctx_t *ctx)
                 p = ctx->pos;
             }
 
-            while (p < ctx->buf->last && pat < pat_end) {
-                if (ngx_tolower(*p) != *pat) {
+            while (p < ctx->buf->last && pat < pat_end)
+            {
+                if (ngx_tolower(*p) != *pat)
+                {
                     goto next;
                 }
 
@@ -674,7 +763,8 @@ ngx_http_sub_parse(ngx_http_request_t *r, ngx_http_sub_ctx_t *ctx)
 
             ctx->index = i;
 
-            if (pat != pat_end) {
+            if (pat != pat_end)
+            {
                 /* partial match */
                 goto again;
             }
@@ -686,7 +776,7 @@ ngx_http_sub_parse(ngx_http_request_t *r, ngx_http_sub_ctx_t *ctx)
 
             goto done;
 
-        next:
+next:
 
             i++;
         }
@@ -742,20 +832,24 @@ ngx_http_sub_filter(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     value = cf->args->elts;
 
-    if (value[1].len == 0) {
+    if (value[1].len == 0)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0, "empty search pattern");
         return NGX_CONF_ERROR;
     }
 
-    if (slcf->pairs == NULL) {
+    if (slcf->pairs == NULL)
+    {
         slcf->pairs = ngx_array_create(cf->pool, 1,
                                        sizeof(ngx_http_sub_pair_t));
-        if (slcf->pairs == NULL) {
+        if (slcf->pairs == NULL)
+        {
             return NGX_CONF_ERROR;
         }
     }
 
-    if (slcf->pairs->nelts == 255) {
+    if (slcf->pairs->nelts == 255)
+    {
         ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                            "number of search patterns exceeds 255");
         return NGX_CONF_ERROR;
@@ -764,7 +858,8 @@ ngx_http_sub_filter(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_strlow(value[1].data, value[1].data, value[1].len);
 
     pair = ngx_array_push(slcf->pairs);
-    if (pair == NULL) {
+    if (pair == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -774,14 +869,18 @@ ngx_http_sub_filter(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ccv.value = &value[1];
     ccv.complex_value = &pair->match;
 
-    if (ngx_http_compile_complex_value(&ccv) != NGX_OK) {
+    if (ngx_http_compile_complex_value(&ccv) != NGX_OK)
+    {
         return NGX_CONF_ERROR;
     }
 
-    if (ccv.complex_value->lengths != NULL) {
+    if (ccv.complex_value->lengths != NULL)
+    {
         slcf->dynamic = 1;
 
-    } else {
+    }
+    else
+    {
         ngx_strlow(pair->match.value.data, pair->match.value.data,
                    pair->match.value.len);
     }
@@ -792,7 +891,8 @@ ngx_http_sub_filter(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ccv.value = &value[2];
     ccv.complex_value = &pair->value;
 
-    if (ngx_http_compile_complex_value(&ccv) != NGX_OK) {
+    if (ngx_http_compile_complex_value(&ccv) != NGX_OK)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -806,7 +906,8 @@ ngx_http_sub_create_conf(ngx_conf_t *cf)
     ngx_http_sub_loc_conf_t  *slcf;
 
     slcf = ngx_pcalloc(cf->pool, sizeof(ngx_http_sub_loc_conf_t));
-    if (slcf == NULL) {
+    if (slcf == NULL)
+    {
         return NULL;
     }
 
@@ -843,34 +944,39 @@ ngx_http_sub_merge_conf(ngx_conf_t *cf, void *parent, void *child)
     if (ngx_http_merge_types(cf, &conf->types_keys, &conf->types,
                              &prev->types_keys, &prev->types,
                              ngx_http_html_default_types)
-        != NGX_OK)
+            != NGX_OK)
     {
         return NGX_CONF_ERROR;
     }
 
-    if (conf->pairs == NULL) {
+    if (conf->pairs == NULL)
+    {
         conf->dynamic = prev->dynamic;
         conf->pairs = prev->pairs;
         conf->matches = prev->matches;
         conf->tables = prev->tables;
     }
 
-    if (conf->pairs && conf->dynamic == 0 && conf->tables == NULL) {
+    if (conf->pairs && conf->dynamic == 0 && conf->tables == NULL)
+    {
         pairs = conf->pairs->elts;
         n = conf->pairs->nelts;
 
         matches = ngx_palloc(cf->pool, sizeof(ngx_http_sub_match_t) * n);
-        if (matches == NULL) {
+        if (matches == NULL)
+        {
             return NGX_CONF_ERROR;
         }
 
-        for (i = 0; i < n; i++) {
+        for (i = 0; i < n; i++)
+        {
             matches[i].match = pairs[i].match.value;
             matches[i].value = &pairs[i].value;
         }
 
         conf->matches = ngx_palloc(cf->pool, sizeof(ngx_array_t));
-        if (conf->matches == NULL) {
+        if (conf->matches == NULL)
+        {
             return NGX_CONF_ERROR;
         }
 
@@ -878,7 +984,8 @@ ngx_http_sub_merge_conf(ngx_conf_t *cf, void *parent, void *child)
         conf->matches->nelts = n;
 
         conf->tables = ngx_palloc(cf->pool, sizeof(ngx_http_sub_tables_t));
-        if (conf->tables == NULL) {
+        if (conf->tables == NULL)
+        {
             return NGX_CONF_ERROR;
         }
 
@@ -892,7 +999,7 @@ ngx_http_sub_merge_conf(ngx_conf_t *cf, void *parent, void *child)
 
 static void
 ngx_http_sub_init_tables(ngx_http_sub_tables_t *tables,
-    ngx_http_sub_match_t *match, ngx_uint_t n)
+                         ngx_http_sub_match_t *match, ngx_uint_t n)
 {
     u_char      c;
     ngx_uint_t  i, j, min, max, ch;
@@ -900,7 +1007,8 @@ ngx_http_sub_init_tables(ngx_http_sub_tables_t *tables,
     min = match[0].match.len;
     max = match[0].match.len;
 
-    for (i = 1; i < n; i++) {
+    for (i = 1; i < n; i++)
+    {
         min = ngx_min(min, match[i].match.len);
         max = ngx_max(max, match[i].match.len);
     }
@@ -916,20 +1024,24 @@ ngx_http_sub_init_tables(ngx_http_sub_tables_t *tables,
 
     ch = 0;
 
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < n; i++)
+    {
 
-        for (j = 0; j < min; j++) {
+        for (j = 0; j < min; j++)
+        {
             c = match[i].match.data[tables->min_match_len - 1 - j];
             tables->shift[c] = ngx_min(tables->shift[c], (u_char) j);
         }
 
         c = match[i].match.data[tables->min_match_len - 1];
-        while (ch <= c) {
+        while (ch <= c)
+        {
             tables->index[ch++] = (u_char) i;
         }
     }
 
-    while (ch < 257) {
+    while (ch < 257)
+    {
         tables->index[ch++] = (u_char) n;
     }
 }

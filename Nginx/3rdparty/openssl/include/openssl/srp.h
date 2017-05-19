@@ -73,7 +73,8 @@ extern "C" {
 #  include <openssl/bn.h>
 #  include <openssl/crypto.h>
 
-typedef struct SRP_gN_cache_st {
+typedef struct SRP_gN_cache_st
+{
     char *b64_bn;
     BIGNUM *bn;
 } SRP_gN_cache;
@@ -81,7 +82,8 @@ typedef struct SRP_gN_cache_st {
 
 DECLARE_STACK_OF(SRP_gN_cache)
 
-typedef struct SRP_user_pwd_st {
+typedef struct SRP_user_pwd_st
+{
     /* Owned by us. */
     char *id;
     BIGNUM *s;
@@ -97,10 +99,11 @@ DECLARE_STACK_OF(SRP_user_pwd)
 
 void SRP_user_pwd_free(SRP_user_pwd *user_pwd);
 
-typedef struct SRP_VBASE_st {
+typedef struct SRP_VBASE_st
+{
     STACK_OF(SRP_user_pwd) *users_pwd;
     STACK_OF(SRP_gN_cache) *gN_cache;
-/* to simulate a user */
+    /* to simulate a user */
     char *seed_key;
     BIGNUM *default_g;
     BIGNUM *default_N;
@@ -109,7 +112,8 @@ typedef struct SRP_VBASE_st {
 /*
  * Structure interne pour retenir les couples N et g
  */
-typedef struct SRP_gN_st {
+typedef struct SRP_gN_st
+{
     char *id;
     BIGNUM *g;
     BIGNUM *N;

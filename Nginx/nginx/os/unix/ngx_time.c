@@ -26,7 +26,8 @@ ngx_timezone_update(void)
 {
 #if (NGX_FREEBSD)
 
-    if (getenv("TZ")) {
+    if (getenv("TZ"))
+    {
         return;
     }
 

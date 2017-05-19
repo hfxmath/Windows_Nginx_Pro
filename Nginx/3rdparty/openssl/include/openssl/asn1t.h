@@ -440,7 +440,8 @@ extern "C" {
  * structure, various flags such as OPTIONAL and the field name.
  */
 
-struct ASN1_TEMPLATE_st {
+struct ASN1_TEMPLATE_st
+{
     unsigned long flags;        /* Various flags */
     long tag;                   /* tag, not used if no tagging */
     unsigned long offset;       /* Offset of this field in structure */
@@ -458,7 +459,8 @@ struct ASN1_TEMPLATE_st {
 typedef struct ASN1_ADB_TABLE_st ASN1_ADB_TABLE;
 typedef struct ASN1_ADB_st ASN1_ADB;
 
-struct ASN1_ADB_st {
+struct ASN1_ADB_st
+{
     unsigned long flags;        /* Various flags */
     unsigned long offset;       /* Offset of selector field */
     STACK_OF(ASN1_ADB_TABLE) **app_items; /* Application defined items */
@@ -468,7 +470,8 @@ struct ASN1_ADB_st {
     const ASN1_TEMPLATE *null_tt; /* Type to use if selector is NULL */
 };
 
-struct ASN1_ADB_TABLE_st {
+struct ASN1_ADB_TABLE_st
+{
     long value;                 /* NID for an object or value for an int */
     const ASN1_TEMPLATE tt;     /* item for this value */
 };
@@ -560,7 +563,8 @@ struct ASN1_ADB_TABLE_st {
 
 /* This is the actual ASN1 item itself */
 
-struct ASN1_ITEM_st {
+struct ASN1_ITEM_st
+{
     char itype;                 /* The item type, primitive, SEQUENCE, CHOICE
                                  * or extern */
     long utype;                 /* underlying type */
@@ -638,7 +642,8 @@ struct ASN1_ITEM_st {
  * like CHOICE
  */
 
-struct ASN1_TLC_st {
+struct ASN1_TLC_st
+{
     char valid;                 /* Values below are valid */
     int ret;                    /* return value */
     long plen;                  /* length */
@@ -677,14 +682,16 @@ typedef int ASN1_primitive_print(BIO *out, ASN1_VALUE **pval,
                                  const ASN1_ITEM *it, int indent,
                                  const ASN1_PCTX *pctx);
 
-typedef struct ASN1_COMPAT_FUNCS_st {
+typedef struct ASN1_COMPAT_FUNCS_st
+{
     ASN1_new_func *asn1_new;
     ASN1_free_func *asn1_free;
     ASN1_d2i_func *asn1_d2i;
     ASN1_i2d_func *asn1_i2d;
 } ASN1_COMPAT_FUNCS;
 
-typedef struct ASN1_EXTERN_FUNCS_st {
+typedef struct ASN1_EXTERN_FUNCS_st
+{
     void *app_data;
     ASN1_ex_new_func *asn1_ex_new;
     ASN1_ex_free_func *asn1_ex_free;
@@ -694,7 +701,8 @@ typedef struct ASN1_EXTERN_FUNCS_st {
     ASN1_ex_print_func *asn1_ex_print;
 } ASN1_EXTERN_FUNCS;
 
-typedef struct ASN1_PRIMITIVE_FUNCS_st {
+typedef struct ASN1_PRIMITIVE_FUNCS_st
+{
     void *app_data;
     unsigned long flags;
     ASN1_ex_new_func *prim_new;
@@ -721,7 +729,8 @@ typedef struct ASN1_PRIMITIVE_FUNCS_st {
 typedef int ASN1_aux_cb(int operation, ASN1_VALUE **in, const ASN1_ITEM *it,
                         void *exarg);
 
-typedef struct ASN1_AUX_st {
+typedef struct ASN1_AUX_st
+{
     void *app_data;
     int flags;
     int ref_offset;             /* Offset of reference value */
@@ -731,14 +740,16 @@ typedef struct ASN1_AUX_st {
 } ASN1_AUX;
 
 /* For print related callbacks exarg points to this structure */
-typedef struct ASN1_PRINT_ARG_st {
+typedef struct ASN1_PRINT_ARG_st
+{
     BIO *out;
     int indent;
     const ASN1_PCTX *pctx;
 } ASN1_PRINT_ARG;
 
 /* For streaming related callbacks exarg points to this structure */
-typedef struct ASN1_STREAM_ARG_st {
+typedef struct ASN1_STREAM_ARG_st
+{
     /* BIO to stream through */
     BIO *out;
     /* BIO with filters appended */

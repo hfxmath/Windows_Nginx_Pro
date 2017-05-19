@@ -137,7 +137,8 @@ typedef char *(*DSO_NAME_CONVERTER_FUNC)(DSO *, const char *);
  */
 typedef char *(*DSO_MERGER_FUNC)(DSO *, const char *, const char *);
 
-typedef struct dso_meth_st {
+typedef struct dso_meth_st
+{
     const char *name;
     /*
      * Loads a shared library, NB: new DSO_METHODs must ensure that a
@@ -157,7 +158,7 @@ typedef struct dso_meth_st {
      * libraries at all, let alone a DSO_METHOD implemented for them.
      */
     DSO_FUNC_TYPE (*dso_bind_func) (DSO *dso, const char *symname);
-/* I don't think this would actually be used in any circumstances. */
+    /* I don't think this would actually be used in any circumstances. */
 # if 0
     /* Unbinds a variable */
     int (*dso_unbind_var) (DSO *dso, char *symname, void *symptr);
@@ -191,7 +192,8 @@ typedef struct dso_meth_st {
 /**********************************************************************/
 /* The low-level handle type used to refer to a loaded shared library */
 
-struct dso_st {
+struct dso_st
+{
     DSO_METHOD *meth;
     /*
      * Standard dlopen uses a (void *). Win32 uses a HANDLE. VMS doesn't use

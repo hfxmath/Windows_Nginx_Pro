@@ -27,17 +27,23 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
     HANDLE          events[2];
     char            file[MAX_PATH + 1];
 
-    if (respawn >= 0) {
+    if (respawn >= 0)
+    {
         s = respawn;
 
-    } else {
-        for (s = 0; s < ngx_last_process; s++) {
-            if (ngx_processes[s].handle == NULL) {
+    }
+    else
+    {
+        for (s = 0; s < ngx_last_process; s++)
+        {
+            if (ngx_processes[s].handle == NULL)
+            {
                 break;
             }
         }
 
-        if (s == NGX_MAX_PROCESSES) {
+        if (s == NGX_MAX_PROCESSES)
+        {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
                           "no more than %d processes can be spawned",
                           NGX_MAX_PROCESSES);
@@ -47,7 +53,8 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
 
     n = GetModuleFileName(NULL, file, MAX_PATH);
 
-    if (n == 0) {
+    if (n == 0)
+    {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "GetModuleFileName() failed");
         return NGX_INVALID_PID;
@@ -66,7 +73,8 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
 
     pid = ngx_execute(cycle, &ctx);
 
-    if (pid == NGX_INVALID_PID) {
+    if (pid == NGX_INVALID_PID)
+    {
         return pid;
     }
 
@@ -91,13 +99,15 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
     ngx_log_debug1(NGX_LOG_DEBUG_CORE, cycle->log, 0,
                    "WaitForMultipleObjects: %ul", rc);
 
-    switch (rc) {
+    switch (rc)
+    {
 
     case WAIT_OBJECT_0:
 
         ngx_processes[s].term = OpenEvent(EVENT_MODIFY_STATE, 0,
                                           (char *) ngx_processes[s].term_event);
-        if (ngx_processes[s].term == NULL) {
+        if (ngx_processes[s].term == NULL)
+        {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "OpenEvent(\"%s\") failed",
                           ngx_processes[s].term_event);
@@ -106,7 +116,8 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
 
         ngx_processes[s].quit = OpenEvent(EVENT_MODIFY_STATE, 0,
                                           (char *) ngx_processes[s].quit_event);
-        if (ngx_processes[s].quit == NULL) {
+        if (ngx_processes[s].quit == NULL)
+        {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "OpenEvent(\"%s\") failed",
                           ngx_processes[s].quit_event);
@@ -114,15 +125,17 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
         }
 
         ngx_processes[s].reopen = OpenEvent(EVENT_MODIFY_STATE, 0,
-                                       (char *) ngx_processes[s].reopen_event);
-        if (ngx_processes[s].reopen == NULL) {
+                                            (char *) ngx_processes[s].reopen_event);
+        if (ngx_processes[s].reopen == NULL)
+        {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "OpenEvent(\"%s\") failed",
                           ngx_processes[s].reopen_event);
             goto failed;
         }
 
-        if (ResetEvent(ngx_master_process_event) == 0) {
+        if (ResetEvent(ngx_master_process_event) == 0)
+        {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, 0,
                           "ResetEvent(\"%s\") failed",
                           ngx_master_process_event_name);
@@ -132,7 +145,8 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
         break;
 
     case WAIT_OBJECT_0 + 1:
-        if (GetExitCodeProcess(ctx.child, &code) == 0) {
+        if (GetExitCodeProcess(ctx.child, &code) == 0)
+        {
             ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                           "GetExitCodeProcess(%P) failed", pid);
         }
@@ -157,11 +171,13 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
         goto failed;
     }
 
-    if (respawn >= 0) {
+    if (respawn >= 0)
+    {
         return pid;
     }
 
-    switch (respawn) {
+    switch (respawn)
+    {
 
     case NGX_PROCESS_RESPAWN:
         ngx_processes[s].just_spawn = 0;
@@ -172,7 +188,8 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
         break;
     }
 
-    if (s == ngx_last_process) {
+    if (s == ngx_last_process)
+    {
         ngx_last_process++;
     }
 
@@ -180,21 +197,25 @@ ngx_spawn_process(ngx_cycle_t *cycle, char *name, ngx_int_t respawn)
 
 failed:
 
-    if (ngx_processes[s].reopen) {
+    if (ngx_processes[s].reopen)
+    {
         ngx_close_handle(ngx_processes[s].reopen);
     }
 
-    if (ngx_processes[s].quit) {
+    if (ngx_processes[s].quit)
+    {
         ngx_close_handle(ngx_processes[s].quit);
     }
 
-    if (ngx_processes[s].term) {
+    if (ngx_processes[s].term)
+    {
         ngx_close_handle(ngx_processes[s].term);
     }
 
     TerminateProcess(ngx_processes[s].handle, 2);
 
-    if (ngx_processes[s].handle) {
+    if (ngx_processes[s].handle)
+    {
         ngx_close_handle(ngx_processes[s].handle);
         ngx_processes[s].handle = NULL;
     }
@@ -216,7 +237,7 @@ ngx_execute(ngx_cycle_t *cycle, ngx_exec_ctx_t *ctx)
 
     if (CreateProcess(ctx->path, ctx->args,
                       NULL, NULL, 0, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)
-        == 0)
+            == 0)
     {
         ngx_log_error(NGX_LOG_CRIT, cycle->log, ngx_errno,
                       "CreateProcess(\"%s\") failed", ngx_argv[0]);
@@ -226,7 +247,8 @@ ngx_execute(ngx_cycle_t *cycle, ngx_exec_ctx_t *ctx)
 
     ctx->child = pi.hProcess;
 
-    if (CloseHandle(pi.hThread) == 0) {
+    if (CloseHandle(pi.hThread) == 0)
+    {
         ngx_log_error(NGX_LOG_ALERT, cycle->log, ngx_errno,
                       "CloseHandle(pi.hThread) failed");
     }

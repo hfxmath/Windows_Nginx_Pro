@@ -30,13 +30,15 @@
 #define NGX_HTTP_SSI_ENTITY_ENCODING  2
 
 
-typedef struct {
+typedef struct
+{
     ngx_hash_t                hash;
     ngx_hash_keys_arrays_t    commands;
 } ngx_http_ssi_main_conf_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_buf_t                *buf;
 
     u_char                   *pos;
@@ -71,11 +73,11 @@ typedef struct {
     u_char                   *captures_data;
 #endif
 
-    unsigned                  conditional:2;
-    unsigned                  encoding:2;
-    unsigned                  block:1;
-    unsigned                  output:1;
-    unsigned                  output_chosen:1;
+    unsigned                  conditional: 2;
+    unsigned                  encoding: 2;
+    unsigned                  block: 1;
+    unsigned                  output: 1;
+    unsigned                  output_chosen: 1;
 
     ngx_http_request_t       *wait;
     void                     *value_buf;
@@ -85,26 +87,28 @@ typedef struct {
 
 
 typedef ngx_int_t (*ngx_http_ssi_command_pt) (ngx_http_request_t *r,
-    ngx_http_ssi_ctx_t *ctx, ngx_str_t **);
+        ngx_http_ssi_ctx_t *ctx, ngx_str_t **);
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                 name;
     ngx_uint_t                index;
 
-    unsigned                  mandatory:1;
-    unsigned                  multiple:1;
+    unsigned                  mandatory: 1;
+    unsigned                  multiple: 1;
 } ngx_http_ssi_param_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                 name;
     ngx_http_ssi_command_pt   handler;
     ngx_http_ssi_param_t     *params;
 
-    unsigned                  conditional:2;
-    unsigned                  block:1;
-    unsigned                  flush:1;
+    unsigned                  conditional: 2;
+    unsigned                  block: 1;
+    unsigned                  flush: 1;
 } ngx_http_ssi_command_t;
 
 

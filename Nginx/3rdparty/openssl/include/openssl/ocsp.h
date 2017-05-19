@@ -99,7 +99,8 @@ extern "C" {
  *       issuerKeyHash      OCTET STRING, -- Hash of Issuers public key (excluding the tag & length fields)
  *       serialNumber       CertificateSerialNumber }
  */
-typedef struct ocsp_cert_id_st {
+typedef struct ocsp_cert_id_st
+{
     X509_ALGOR *hashAlgorithm;
     ASN1_OCTET_STRING *issuerNameHash;
     ASN1_OCTET_STRING *issuerKeyHash;
@@ -112,7 +113,8 @@ DECLARE_STACK_OF(OCSP_CERTID)
  *       reqCert                    CertID,
  *       singleRequestExtensions    [0] EXPLICIT Extensions OPTIONAL }
  */
-typedef struct ocsp_one_request_st {
+typedef struct ocsp_one_request_st
+{
     OCSP_CERTID *reqCert;
     STACK_OF(X509_EXTENSION) *singleRequestExtensions;
 } OCSP_ONEREQ;
@@ -126,7 +128,8 @@ DECLARE_ASN1_SET_OF(OCSP_ONEREQ)
  *       requestList             SEQUENCE OF Request,
  *       requestExtensions   [2] EXPLICIT Extensions OPTIONAL }
  */
-typedef struct ocsp_req_info_st {
+typedef struct ocsp_req_info_st
+{
     ASN1_INTEGER *version;
     GENERAL_NAME *requestorName;
     STACK_OF(OCSP_ONEREQ) *requestList;
@@ -138,7 +141,8 @@ typedef struct ocsp_req_info_st {
  *       signature            BIT STRING,
  *       certs                [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
  */
-typedef struct ocsp_signature_st {
+typedef struct ocsp_signature_st
+{
     X509_ALGOR *signatureAlgorithm;
     ASN1_BIT_STRING *signature;
     STACK_OF(X509) *certs;
@@ -148,7 +152,8 @@ typedef struct ocsp_signature_st {
  *       tbsRequest                  TBSRequest,
  *       optionalSignature   [0]     EXPLICIT Signature OPTIONAL }
  */
-typedef struct ocsp_request_st {
+typedef struct ocsp_request_st
+{
     OCSP_REQINFO *tbsRequest;
     OCSP_SIGNATURE *optionalSignature; /* OPTIONAL */
 } OCSP_REQUEST;
@@ -174,7 +179,8 @@ typedef struct ocsp_request_st {
  *       responseType   OBJECT IDENTIFIER,
  *       response       OCTET STRING }
  */
-typedef struct ocsp_resp_bytes_st {
+typedef struct ocsp_resp_bytes_st
+{
     ASN1_OBJECT *responseType;
     ASN1_OCTET_STRING *response;
 } OCSP_RESPBYTES;
@@ -183,7 +189,8 @@ typedef struct ocsp_resp_bytes_st {
  *      responseStatus         OCSPResponseStatus,
  *      responseBytes          [0] EXPLICIT ResponseBytes OPTIONAL }
  */
-struct ocsp_response_st {
+struct ocsp_response_st
+{
     ASN1_ENUMERATED *responseStatus;
     OCSP_RESPBYTES *responseBytes;
 };
@@ -194,9 +201,11 @@ struct ocsp_response_st {
  */
 # define V_OCSP_RESPID_NAME 0
 # define V_OCSP_RESPID_KEY  1
-struct ocsp_responder_id_st {
+struct ocsp_responder_id_st
+{
     int type;
-    union {
+    union
+    {
         X509_NAME *byName;
         ASN1_OCTET_STRING *byKey;
     } value;
@@ -213,7 +222,8 @@ DECLARE_ASN1_FUNCTIONS(OCSP_RESPID)
  *       revocationTime              GeneralizedTime,
  *       revocationReason    [0]     EXPLICIT CRLReason OPTIONAL }
  */
-typedef struct ocsp_revoked_info_st {
+typedef struct ocsp_revoked_info_st
+{
     ASN1_GENERALIZEDTIME *revocationTime;
     ASN1_ENUMERATED *revocationReason;
 } OCSP_REVOKEDINFO;
@@ -226,9 +236,11 @@ typedef struct ocsp_revoked_info_st {
 # define V_OCSP_CERTSTATUS_GOOD    0
 # define V_OCSP_CERTSTATUS_REVOKED 1
 # define V_OCSP_CERTSTATUS_UNKNOWN 2
-typedef struct ocsp_cert_status_st {
+typedef struct ocsp_cert_status_st
+{
     int type;
-    union {
+    union
+    {
         ASN1_NULL *good;
         OCSP_REVOKEDINFO *revoked;
         ASN1_NULL *unknown;
@@ -242,7 +254,8 @@ typedef struct ocsp_cert_status_st {
  *      nextUpdate           [0]     EXPLICIT GeneralizedTime OPTIONAL,
  *      singleExtensions     [1]     EXPLICIT Extensions OPTIONAL }
  */
-typedef struct ocsp_single_response_st {
+typedef struct ocsp_single_response_st
+{
     OCSP_CERTID *certId;
     OCSP_CERTSTATUS *certStatus;
     ASN1_GENERALIZEDTIME *thisUpdate;
@@ -260,7 +273,8 @@ DECLARE_ASN1_SET_OF(OCSP_SINGLERESP)
  *      responses                SEQUENCE OF SingleResponse,
  *      responseExtensions   [1] EXPLICIT Extensions OPTIONAL }
  */
-typedef struct ocsp_response_data_st {
+typedef struct ocsp_response_data_st
+{
     ASN1_INTEGER *version;
     OCSP_RESPID *responderId;
     ASN1_GENERALIZEDTIME *producedAt;
@@ -274,27 +288,28 @@ typedef struct ocsp_response_data_st {
  *      signature            BIT STRING,
  *      certs                [0] EXPLICIT SEQUENCE OF Certificate OPTIONAL }
  */
-  /*
-   * Note 1: The value for "signature" is specified in the OCSP rfc2560 as
-   * follows: "The value for the signature SHALL be computed on the hash of
-   * the DER encoding ResponseData." This means that you must hash the
-   * DER-encoded tbsResponseData, and then run it through a crypto-signing
-   * function, which will (at least w/RSA) do a hash-'n'-private-encrypt
-   * operation.  This seems a bit odd, but that's the spec.  Also note that
-   * the data structures do not leave anywhere to independently specify the
-   * algorithm used for the initial hash. So, we look at the
-   * signature-specification algorithm, and try to do something intelligent.
-   * -- Kathy Weinhold, CertCo
-   */
-  /*
-   * Note 2: It seems that the mentioned passage from RFC 2560 (section
-   * 4.2.1) is open for interpretation.  I've done tests against another
-   * responder, and found that it doesn't do the double hashing that the RFC
-   * seems to say one should.  Therefore, all relevant functions take a flag
-   * saying which variant should be used.  -- Richard Levitte, OpenSSL team
-   * and CeloCom
-   */
-typedef struct ocsp_basic_response_st {
+/*
+ * Note 1: The value for "signature" is specified in the OCSP rfc2560 as
+ * follows: "The value for the signature SHALL be computed on the hash of
+ * the DER encoding ResponseData." This means that you must hash the
+ * DER-encoded tbsResponseData, and then run it through a crypto-signing
+ * function, which will (at least w/RSA) do a hash-'n'-private-encrypt
+ * operation.  This seems a bit odd, but that's the spec.  Also note that
+ * the data structures do not leave anywhere to independently specify the
+ * algorithm used for the initial hash. So, we look at the
+ * signature-specification algorithm, and try to do something intelligent.
+ * -- Kathy Weinhold, CertCo
+ */
+/*
+ * Note 2: It seems that the mentioned passage from RFC 2560 (section
+ * 4.2.1) is open for interpretation.  I've done tests against another
+ * responder, and found that it doesn't do the double hashing that the RFC
+ * seems to say one should.  Therefore, all relevant functions take a flag
+ * saying which variant should be used.  -- Richard Levitte, OpenSSL team
+ * and CeloCom
+ */
+typedef struct ocsp_basic_response_st
+{
     OCSP_RESPDATA *tbsResponseData;
     X509_ALGOR *signatureAlgorithm;
     ASN1_BIT_STRING *signature;
@@ -328,7 +343,8 @@ typedef struct ocsp_basic_response_st {
  *     crlNum               [1]     EXPLICIT INTEGER OPTIONAL,
  *     crlTime              [2]     EXPLICIT GeneralizedTime OPTIONAL }
  */
-typedef struct ocsp_crl_id_st {
+typedef struct ocsp_crl_id_st
+{
     ASN1_IA5STRING *crlUrl;
     ASN1_INTEGER *crlNum;
     ASN1_GENERALIZEDTIME *crlTime;
@@ -339,7 +355,8 @@ typedef struct ocsp_crl_id_st {
  *      issuer    Name,
  *      locator   AuthorityInfoAccessSyntax OPTIONAL }
  */
-typedef struct ocsp_service_locator_st {
+typedef struct ocsp_service_locator_st
+{
     X509_NAME *issuer;
     STACK_OF(ACCESS_DESCRIPTION) *locator;
 } OCSP_SERVICELOC;

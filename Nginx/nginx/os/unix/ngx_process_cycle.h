@@ -27,7 +27,8 @@
 #define NGX_PROCESS_HELPER     4
 
 
-typedef struct {
+typedef struct
+{
     ngx_event_handler_pt       handler;
     char                      *name;
     ngx_msec_t                 delay;

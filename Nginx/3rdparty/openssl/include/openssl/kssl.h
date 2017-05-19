@@ -129,7 +129,8 @@ typedef unsigned char krb5_octet;
 #  endif
 
 #  define KSSL_ERR_MAX    255
-typedef struct kssl_err_st {
+typedef struct kssl_err_st
+{
     int reason;
     char text[KSSL_ERR_MAX + 1];
 } KSSL_ERR;
@@ -138,7 +139,8 @@ typedef struct kssl_err_st {
  *              (1) Kerberos session key to SSL, and
  *              (2)     Config data between application and SSL lib
  */
-typedef struct kssl_ctx_st {
+typedef struct kssl_ctx_st
+{
     /*      used by:    disposition:            */
     char *service_name;         /* C,S default ok (kssl) */
     char *service_host;         /* C input, REQUIRED */

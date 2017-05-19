@@ -53,28 +53,30 @@ typedef struct ngx_http_v2_out_frame_s    ngx_http_v2_out_frame_t;
 
 
 typedef u_char *(*ngx_http_v2_handler_pt) (ngx_http_v2_connection_t *h2c,
-    u_char *pos, u_char *end);
+        u_char *pos, u_char *end);
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t                        name;
     ngx_str_t                        value;
 } ngx_http_v2_header_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_uint_t                       sid;
     size_t                           length;
     size_t                           padding;
-    unsigned                         flags:8;
+    unsigned                         flags: 8;
 
-    unsigned                         incomplete:1;
-    unsigned                         keep_pool:1;
+    unsigned                         incomplete: 1;
+    unsigned                         keep_pool: 1;
 
     /* HPACK */
-    unsigned                         parse_name:1;
-    unsigned                         parse_value:1;
-    unsigned                         index:1;
+    unsigned                         parse_name: 1;
+    unsigned                         parse_value: 1;
+    unsigned                         index: 1;
     ngx_http_v2_header_t             header;
     size_t                           header_limit;
     u_char                           field_state;
@@ -92,7 +94,8 @@ typedef struct {
 
 
 
-typedef struct {
+typedef struct
+{
     ngx_http_v2_header_t           **entries;
 
     ngx_uint_t                       added;
@@ -107,7 +110,8 @@ typedef struct {
 } ngx_http_v2_hpack_t;
 
 
-struct ngx_http_v2_connection_s {
+struct ngx_http_v2_connection_s
+{
     ngx_connection_t                *connection;
     ngx_http_connection_t           *http_connection;
 
@@ -140,13 +144,14 @@ struct ngx_http_v2_connection_s {
 
     ngx_uint_t                       last_sid;
 
-    unsigned                         closed_nodes:8;
-    unsigned                         settings_ack:1;
-    unsigned                         blocked:1;
+    unsigned                         closed_nodes: 8;
+    unsigned                         settings_ack: 1;
+    unsigned                         blocked: 1;
 };
 
 
-struct ngx_http_v2_node_s {
+struct ngx_http_v2_node_s
+{
     ngx_uint_t                       id;
     ngx_http_v2_node_t              *index;
     ngx_http_v2_node_t              *parent;
@@ -160,7 +165,8 @@ struct ngx_http_v2_node_s {
 };
 
 
-struct ngx_http_v2_stream_s {
+struct ngx_http_v2_stream_s
+{
     ngx_http_request_t              *request;
     ngx_http_v2_connection_t        *connection;
     ngx_http_v2_node_t              *node;
@@ -186,48 +192,51 @@ struct ngx_http_v2_stream_s {
 
     ngx_pool_t                      *pool;
 
-    unsigned                         handled:1;
-    unsigned                         blocked:1;
-    unsigned                         exhausted:1;
-    unsigned                         in_closed:1;
-    unsigned                         out_closed:1;
-    unsigned                         rst_sent:1;
-    unsigned                         no_flow_control:1;
-    unsigned                         skip_data:1;
+    unsigned                         handled: 1;
+    unsigned                         blocked: 1;
+    unsigned                         exhausted: 1;
+    unsigned                         in_closed: 1;
+    unsigned                         out_closed: 1;
+    unsigned                         rst_sent: 1;
+    unsigned                         no_flow_control: 1;
+    unsigned                         skip_data: 1;
 };
 
 
-struct ngx_http_v2_out_frame_s {
+struct ngx_http_v2_out_frame_s
+{
     ngx_http_v2_out_frame_t         *next;
     ngx_chain_t                     *first;
     ngx_chain_t                     *last;
     ngx_int_t                      (*handler)(ngx_http_v2_connection_t *h2c,
-                                        ngx_http_v2_out_frame_t *frame);
+            ngx_http_v2_out_frame_t *frame);
 
     ngx_http_v2_stream_t            *stream;
     size_t                           length;
 
-    unsigned                         blocked:1;
-    unsigned                         fin:1;
+    unsigned                         blocked: 1;
+    unsigned                         fin: 1;
 };
 
 
 static ngx_inline void
 ngx_http_v2_queue_frame(ngx_http_v2_connection_t *h2c,
-    ngx_http_v2_out_frame_t *frame)
+                        ngx_http_v2_out_frame_t *frame)
 {
     ngx_http_v2_out_frame_t  **out;
 
-    for (out = &h2c->last_out; *out; out = &(*out)->next) {
+    for (out = &h2c->last_out; *out; out = &(*out)->next)
+    {
 
-        if ((*out)->blocked || (*out)->stream == NULL) {
+        if ((*out)->blocked || (*out)->stream == NULL)
+        {
             break;
         }
 
         if ((*out)->stream->node->rank < frame->stream->node->rank
-            || ((*out)->stream->node->rank == frame->stream->node->rank
-                && (*out)->stream->node->rel_weight
-                   >= frame->stream->node->rel_weight))
+                || ((*out)->stream->node->rank == frame->stream->node->rank
+                    && (*out)->stream->node->rel_weight
+                    >= frame->stream->node->rel_weight))
         {
             break;
         }
@@ -240,13 +249,14 @@ ngx_http_v2_queue_frame(ngx_http_v2_connection_t *h2c,
 
 static ngx_inline void
 ngx_http_v2_queue_blocked_frame(ngx_http_v2_connection_t *h2c,
-    ngx_http_v2_out_frame_t *frame)
+                                ngx_http_v2_out_frame_t *frame)
 {
     ngx_http_v2_out_frame_t  **out;
 
     for (out = &h2c->last_out; *out; out = &(*out)->next)
     {
-        if ((*out)->blocked || (*out)->stream == NULL) {
+        if ((*out)->blocked || (*out)->stream == NULL)
+        {
             break;
         }
     }
@@ -260,7 +270,7 @@ void ngx_http_v2_init(ngx_event_t *rev);
 void ngx_http_v2_request_headers_init(void);
 
 ngx_int_t ngx_http_v2_read_request_body(ngx_http_request_t *r,
-    ngx_http_client_body_handler_pt post_handler);
+                                        ngx_http_client_body_handler_pt post_handler);
 ngx_int_t ngx_http_v2_read_unbuffered_request_body(ngx_http_request_t *r);
 
 void ngx_http_v2_close_stream(ngx_http_v2_stream_t *stream, ngx_int_t rc);
@@ -269,16 +279,16 @@ ngx_int_t ngx_http_v2_send_output_queue(ngx_http_v2_connection_t *h2c);
 
 
 ngx_int_t ngx_http_v2_get_indexed_header(ngx_http_v2_connection_t *h2c,
-    ngx_uint_t index, ngx_uint_t name_only);
+        ngx_uint_t index, ngx_uint_t name_only);
 ngx_int_t ngx_http_v2_add_header(ngx_http_v2_connection_t *h2c,
-    ngx_http_v2_header_t *header);
+                                 ngx_http_v2_header_t *header);
 ngx_int_t ngx_http_v2_table_size(ngx_http_v2_connection_t *h2c, size_t size);
 
 
 ngx_int_t ngx_http_v2_huff_decode(u_char *state, u_char *src, size_t len,
-    u_char **dst, ngx_uint_t last, ngx_log_t *log);
+                                  u_char **dst, ngx_uint_t last, ngx_log_t *log);
 size_t ngx_http_v2_huff_encode(u_char *src, size_t len, u_char *dst,
-    ngx_uint_t lower);
+                               ngx_uint_t lower);
 
 
 #define ngx_http_v2_prefix(bits)  ((1 << (bits)) - 1)

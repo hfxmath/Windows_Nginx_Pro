@@ -19,7 +19,8 @@ ngx_parse_size(ngx_str_t *line)
     len = line->len;
     unit = line->data[len - 1];
 
-    switch (unit) {
+    switch (unit)
+    {
     case 'K':
     case 'k':
         len--;
@@ -40,7 +41,8 @@ ngx_parse_size(ngx_str_t *line)
     }
 
     size = ngx_atosz(line->data, len);
-    if (size == NGX_ERROR || size > max) {
+    if (size == NGX_ERROR || size > max)
+    {
         return NGX_ERROR;
     }
 
@@ -60,7 +62,8 @@ ngx_parse_offset(ngx_str_t *line)
     len = line->len;
     unit = line->data[len - 1];
 
-    switch (unit) {
+    switch (unit)
+    {
     case 'K':
     case 'k':
         len--;
@@ -88,7 +91,8 @@ ngx_parse_offset(ngx_str_t *line)
     }
 
     offset = ngx_atoof(line->data, len);
-    if (offset == NGX_ERROR || offset > max) {
+    if (offset == NGX_ERROR || offset > max)
+    {
         return NGX_ERROR;
     }
 
@@ -105,7 +109,8 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
     ngx_int_t    value, total, scale;
     ngx_int_t    max, cutoff, cutlim;
     ngx_uint_t   valid;
-    enum {
+    enum
+    {
         st_start = 0,
         st_year,
         st_month,
@@ -128,10 +133,13 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
     p = line->data;
     last = p + line->len;
 
-    while (p < last) {
+    while (p < last)
+    {
 
-        if (*p >= '0' && *p <= '9') {
-            if (value >= cutoff && (value > cutoff || *p - '0' > cutlim)) {
+        if (*p >= '0' && *p <= '9')
+        {
+            if (value >= cutoff && (value > cutoff || *p - '0' > cutlim))
+            {
                 return NGX_ERROR;
             }
 
@@ -140,10 +148,12 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
             continue;
         }
 
-        switch (*p++) {
+        switch (*p++)
+        {
 
         case 'y':
-            if (step > st_start) {
+            if (step > st_start)
+            {
                 return NGX_ERROR;
             }
             step = st_year;
@@ -152,7 +162,8 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
             break;
 
         case 'M':
-            if (step >= st_month) {
+            if (step >= st_month)
+            {
                 return NGX_ERROR;
             }
             step = st_month;
@@ -161,7 +172,8 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
             break;
 
         case 'w':
-            if (step >= st_week) {
+            if (step >= st_week)
+            {
                 return NGX_ERROR;
             }
             step = st_week;
@@ -170,7 +182,8 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
             break;
 
         case 'd':
-            if (step >= st_day) {
+            if (step >= st_day)
+            {
                 return NGX_ERROR;
             }
             step = st_day;
@@ -179,7 +192,8 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
             break;
 
         case 'h':
-            if (step >= st_hour) {
+            if (step >= st_hour)
+            {
                 return NGX_ERROR;
             }
             step = st_hour;
@@ -188,8 +202,10 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
             break;
 
         case 'm':
-            if (p < last && *p == 's') {
-                if (is_sec || step >= st_msec) {
+            if (p < last && *p == 's')
+            {
+                if (is_sec || step >= st_msec)
+                {
                     return NGX_ERROR;
                 }
                 p++;
@@ -199,7 +215,8 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
                 break;
             }
 
-            if (step >= st_min) {
+            if (step >= st_min)
+            {
                 return NGX_ERROR;
             }
             step = st_min;
@@ -208,7 +225,8 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
             break;
 
         case 's':
-            if (step >= st_sec) {
+            if (step >= st_sec)
+            {
                 return NGX_ERROR;
             }
             step = st_sec;
@@ -217,7 +235,8 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
             break;
 
         case ' ':
-            if (step >= st_sec) {
+            if (step >= st_sec)
+            {
                 return NGX_ERROR;
             }
             step = st_last;
@@ -229,18 +248,21 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
             return NGX_ERROR;
         }
 
-        if (step != st_msec && !is_sec) {
+        if (step != st_msec && !is_sec)
+        {
             scale *= 1000;
             max /= 1000;
         }
 
-        if (value > max) {
+        if (value > max)
+        {
             return NGX_ERROR;
         }
 
         value *= scale;
 
-        if (total > NGX_MAX_INT_T_VALUE - value) {
+        if (total > NGX_MAX_INT_T_VALUE - value)
+        {
             return NGX_ERROR;
         }
 
@@ -248,24 +270,29 @@ ngx_parse_time(ngx_str_t *line, ngx_uint_t is_sec)
 
         value = 0;
 
-        while (p < last && *p == ' ') {
+        while (p < last && *p == ' ')
+        {
             p++;
         }
     }
 
-    if (!valid) {
+    if (!valid)
+    {
         return NGX_ERROR;
     }
 
-    if (!is_sec) {
-        if (value > NGX_MAX_INT_T_VALUE / 1000) {
+    if (!is_sec)
+    {
+        if (value > NGX_MAX_INT_T_VALUE / 1000)
+        {
             return NGX_ERROR;
         }
 
         value *= 1000;
     }
 
-    if (total > NGX_MAX_INT_T_VALUE - value) {
+    if (total > NGX_MAX_INT_T_VALUE - value)
+    {
         return NGX_ERROR;
     }
 

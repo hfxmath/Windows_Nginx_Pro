@@ -13,50 +13,60 @@
 static void *ngx_stream_core_create_main_conf(ngx_conf_t *cf);
 static void *ngx_stream_core_create_srv_conf(ngx_conf_t *cf);
 static char *ngx_stream_core_merge_srv_conf(ngx_conf_t *cf, void *parent,
-    void *child);
+        void *child);
 static char *ngx_stream_core_error_log(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                       void *conf);
 static char *ngx_stream_core_server(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                    void *conf);
 static char *ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                    void *conf);
 
 
-static ngx_command_t  ngx_stream_core_commands[] = {
+static ngx_command_t  ngx_stream_core_commands[] =
+{
 
-    { ngx_string("server"),
-      NGX_STREAM_MAIN_CONF|NGX_CONF_BLOCK|NGX_CONF_NOARGS,
-      ngx_stream_core_server,
-      0,
-      0,
-      NULL },
+    {
+        ngx_string("server"),
+        NGX_STREAM_MAIN_CONF | NGX_CONF_BLOCK | NGX_CONF_NOARGS,
+        ngx_stream_core_server,
+        0,
+        0,
+        NULL
+    },
 
-    { ngx_string("listen"),
-      NGX_STREAM_SRV_CONF|NGX_CONF_1MORE,
-      ngx_stream_core_listen,
-      NGX_STREAM_SRV_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("listen"),
+        NGX_STREAM_SRV_CONF | NGX_CONF_1MORE,
+        ngx_stream_core_listen,
+        NGX_STREAM_SRV_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("error_log"),
-      NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF|NGX_CONF_1MORE,
-      ngx_stream_core_error_log,
-      NGX_STREAM_SRV_CONF_OFFSET,
-      0,
-      NULL },
+    {
+        ngx_string("error_log"),
+        NGX_STREAM_MAIN_CONF | NGX_STREAM_SRV_CONF | NGX_CONF_1MORE,
+        ngx_stream_core_error_log,
+        NGX_STREAM_SRV_CONF_OFFSET,
+        0,
+        NULL
+    },
 
-    { ngx_string("tcp_nodelay"),
-      NGX_STREAM_MAIN_CONF|NGX_STREAM_SRV_CONF|NGX_CONF_FLAG,
-      ngx_conf_set_flag_slot,
-      NGX_STREAM_SRV_CONF_OFFSET,
-      offsetof(ngx_stream_core_srv_conf_t, tcp_nodelay),
-      NULL },
+    {
+        ngx_string("tcp_nodelay"),
+        NGX_STREAM_MAIN_CONF | NGX_STREAM_SRV_CONF | NGX_CONF_FLAG,
+        ngx_conf_set_flag_slot,
+        NGX_STREAM_SRV_CONF_OFFSET,
+        offsetof(ngx_stream_core_srv_conf_t, tcp_nodelay),
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_stream_module_t  ngx_stream_core_module_ctx = {
+static ngx_stream_module_t  ngx_stream_core_module_ctx =
+{
     NULL,                                  /* postconfiguration */
 
     ngx_stream_core_create_main_conf,      /* create main configuration */
@@ -67,7 +77,8 @@ static ngx_stream_module_t  ngx_stream_core_module_ctx = {
 };
 
 
-ngx_module_t  ngx_stream_core_module = {
+ngx_module_t  ngx_stream_core_module =
+{
     NGX_MODULE_V1,
     &ngx_stream_core_module_ctx,           /* module context */
     ngx_stream_core_commands,              /* module directives */
@@ -89,19 +100,20 @@ ngx_stream_core_create_main_conf(ngx_conf_t *cf)
     ngx_stream_core_main_conf_t  *cmcf;
 
     cmcf = ngx_pcalloc(cf->pool, sizeof(ngx_stream_core_main_conf_t));
-    if (cmcf == NULL) {
+    if (cmcf == NULL)
+    {
         return NULL;
     }
 
     if (ngx_array_init(&cmcf->servers, cf->pool, 4,
                        sizeof(ngx_stream_core_srv_conf_t *))
-        != NGX_OK)
+            != NGX_OK)
     {
         return NULL;
     }
 
     if (ngx_array_init(&cmcf->listen, cf->pool, 4, sizeof(ngx_stream_listen_t))
-        != NGX_OK)
+            != NGX_OK)
     {
         return NULL;
     }
@@ -116,7 +128,8 @@ ngx_stream_core_create_srv_conf(ngx_conf_t *cf)
     ngx_stream_core_srv_conf_t  *cscf;
 
     cscf = ngx_pcalloc(cf->pool, sizeof(ngx_stream_core_srv_conf_t));
-    if (cscf == NULL) {
+    if (cscf == NULL)
+    {
         return NULL;
     }
 
@@ -141,17 +154,22 @@ ngx_stream_core_merge_srv_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_stream_core_srv_conf_t *prev = parent;
     ngx_stream_core_srv_conf_t *conf = child;
 
-    if (conf->handler == NULL) {
+    if (conf->handler == NULL)
+    {
         ngx_log_error(NGX_LOG_EMERG, cf->log, 0,
                       "no handler for server in %s:%ui",
                       conf->file_name, conf->line);
         return NGX_CONF_ERROR;
     }
 
-    if (conf->error_log == NULL) {
-        if (prev->error_log) {
+    if (conf->error_log == NULL)
+    {
+        if (prev->error_log)
+        {
             conf->error_log = prev->error_log;
-        } else {
+        }
+        else
+        {
             conf->error_log = &cf->cycle->new_log;
         }
     }
@@ -184,7 +202,8 @@ ngx_stream_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_stream_core_main_conf_t  *cmcf;
 
     ctx = ngx_pcalloc(cf->pool, sizeof(ngx_stream_conf_ctx_t));
-    if (ctx == NULL) {
+    if (ctx == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -195,20 +214,25 @@ ngx_stream_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     ctx->srv_conf = ngx_pcalloc(cf->pool,
                                 sizeof(void *) * ngx_stream_max_module);
-    if (ctx->srv_conf == NULL) {
+    if (ctx->srv_conf == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
-    for (m = 0; cf->cycle->modules[m]; m++) {
-        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE) {
+    for (m = 0; cf->cycle->modules[m]; m++)
+    {
+        if (cf->cycle->modules[m]->type != NGX_STREAM_MODULE)
+        {
             continue;
         }
 
         module = cf->cycle->modules[m]->ctx;
 
-        if (module->create_srv_conf) {
+        if (module->create_srv_conf)
+        {
             mconf = module->create_srv_conf(cf);
-            if (mconf == NULL) {
+            if (mconf == NULL)
+            {
                 return NGX_CONF_ERROR;
             }
 
@@ -224,7 +248,8 @@ ngx_stream_core_server(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     cmcf = ctx->main_conf[ngx_stream_core_module.ctx_index];
 
     cscfp = ngx_array_push(&cmcf->servers);
-    if (cscfp == NULL) {
+    if (cscfp == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -268,8 +293,10 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     u.url = value[1];
     u.listen = 1;
 
-    if (ngx_parse_url(cf->pool, &u) != NGX_OK) {
-        if (u.err) {
+    if (ngx_parse_url(cf->pool, &u) != NGX_OK)
+    {
+        if (u.err)
+        {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                                "%s in \"%V\" of the \"listen\" directive",
                                u.err, &u.url);
@@ -282,15 +309,18 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     ls = cmcf->listen.elts;
 
-    for (i = 0; i < cmcf->listen.nelts; i++) {
+    for (i = 0; i < cmcf->listen.nelts; i++)
+    {
 
         sa = &ls[i].u.sockaddr;
 
-        if (sa->sa_family != u.family) {
+        if (sa->sa_family != u.family)
+        {
             continue;
         }
 
-        switch (sa->sa_family) {
+        switch (sa->sa_family)
+        {
 
 #if (NGX_HAVE_INET6)
         case AF_INET6:
@@ -318,12 +348,13 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         }
 
         if (ngx_memcmp(ls[i].u.sockaddr_data + off, u.sockaddr + off, len)
-            != 0)
+                != 0)
         {
             continue;
         }
 
-        if (port != u.port) {
+        if (port != u.port)
+        {
             continue;
         }
 
@@ -333,7 +364,8 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
     ls = ngx_array_push(&cmcf->listen);
-    if (ls == NULL) {
+    if (ls == NULL)
+    {
         return NGX_CONF_ERROR;
     }
 
@@ -353,25 +385,30 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     backlog = 0;
 
-    for (i = 2; i < cf->args->nelts; i++) {
+    for (i = 2; i < cf->args->nelts; i++)
+    {
 
 #if !(NGX_WIN32)
-        if (ngx_strcmp(value[i].data, "udp") == 0) {
+        if (ngx_strcmp(value[i].data, "udp") == 0)
+        {
             ls->type = SOCK_DGRAM;
             continue;
         }
 #endif
 
-        if (ngx_strcmp(value[i].data, "bind") == 0) {
+        if (ngx_strcmp(value[i].data, "bind") == 0)
+        {
             ls->bind = 1;
             continue;
         }
 
-        if (ngx_strncmp(value[i].data, "backlog=", 8) == 0) {
+        if (ngx_strncmp(value[i].data, "backlog=", 8) == 0)
+        {
             ls->backlog = ngx_atoi(value[i].data + 8, value[i].len - 8);
             ls->bind = 1;
 
-            if (ls->backlog == NGX_ERROR || ls->backlog == 0) {
+            if (ls->backlog == NGX_ERROR || ls->backlog == 0)
+            {
                 ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                                    "invalid backlog \"%V\"", &value[i]);
                 return NGX_CONF_ERROR;
@@ -382,21 +419,28 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             continue;
         }
 
-        if (ngx_strncmp(value[i].data, "ipv6only=o", 10) == 0) {
+        if (ngx_strncmp(value[i].data, "ipv6only=o", 10) == 0)
+        {
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
             u_char  buf[NGX_SOCKADDR_STRLEN];
 
             sa = &ls->u.sockaddr;
 
-            if (sa->sa_family == AF_INET6) {
+            if (sa->sa_family == AF_INET6)
+            {
 
-                if (ngx_strcmp(&value[i].data[10], "n") == 0) {
+                if (ngx_strcmp(&value[i].data[10], "n") == 0)
+                {
                     ls->ipv6only = 1;
 
-                } else if (ngx_strcmp(&value[i].data[10], "ff") == 0) {
+                }
+                else if (ngx_strcmp(&value[i].data[10], "ff") == 0)
+                {
                     ls->ipv6only = 0;
 
-                } else {
+                }
+                else
+                {
                     ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                                        "invalid ipv6only flags \"%s\"",
                                        &value[i].data[9]);
@@ -405,7 +449,9 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
                 ls->bind = 1;
 
-            } else {
+            }
+            else
+            {
                 len = ngx_sock_ntop(sa, ls->socklen, buf,
                                     NGX_SOCKADDR_STRLEN, 1);
 
@@ -423,7 +469,8 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 #endif
         }
 
-        if (ngx_strcmp(value[i].data, "reuseport") == 0) {
+        if (ngx_strcmp(value[i].data, "reuseport") == 0)
+        {
 #if (NGX_HAVE_REUSEPORT)
             ls->reuseport = 1;
             ls->bind = 1;
@@ -435,7 +482,8 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             continue;
         }
 
-        if (ngx_strcmp(value[i].data, "ssl") == 0) {
+        if (ngx_strcmp(value[i].data, "ssl") == 0)
+        {
 #if (NGX_STREAM_SSL)
             ls->ssl = 1;
             continue;
@@ -447,15 +495,21 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 #endif
         }
 
-        if (ngx_strncmp(value[i].data, "so_keepalive=", 13) == 0) {
+        if (ngx_strncmp(value[i].data, "so_keepalive=", 13) == 0)
+        {
 
-            if (ngx_strcmp(&value[i].data[13], "on") == 0) {
+            if (ngx_strcmp(&value[i].data[13], "on") == 0)
+            {
                 ls->so_keepalive = 1;
 
-            } else if (ngx_strcmp(&value[i].data[13], "off") == 0) {
+            }
+            else if (ngx_strcmp(&value[i].data[13], "off") == 0)
+            {
                 ls->so_keepalive = 2;
 
-            } else {
+            }
+            else
+            {
 
 #if (NGX_HAVE_KEEPALIVE_TUNABLE)
                 u_char     *p, *end;
@@ -465,15 +519,18 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                 s.data = value[i].data + 13;
 
                 p = ngx_strlchr(s.data, end, ':');
-                if (p == NULL) {
+                if (p == NULL)
+                {
                     p = end;
                 }
 
-                if (p > s.data) {
+                if (p > s.data)
+                {
                     s.len = p - s.data;
 
                     ls->tcp_keepidle = ngx_parse_time(&s, 1);
-                    if (ls->tcp_keepidle == (time_t) NGX_ERROR) {
+                    if (ls->tcp_keepidle == (time_t) NGX_ERROR)
+                    {
                         goto invalid_so_keepalive;
                     }
                 }
@@ -481,32 +538,37 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
                 s.data = (p < end) ? (p + 1) : end;
 
                 p = ngx_strlchr(s.data, end, ':');
-                if (p == NULL) {
+                if (p == NULL)
+                {
                     p = end;
                 }
 
-                if (p > s.data) {
+                if (p > s.data)
+                {
                     s.len = p - s.data;
 
                     ls->tcp_keepintvl = ngx_parse_time(&s, 1);
-                    if (ls->tcp_keepintvl == (time_t) NGX_ERROR) {
+                    if (ls->tcp_keepintvl == (time_t) NGX_ERROR)
+                    {
                         goto invalid_so_keepalive;
                     }
                 }
 
                 s.data = (p < end) ? (p + 1) : end;
 
-                if (s.data < end) {
+                if (s.data < end)
+                {
                     s.len = end - s.data;
 
                     ls->tcp_keepcnt = ngx_atoi(s.data, s.len);
-                    if (ls->tcp_keepcnt == NGX_ERROR) {
+                    if (ls->tcp_keepcnt == NGX_ERROR)
+                    {
                         goto invalid_so_keepalive;
                     }
                 }
 
                 if (ls->tcp_keepidle == 0 && ls->tcp_keepintvl == 0
-                    && ls->tcp_keepcnt == 0)
+                        && ls->tcp_keepcnt == 0)
                 {
                     goto invalid_so_keepalive;
                 }
@@ -528,7 +590,7 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
             continue;
 
 #if (NGX_HAVE_KEEPALIVE_TUNABLE)
-        invalid_so_keepalive:
+invalid_so_keepalive:
 
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
                                "invalid so_keepalive value: \"%s\"",
@@ -542,18 +604,22 @@ ngx_stream_core_listen(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_ERROR;
     }
 
-    if (ls->type == SOCK_DGRAM) {
-        if (backlog) {
+    if (ls->type == SOCK_DGRAM)
+    {
+        if (backlog)
+        {
             return "\"backlog\" parameter is incompatible with \"udp\"";
         }
 
 #if (NGX_STREAM_SSL)
-        if (ls->ssl) {
+        if (ls->ssl)
+        {
             return "\"ssl\" parameter is incompatible with \"udp\"";
         }
 #endif
 
-        if (ls->so_keepalive) {
+        if (ls->so_keepalive)
+        {
             return "\"so_keepalive\" parameter is incompatible with \"udp\"";
         }
     }

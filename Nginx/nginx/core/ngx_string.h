@@ -13,25 +13,28 @@
 #include <ngx_core.h>
 
 
-typedef struct {
+typedef struct
+{
     size_t      len;
     u_char     *data;
 } ngx_str_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t   key;
     ngx_str_t   value;
 } ngx_keyval_t;
 
 
-typedef struct {
-    unsigned    len:28;
+typedef struct
+{
+    unsigned    len: 28;
 
-    unsigned    valid:1;
-    unsigned    no_cacheable:1;
-    unsigned    not_found:1;
-    unsigned    escape:1;
+    unsigned    valid: 1;
+    unsigned    no_cacheable: 1;
+    unsigned    not_found: 1;
+    unsigned    escape: 1;
 
     u_char     *data;
 } ngx_variable_value_t;
@@ -65,9 +68,11 @@ void ngx_strlow(u_char *dst, u_char *src, size_t n);
 static ngx_inline u_char *
 ngx_strlchr(u_char *p, u_char *last, u_char c)
 {
-    while (p < last) {
+    while (p < last)
+    {
 
-        if (*p == c) {
+        if (*p == c)
+        {
             return p;
         }
 
@@ -115,16 +120,20 @@ void *ngx_memcpy(void *dst, const void *src, size_t n);
 static ngx_inline u_char *
 ngx_copy(u_char *dst, u_char *src, size_t len)
 {
-    if (len < 17) {
+    if (len < 17)
+    {
 
-        while (len) {
+        while (len)
+        {
             *dst++ = *src++;
             len--;
         }
 
         return dst;
 
-    } else {
+    }
+    else
+    {
         return ngx_cpymem(dst, src, len);
     }
 }
@@ -146,10 +155,10 @@ ngx_copy(u_char *dst, u_char *src, size_t len)
 
 u_char *ngx_cpystrn(u_char *dst, u_char *src, size_t n);
 u_char *ngx_pstrdup(ngx_pool_t *pool, ngx_str_t *src);
-u_char * ngx_cdecl ngx_sprintf(u_char *buf, const char *fmt, ...);
-u_char * ngx_cdecl ngx_snprintf(u_char *buf, size_t max, const char *fmt, ...);
-u_char * ngx_cdecl ngx_slprintf(u_char *buf, u_char *last, const char *fmt,
-    ...);
+u_char *ngx_cdecl ngx_sprintf(u_char *buf, const char *fmt, ...);
+u_char *ngx_cdecl ngx_snprintf(u_char *buf, size_t max, const char *fmt, ...);
+u_char *ngx_cdecl ngx_slprintf(u_char *buf, u_char *last, const char *fmt,
+                               ...);
 u_char *ngx_vslprintf(u_char *buf, u_char *last, const char *fmt, va_list args);
 #define ngx_vsnprintf(buf, max, fmt, args)                                   \
     ngx_vslprintf(buf, buf + (max), fmt, args)
@@ -204,26 +213,27 @@ u_char *ngx_utf8_cpystrn(u_char *dst, u_char *src, size_t n, size_t len);
 #define NGX_UNESCAPE_REDIRECT  2
 
 uintptr_t ngx_escape_uri(u_char *dst, u_char *src, size_t size,
-    ngx_uint_t type);
+                         ngx_uint_t type);
 void ngx_unescape_uri(u_char **dst, u_char **src, size_t size, ngx_uint_t type);
 uintptr_t ngx_escape_html(u_char *dst, u_char *src, size_t size);
 uintptr_t ngx_escape_json(u_char *dst, u_char *src, size_t size);
 
 
-typedef struct {
+typedef struct
+{
     ngx_rbtree_node_t         node;
     ngx_str_t                 str;
 } ngx_str_node_t;
 
 
 void ngx_str_rbtree_insert_value(ngx_rbtree_node_t *temp,
-    ngx_rbtree_node_t *node, ngx_rbtree_node_t *sentinel);
+                                 ngx_rbtree_node_t *node, ngx_rbtree_node_t *sentinel);
 ngx_str_node_t *ngx_str_rbtree_lookup(ngx_rbtree_t *rbtree, ngx_str_t *name,
-    uint32_t hash);
+                                      uint32_t hash);
 
 
 void ngx_sort(void *base, size_t n, size_t size,
-    ngx_int_t (*cmp)(const void *, const void *));
+              ngx_int_t (*cmp)(const void *, const void *));
 #define ngx_qsort             qsort
 
 

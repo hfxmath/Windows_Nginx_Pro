@@ -18,14 +18,16 @@ ngx_proxy_protocol_read(ngx_connection_t *c, u_char *buf, u_char *last)
     p = buf;
     len = last - buf;
 
-    if (len < 8 || ngx_strncmp(p, "PROXY ", 6) != 0) {
+    if (len < 8 || ngx_strncmp(p, "PROXY ", 6) != 0)
+    {
         goto invalid;
     }
 
     p += 6;
     len -= 6;
 
-    if (len >= 7 && ngx_strncmp(p, "UNKNOWN", 7) == 0) {
+    if (len >= 7 && ngx_strncmp(p, "UNKNOWN", 7) == 0)
+    {
         ngx_log_debug0(NGX_LOG_DEBUG_CORE, c->log, 0,
                        "PROXY protocol unknown protocol");
         p += 7;
@@ -33,7 +35,7 @@ ngx_proxy_protocol_read(ngx_connection_t *c, u_char *buf, u_char *last)
     }
 
     if (len < 5 || ngx_strncmp(p, "TCP", 3) != 0
-        || (p[3] != '4' && p[3] != '6') || p[4] != ' ')
+            || (p[3] != '4' && p[3] != '6') || p[4] != ' ')
     {
         goto invalid;
     }
@@ -41,21 +43,24 @@ ngx_proxy_protocol_read(ngx_connection_t *c, u_char *buf, u_char *last)
     p += 5;
     addr = p;
 
-    for ( ;; ) {
-        if (p == last) {
+    for ( ;; )
+    {
+        if (p == last)
+        {
             goto invalid;
         }
 
         ch = *p++;
 
-        if (ch == ' ') {
+        if (ch == ' ')
+        {
             break;
         }
 
         if (ch != ':' && ch != '.'
-            && (ch < 'a' || ch > 'f')
-            && (ch < 'A' || ch > 'F')
-            && (ch < '0' || ch > '9'))
+                && (ch < 'a' || ch > 'f')
+                && (ch < 'A' || ch > 'F')
+                && (ch < '0' || ch > '9'))
         {
             goto invalid;
         }
@@ -64,7 +69,8 @@ ngx_proxy_protocol_read(ngx_connection_t *c, u_char *buf, u_char *last)
     len = p - addr - 1;
     c->proxy_protocol_addr.data = ngx_pnalloc(c->pool, len);
 
-    if (c->proxy_protocol_addr.data == NULL) {
+    if (c->proxy_protocol_addr.data == NULL)
+    {
         return NULL;
     }
 
@@ -76,8 +82,10 @@ ngx_proxy_protocol_read(ngx_connection_t *c, u_char *buf, u_char *last)
 
 skip:
 
-    for ( /* void */ ; p < last - 1; p++) {
-        if (p[0] == CR && p[1] == LF) {
+    for ( /* void */ ; p < last - 1; p++)
+    {
+        if (p[0] == CR && p[1] == LF)
+        {
             return p + 2;
         }
     }
@@ -96,15 +104,18 @@ ngx_proxy_protocol_write(ngx_connection_t *c, u_char *buf, u_char *last)
 {
     ngx_uint_t  port, lport;
 
-    if (last - buf < NGX_PROXY_PROTOCOL_MAX_HEADER) {
+    if (last - buf < NGX_PROXY_PROTOCOL_MAX_HEADER)
+    {
         return NULL;
     }
 
-    if (ngx_connection_local_sockaddr(c, NULL, 0) != NGX_OK) {
+    if (ngx_connection_local_sockaddr(c, NULL, 0) != NGX_OK)
+    {
         return NULL;
     }
 
-    switch (c->sockaddr->sa_family) {
+    switch (c->sockaddr->sa_family)
+    {
 
     case AF_INET:
         buf = ngx_cpymem(buf, "PROXY TCP4 ", sizeof("PROXY TCP4 ") - 1);

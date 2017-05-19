@@ -20,7 +20,8 @@ ngx_uint_t  ngx_tcp_nodelay_and_tcp_nopush;
 char        ngx_unique[NGX_INT32_LEN + 1];
 
 
-ngx_os_io_t ngx_os_io = {
+ngx_os_io_t ngx_os_io =
+{
     ngx_wsarecv,
     ngx_wsarecv_chain,
     ngx_udp_wsarecv,
@@ -30,7 +31,8 @@ ngx_os_io_t ngx_os_io = {
 };
 
 
-typedef struct {
+typedef struct
+{
     WORD  wServicePackMinor;
     WORD  wSuiteMask;
     BYTE  wProductType;
@@ -77,9 +79,11 @@ ngx_os_init(ngx_log_t *log)
 
     osviex = GetVersionEx((OSVERSIONINFO *) &osvi);
 
-    if (osviex == 0) {
+    if (osviex == 0)
+    {
         osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-        if (GetVersionEx((OSVERSIONINFO *) &osvi) == 0) {
+        if (GetVersionEx((OSVERSIONINFO *) &osvi) == 0)
+        {
             ngx_log_error(NGX_LOG_EMERG, log, ngx_errno,
                           "GetVersionEx() failed");
             return NGX_ERROR;
@@ -111,7 +115,8 @@ ngx_os_init(ngx_log_t *log)
                         + osvi.dwMajorVersion * 10000
                         + osvi.dwMinorVersion * 100;
 
-    if (osviex) {
+    if (osviex)
+    {
         ngx_win32_version += osvi.wServicePackMajor * 10
                              + osvi.wServicePackMinor;
     }
@@ -122,7 +127,10 @@ ngx_os_init(ngx_log_t *log)
     ngx_ncpu = si.dwNumberOfProcessors;
     ngx_cacheline_size = NGX_CPU_CACHE_LINE;
 
-    for (n = ngx_pagesize; n >>= 1; ngx_pagesize_shift++) { /* void */ }
+    for (n = ngx_pagesize; n >>= 1; ngx_pagesize_shift++)
+    {
+        /* void */
+    }
 
     /* delete default "C" locale for _wcsicmp() */
     setlocale(LC_ALL, "");
@@ -130,13 +138,15 @@ ngx_os_init(ngx_log_t *log)
 
     /* init Winsock */
 
-    if (WSAStartup(MAKEWORD(2,2), &wsd) != 0) {
+    if (WSAStartup(MAKEWORD(2, 2), &wsd) != 0)
+    {
         ngx_log_error(NGX_LOG_EMERG, log, ngx_socket_errno,
                       "WSAStartup() failed");
         return NGX_ERROR;
     }
 
-    if (ngx_win32_version < NGX_WIN_NT) {
+    if (ngx_win32_version < NGX_WIN_NT)
+    {
         ngx_max_wsabufs = 16;
         return NGX_OK;
     }
@@ -150,7 +160,8 @@ ngx_os_init(ngx_log_t *log)
      */
 
     s = ngx_socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
-    if (s == (ngx_socket_t) -1) {
+    if (s == (ngx_socket_t) - 1)
+    {
         ngx_log_error(NGX_LOG_EMERG, log, ngx_socket_errno,
                       ngx_socket_n " failed");
         return NGX_ERROR;
@@ -158,77 +169,81 @@ ngx_os_init(ngx_log_t *log)
 
     if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &ax_guid, sizeof(GUID),
                  &ngx_acceptex, sizeof(LPFN_ACCEPTEX), &bytes, NULL, NULL)
-        == -1)
+            == -1)
     {
         ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
                       "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_ACCEPTEX) failed");
+                      "WSAID_ACCEPTEX) failed");
     }
 
     if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &as_guid, sizeof(GUID),
                  &ngx_getacceptexsockaddrs, sizeof(LPFN_GETACCEPTEXSOCKADDRS),
                  &bytes, NULL, NULL)
-        == -1)
+            == -1)
     {
         ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
                       "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_GETACCEPTEXSOCKADDRS) failed");
+                      "WSAID_GETACCEPTEXSOCKADDRS) failed");
     }
 
     if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &tf_guid, sizeof(GUID),
                  &ngx_transmitfile, sizeof(LPFN_TRANSMITFILE), &bytes,
                  NULL, NULL)
-        == -1)
+            == -1)
     {
         ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
                       "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_TRANSMITFILE) failed");
+                      "WSAID_TRANSMITFILE) failed");
     }
 
     if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &tp_guid, sizeof(GUID),
                  &ngx_transmitpackets, sizeof(LPFN_TRANSMITPACKETS), &bytes,
                  NULL, NULL)
-        == -1)
+            == -1)
     {
         ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
                       "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_TRANSMITPACKETS) failed");
+                      "WSAID_TRANSMITPACKETS) failed");
     }
 
     if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &cx_guid, sizeof(GUID),
                  &ngx_connectex, sizeof(LPFN_CONNECTEX), &bytes,
                  NULL, NULL)
-        == -1)
+            == -1)
     {
         ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
                       "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_CONNECTEX) failed");
+                      "WSAID_CONNECTEX) failed");
     }
 
     if (WSAIoctl(s, SIO_GET_EXTENSION_FUNCTION_POINTER, &dx_guid, sizeof(GUID),
                  &ngx_disconnectex, sizeof(LPFN_DISCONNECTEX), &bytes,
                  NULL, NULL)
-        == -1)
+            == -1)
     {
         ngx_log_error(NGX_LOG_NOTICE, log, ngx_socket_errno,
                       "WSAIoctl(SIO_GET_EXTENSION_FUNCTION_POINTER, "
-                               "WSAID_DISCONNECTEX) failed");
+                      "WSAID_DISCONNECTEX) failed");
     }
 
-    if (ngx_close_socket(s) == -1) {
+    if (ngx_close_socket(s) == -1)
+    {
         ngx_log_error(NGX_LOG_ALERT, log, ngx_socket_errno,
                       ngx_close_socket_n " failed");
     }
 
     if (GetEnvironmentVariable("ngx_unique", ngx_unique, NGX_INT32_LEN + 1)
-        != 0)
+            != 0)
     {
         ngx_process = NGX_PROCESS_WORKER;
 
-    } else {
+    }
+    else
+    {
         err = ngx_errno;
 
-        if (err != ERROR_ENVVAR_NOT_FOUND) {
+        if (err != ERROR_ENVVAR_NOT_FOUND)
+        {
             ngx_log_error(NGX_LOG_EMERG, log, err,
                           "GetEnvironmentVariable(\"ngx_unique\") failed");
             return NGX_ERROR;
@@ -250,7 +265,8 @@ ngx_os_status(ngx_log_t *log)
 
     ngx_log_error(NGX_LOG_NOTICE, log, 0, NGINX_VER_BUILD);
 
-    if (osviex) {
+    if (osviex)
+    {
 
         /*
          * the MSVC 6.0 SP2 defines wSuiteMask and wProductType
@@ -263,8 +279,11 @@ ngx_os_status(ngx_log_t *log)
                       ngx_win32_version, osvi.dwBuildNumber, osvi.szCSDVersion,
                       osviex_stub->wSuiteMask, osviex_stub->wProductType);
 
-    } else {
-        if (osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
+    }
+    else
+    {
+        if (osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+        {
 
             /* Win9x build */
 
@@ -276,7 +295,9 @@ ngx_os_status(ngx_log_t *log)
                           osvi.dwBuildNumber & 0xffff,
                           osvi.szCSDVersion);
 
-        } else {
+        }
+        else
+        {
 
             /*
              * VER_PLATFORM_WIN32_NT

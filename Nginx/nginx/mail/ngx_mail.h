@@ -20,14 +20,17 @@
 
 
 
-typedef struct {
+typedef struct
+{
     void                  **main_conf;
     void                  **srv_conf;
 } ngx_mail_conf_ctx_t;
 
 
-typedef struct {
-    union {
+typedef struct
+{
+    union
+    {
         struct sockaddr     sockaddr;
         struct sockaddr_in  sockaddr_in;
 #if (NGX_HAVE_INET6)
@@ -44,15 +47,15 @@ typedef struct {
     /* server ctx */
     ngx_mail_conf_ctx_t    *ctx;
 
-    unsigned                bind:1;
-    unsigned                wildcard:1;
+    unsigned                bind: 1;
+    unsigned                wildcard: 1;
 #if (NGX_MAIL_SSL)
-    unsigned                ssl:1;
+    unsigned                ssl: 1;
 #endif
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
-    unsigned                ipv6only:1;
+    unsigned                ipv6only: 1;
 #endif
-    unsigned                so_keepalive:2;
+    unsigned                so_keepalive: 2;
 #if (NGX_HAVE_KEEPALIVE_TUNABLE)
     int                     tcp_keepidle;
     int                     tcp_keepintvl;
@@ -62,7 +65,8 @@ typedef struct {
 } ngx_mail_listen_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_mail_conf_ctx_t    *ctx;
     ngx_str_t               addr_text;
 #if (NGX_MAIL_SSL)
@@ -70,7 +74,8 @@ typedef struct {
 #endif
 } ngx_mail_addr_conf_t;
 
-typedef struct {
+typedef struct
+{
     in_addr_t               addr;
     ngx_mail_addr_conf_t    conf;
 } ngx_mail_in_addr_t;
@@ -78,7 +83,8 @@ typedef struct {
 
 #if (NGX_HAVE_INET6)
 
-typedef struct {
+typedef struct
+{
     struct in6_addr         addr6;
     ngx_mail_addr_conf_t    conf;
 } ngx_mail_in6_addr_t;
@@ -86,26 +92,30 @@ typedef struct {
 #endif
 
 
-typedef struct {
+typedef struct
+{
     /* ngx_mail_in_addr_t or ngx_mail_in6_addr_t */
     void                   *addrs;
     ngx_uint_t              naddrs;
 } ngx_mail_port_t;
 
 
-typedef struct {
+typedef struct
+{
     int                     family;
     in_port_t               port;
     ngx_array_t             addrs;       /* array of ngx_mail_conf_addr_t */
 } ngx_mail_conf_port_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_mail_listen_t       opt;
 } ngx_mail_conf_addr_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_array_t             servers;     /* ngx_mail_core_srv_conf_t */
     ngx_array_t             listen;      /* ngx_mail_listen_t */
 } ngx_mail_core_main_conf_t;
@@ -119,7 +129,8 @@ typedef struct {
 typedef struct ngx_mail_protocol_s  ngx_mail_protocol_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_mail_protocol_t    *protocol;
 
     ngx_msec_t              timeout;
@@ -138,7 +149,8 @@ typedef struct {
 } ngx_mail_core_srv_conf_t;
 
 
-typedef enum {
+typedef enum
+{
     ngx_pop3_start = 0,
     ngx_pop3_user,
     ngx_pop3_passwd,
@@ -149,7 +161,8 @@ typedef enum {
 } ngx_pop3_state_e;
 
 
-typedef enum {
+typedef enum
+{
     ngx_imap_start = 0,
     ngx_imap_auth_login_username,
     ngx_imap_auth_login_password,
@@ -161,7 +174,8 @@ typedef enum {
 } ngx_imap_state_e;
 
 
-typedef enum {
+typedef enum
+{
     ngx_smtp_start = 0,
     ngx_smtp_auth_login_username,
     ngx_smtp_auth_login_password,
@@ -178,13 +192,15 @@ typedef enum {
 } ngx_smtp_state_e;
 
 
-typedef struct {
+typedef struct
+{
     ngx_peer_connection_t   upstream;
     ngx_buf_t              *buffer;
 } ngx_mail_proxy_ctx_t;
 
 
-typedef struct {
+typedef struct
+{
     uint32_t                signature;         /* "MAIL" */
 
     ngx_connection_t       *connection;
@@ -202,16 +218,16 @@ typedef struct {
 
     ngx_uint_t              mail_state;
 
-    unsigned                protocol:3;
-    unsigned                blocked:1;
-    unsigned                quit:1;
-    unsigned                quoted:1;
-    unsigned                backslash:1;
-    unsigned                no_sync_literal:1;
-    unsigned                starttls:1;
-    unsigned                esmtp:1;
-    unsigned                auth_method:3;
-    unsigned                auth_wait:1;
+    unsigned                protocol: 3;
+    unsigned                blocked: 1;
+    unsigned                quit: 1;
+    unsigned                quoted: 1;
+    unsigned                backslash: 1;
+    unsigned                no_sync_literal: 1;
+    unsigned                starttls: 1;
+    unsigned                esmtp: 1;
+    unsigned                auth_method: 3;
+    unsigned                auth_wait: 1;
 
     ngx_str_t               login;
     ngx_str_t               passwd;
@@ -244,7 +260,8 @@ typedef struct {
 } ngx_mail_session_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_str_t              *client;
     ngx_mail_session_t     *session;
 } ngx_mail_log_ctx_t;
@@ -312,13 +329,14 @@ typedef struct {
 
 
 typedef void (*ngx_mail_init_session_pt)(ngx_mail_session_t *s,
-    ngx_connection_t *c);
+        ngx_connection_t *c);
 typedef void (*ngx_mail_init_protocol_pt)(ngx_event_t *rev);
 typedef void (*ngx_mail_auth_state_pt)(ngx_event_t *rev);
 typedef ngx_int_t (*ngx_mail_parse_command_pt)(ngx_mail_session_t *s);
 
 
-struct ngx_mail_protocol_s {
+struct ngx_mail_protocol_s
+{
     ngx_str_t                   name;
     in_port_t                   port[4];
     ngx_uint_t                  type;
@@ -334,7 +352,8 @@ struct ngx_mail_protocol_s {
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_mail_protocol_t        *protocol;
 
     void                       *(*create_main_conf)(ngx_conf_t *cf);
@@ -342,7 +361,7 @@ typedef struct {
 
     void                       *(*create_srv_conf)(ngx_conf_t *cf);
     char                       *(*merge_srv_conf)(ngx_conf_t *cf, void *prev,
-                                                  void *conf);
+            void *conf);
 } ngx_mail_module_t;
 
 
@@ -380,15 +399,15 @@ ngx_int_t ngx_mail_starttls_only(ngx_mail_session_t *s, ngx_connection_t *c);
 void ngx_mail_init_connection(ngx_connection_t *c);
 
 ngx_int_t ngx_mail_salt(ngx_mail_session_t *s, ngx_connection_t *c,
-    ngx_mail_core_srv_conf_t *cscf);
+                        ngx_mail_core_srv_conf_t *cscf);
 ngx_int_t ngx_mail_auth_plain(ngx_mail_session_t *s, ngx_connection_t *c,
-    ngx_uint_t n);
+                              ngx_uint_t n);
 ngx_int_t ngx_mail_auth_login_username(ngx_mail_session_t *s,
-    ngx_connection_t *c, ngx_uint_t n);
+                                       ngx_connection_t *c, ngx_uint_t n);
 ngx_int_t ngx_mail_auth_login_password(ngx_mail_session_t *s,
-    ngx_connection_t *c);
+                                       ngx_connection_t *c);
 ngx_int_t ngx_mail_auth_cram_md5_salt(ngx_mail_session_t *s,
-    ngx_connection_t *c, char *prefix, size_t len);
+                                      ngx_connection_t *c, char *prefix, size_t len);
 ngx_int_t ngx_mail_auth_cram_md5(ngx_mail_session_t *s, ngx_connection_t *c);
 ngx_int_t ngx_mail_auth_parse(ngx_mail_session_t *s, ngx_connection_t *c);
 

@@ -99,21 +99,25 @@ extern "C" {
 # define KEY_EX  0x10
 # define KEY_SIG 0x80
 
-typedef struct {
+typedef struct
+{
     X509_SIG *dinfo;
     ASN1_OCTET_STRING *salt;
     ASN1_INTEGER *iter;         /* defaults to 1 */
 } PKCS12_MAC_DATA;
 
-typedef struct {
+typedef struct
+{
     ASN1_INTEGER *version;
     PKCS12_MAC_DATA *mac;
     PKCS7 *authsafes;
 } PKCS12;
 
-typedef struct {
+typedef struct
+{
     ASN1_OBJECT *type;
-    union {
+    union
+    {
         struct pkcs12_bag_st *bag; /* secret, crl and certbag */
         struct pkcs8_priv_key_info_st *keybag; /* keybag */
         X509_SIG *shkeybag;     /* shrouded key bag */
@@ -127,9 +131,11 @@ DECLARE_STACK_OF(PKCS12_SAFEBAG)
 DECLARE_ASN1_SET_OF(PKCS12_SAFEBAG)
 DECLARE_PKCS12_STACK_OF(PKCS12_SAFEBAG)
 
-typedef struct pkcs12_bag_st {
+typedef struct pkcs12_bag_st
+{
     ASN1_OBJECT *type;
-    union {
+    union
+    {
         ASN1_OCTET_STRING *x509cert;
         ASN1_OCTET_STRING *x509crl;
         ASN1_OCTET_STRING *octet;
@@ -175,12 +181,12 @@ X509 *PKCS12_certbag2x509(PKCS12_SAFEBAG *bag);
 X509_CRL *PKCS12_certbag2x509crl(PKCS12_SAFEBAG *bag);
 
 PKCS12_SAFEBAG *PKCS12_item_pack_safebag(void *obj, const ASN1_ITEM *it,
-                                         int nid1, int nid2);
+        int nid1, int nid2);
 PKCS12_SAFEBAG *PKCS12_MAKE_KEYBAG(PKCS8_PRIV_KEY_INFO *p8);
 PKCS8_PRIV_KEY_INFO *PKCS8_decrypt(X509_SIG *p8, const char *pass,
                                    int passlen);
 PKCS8_PRIV_KEY_INFO *PKCS12_decrypt_skey(PKCS12_SAFEBAG *bag,
-                                         const char *pass, int passlen);
+        const char *pass, int passlen);
 X509_SIG *PKCS8_encrypt(int pbe_nid, const EVP_CIPHER *cipher,
                         const char *pass, int passlen, unsigned char *salt,
                         int saltlen, int iter, PKCS8_PRIV_KEY_INFO *p8);
@@ -194,7 +200,7 @@ PKCS7 *PKCS12_pack_p7encdata(int pbe_nid, const char *pass, int passlen,
                              unsigned char *salt, int saltlen, int iter,
                              STACK_OF(PKCS12_SAFEBAG) *bags);
 STACK_OF(PKCS12_SAFEBAG) *PKCS12_unpack_p7encdata(PKCS7 *p7, const char *pass,
-                                                  int passlen);
+        int passlen);
 
 int PKCS12_pack_authsafes(PKCS12 *p12, STACK_OF(PKCS7) *safes);
 STACK_OF(PKCS7) *PKCS12_unpack_authsafes(PKCS12 *p12);
@@ -218,9 +224,9 @@ void *PKCS12_item_decrypt_d2i(X509_ALGOR *algor, const ASN1_ITEM *it,
                               const char *pass, int passlen,
                               ASN1_OCTET_STRING *oct, int zbuf);
 ASN1_OCTET_STRING *PKCS12_item_i2d_encrypt(X509_ALGOR *algor,
-                                           const ASN1_ITEM *it,
-                                           const char *pass, int passlen,
-                                           void *obj, int zbuf);
+        const ASN1_ITEM *it,
+        const char *pass, int passlen,
+        void *obj, int zbuf);
 PKCS12 *PKCS12_init(int mode);
 int PKCS12_key_gen_asc(const char *pass, int passlen, unsigned char *salt,
                        int saltlen, int id, int iter, int n,

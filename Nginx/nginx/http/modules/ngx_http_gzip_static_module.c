@@ -15,7 +15,8 @@
 #define NGX_HTTP_GZIP_STATIC_ALWAYS  2
 
 
-typedef struct {
+typedef struct
+{
     ngx_uint_t  enable;
 } ngx_http_gzip_static_conf_t;
 
@@ -23,11 +24,12 @@ typedef struct {
 static ngx_int_t ngx_http_gzip_static_handler(ngx_http_request_t *r);
 static void *ngx_http_gzip_static_create_conf(ngx_conf_t *cf);
 static char *ngx_http_gzip_static_merge_conf(ngx_conf_t *cf, void *parent,
-    void *child);
+        void *child);
 static ngx_int_t ngx_http_gzip_static_init(ngx_conf_t *cf);
 
 
-static ngx_conf_enum_t  ngx_http_gzip_static[] = {
+static ngx_conf_enum_t  ngx_http_gzip_static[] =
+{
     { ngx_string("off"), NGX_HTTP_GZIP_STATIC_OFF },
     { ngx_string("on"), NGX_HTTP_GZIP_STATIC_ON },
     { ngx_string("always"), NGX_HTTP_GZIP_STATIC_ALWAYS },
@@ -35,20 +37,24 @@ static ngx_conf_enum_t  ngx_http_gzip_static[] = {
 };
 
 
-static ngx_command_t  ngx_http_gzip_static_commands[] = {
+static ngx_command_t  ngx_http_gzip_static_commands[] =
+{
 
-    { ngx_string("gzip_static"),
-      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
-      ngx_conf_set_enum_slot,
-      NGX_HTTP_LOC_CONF_OFFSET,
-      offsetof(ngx_http_gzip_static_conf_t, enable),
-      &ngx_http_gzip_static },
+    {
+        ngx_string("gzip_static"),
+        NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+        ngx_conf_set_enum_slot,
+        NGX_HTTP_LOC_CONF_OFFSET,
+        offsetof(ngx_http_gzip_static_conf_t, enable),
+        &ngx_http_gzip_static
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-ngx_http_module_t  ngx_http_gzip_static_module_ctx = {
+ngx_http_module_t  ngx_http_gzip_static_module_ctx =
+{
     NULL,                                  /* preconfiguration */
     ngx_http_gzip_static_init,             /* postconfiguration */
 
@@ -63,7 +69,8 @@ ngx_http_module_t  ngx_http_gzip_static_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_gzip_static_module = {
+ngx_module_t  ngx_http_gzip_static_module =
+{
     NGX_MODULE_V1,
     &ngx_http_gzip_static_module_ctx,      /* module context */
     ngx_http_gzip_static_commands,         /* module directives */
@@ -95,38 +102,46 @@ ngx_http_gzip_static_handler(ngx_http_request_t *r)
     ngx_http_core_loc_conf_t     *clcf;
     ngx_http_gzip_static_conf_t  *gzcf;
 
-    if (!(r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD))) {
+    if (!(r->method & (NGX_HTTP_GET | NGX_HTTP_HEAD)))
+    {
         return NGX_DECLINED;
     }
 
-    if (r->uri.data[r->uri.len - 1] == '/') {
+    if (r->uri.data[r->uri.len - 1] == '/')
+    {
         return NGX_DECLINED;
     }
 
     gzcf = ngx_http_get_module_loc_conf(r, ngx_http_gzip_static_module);
 
-    if (gzcf->enable == NGX_HTTP_GZIP_STATIC_OFF) {
+    if (gzcf->enable == NGX_HTTP_GZIP_STATIC_OFF)
+    {
         return NGX_DECLINED;
     }
 
-    if (gzcf->enable == NGX_HTTP_GZIP_STATIC_ON) {
+    if (gzcf->enable == NGX_HTTP_GZIP_STATIC_ON)
+    {
         rc = ngx_http_gzip_ok(r);
 
-    } else {
+    }
+    else
+    {
         /* always */
         rc = NGX_OK;
     }
 
     clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
 
-    if (!clcf->gzip_vary && rc != NGX_OK) {
+    if (!clcf->gzip_vary && rc != NGX_OK)
+    {
         return NGX_DECLINED;
     }
 
     log = r->connection->log;
 
     p = ngx_http_map_uri_to_path(r, &path, &root, sizeof(".gz") - 1);
-    if (p == NULL) {
+    if (p == NULL)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -149,14 +164,16 @@ ngx_http_gzip_static_handler(ngx_http_request_t *r)
     of.errors = clcf->open_file_cache_errors;
     of.events = clcf->open_file_cache_events;
 
-    if (ngx_http_set_disable_symlinks(r, clcf, &path, &of) != NGX_OK) {
+    if (ngx_http_set_disable_symlinks(r, clcf, &path, &of) != NGX_OK)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
     if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
-        != NGX_OK)
+            != NGX_OK)
     {
-        switch (of.err) {
+        switch (of.err)
+        {
 
         case 0:
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -188,24 +205,28 @@ ngx_http_gzip_static_handler(ngx_http_request_t *r)
         return NGX_DECLINED;
     }
 
-    if (gzcf->enable == NGX_HTTP_GZIP_STATIC_ON) {
+    if (gzcf->enable == NGX_HTTP_GZIP_STATIC_ON)
+    {
         r->gzip_vary = 1;
 
-        if (rc != NGX_OK) {
+        if (rc != NGX_OK)
+        {
             return NGX_DECLINED;
         }
     }
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, log, 0, "http static fd: %d", of.fd);
 
-    if (of.is_dir) {
+    if (of.is_dir)
+    {
         ngx_log_debug0(NGX_LOG_DEBUG_HTTP, log, 0, "http dir");
         return NGX_DECLINED;
     }
 
 #if !(NGX_WIN32) /* the not regular files are probably Unix specific */
 
-    if (!of.is_file) {
+    if (!of.is_file)
+    {
         ngx_log_error(NGX_LOG_CRIT, log, 0,
                       "\"%s\" is not a regular file", path.data);
 
@@ -218,7 +239,8 @@ ngx_http_gzip_static_handler(ngx_http_request_t *r)
 
     rc = ngx_http_discard_request_body(r);
 
-    if (rc != NGX_OK) {
+    if (rc != NGX_OK)
+    {
         return rc;
     }
 
@@ -228,16 +250,19 @@ ngx_http_gzip_static_handler(ngx_http_request_t *r)
     r->headers_out.content_length_n = of.size;
     r->headers_out.last_modified_time = of.mtime;
 
-    if (ngx_http_set_etag(r) != NGX_OK) {
+    if (ngx_http_set_etag(r) != NGX_OK)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    if (ngx_http_set_content_type(r) != NGX_OK) {
+    if (ngx_http_set_content_type(r) != NGX_OK)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
     h = ngx_list_push(&r->headers_out.headers);
-    if (h == NULL) {
+    if (h == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -249,18 +274,21 @@ ngx_http_gzip_static_handler(ngx_http_request_t *r)
     /* we need to allocate all before the header would be sent */
 
     b = ngx_pcalloc(r->pool, sizeof(ngx_buf_t));
-    if (b == NULL) {
+    if (b == NULL)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
     b->file = ngx_pcalloc(r->pool, sizeof(ngx_file_t));
-    if (b->file == NULL) {
+    if (b->file == NULL)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
     rc = ngx_http_send_header(r);
 
-    if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
+    if (rc == NGX_ERROR || rc > NGX_OK || r->header_only)
+    {
         return rc;
     }
 
@@ -289,7 +317,8 @@ ngx_http_gzip_static_create_conf(ngx_conf_t *cf)
     ngx_http_gzip_static_conf_t  *conf;
 
     conf = ngx_palloc(cf->pool, sizeof(ngx_http_gzip_static_conf_t));
-    if (conf == NULL) {
+    if (conf == NULL)
+    {
         return NULL;
     }
 
@@ -321,7 +350,8 @@ ngx_http_gzip_static_init(ngx_conf_t *cf)
     cmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
 
     h = ngx_array_push(&cmcf->phases[NGX_HTTP_CONTENT_PHASE].handlers);
-    if (h == NULL) {
+    if (h == NULL)
+    {
         return NGX_ERROR;
     }
 

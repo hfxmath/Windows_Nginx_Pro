@@ -123,8 +123,10 @@ extern "C" {
 # endif
 
 typedef unsigned char _ossl_old_des_cblock[8];
-typedef struct _ossl_old_des_ks_struct {
-    union {
+typedef struct _ossl_old_des_ks_struct
+{
+    union
+    {
         _ossl_old_des_cblock _;
         /*
          * make sure things are correct size on machines with 8 byte longs

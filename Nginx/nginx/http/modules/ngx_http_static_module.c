@@ -14,7 +14,8 @@ static ngx_int_t ngx_http_static_handler(ngx_http_request_t *r);
 static ngx_int_t ngx_http_static_init(ngx_conf_t *cf);
 
 
-ngx_http_module_t  ngx_http_static_module_ctx = {
+ngx_http_module_t  ngx_http_static_module_ctx =
+{
     NULL,                                  /* preconfiguration */
     ngx_http_static_init,                  /* postconfiguration */
 
@@ -29,7 +30,8 @@ ngx_http_module_t  ngx_http_static_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_static_module = {
+ngx_module_t  ngx_http_static_module =
+{
     NGX_MODULE_V1,
     &ngx_http_static_module_ctx,           /* module context */
     NULL,                                  /* module directives */
@@ -59,11 +61,13 @@ ngx_http_static_handler(ngx_http_request_t *r)
     ngx_open_file_info_t       of;
     ngx_http_core_loc_conf_t  *clcf;
 
-    if (!(r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD|NGX_HTTP_POST))) {
+    if (!(r->method & (NGX_HTTP_GET | NGX_HTTP_HEAD | NGX_HTTP_POST)))
+    {
         return NGX_HTTP_NOT_ALLOWED;
     }
 
-    if (r->uri.data[r->uri.len - 1] == '/') {
+    if (r->uri.data[r->uri.len - 1] == '/')
+    {
         return NGX_DECLINED;
     }
 
@@ -75,7 +79,8 @@ ngx_http_static_handler(ngx_http_request_t *r)
      */
 
     last = ngx_http_map_uri_to_path(r, &path, &root, 0);
-    if (last == NULL) {
+    if (last == NULL)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -95,14 +100,16 @@ ngx_http_static_handler(ngx_http_request_t *r)
     of.errors = clcf->open_file_cache_errors;
     of.events = clcf->open_file_cache_events;
 
-    if (ngx_http_set_disable_symlinks(r, clcf, &path, &of) != NGX_OK) {
+    if (ngx_http_set_disable_symlinks(r, clcf, &path, &of) != NGX_OK)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
     if (ngx_open_cached_file(clcf->open_file_cache, &path, &of, r->pool)
-        != NGX_OK)
+            != NGX_OK)
     {
-        switch (of.err) {
+        switch (of.err)
+        {
 
         case 0:
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -132,7 +139,8 @@ ngx_http_static_handler(ngx_http_request_t *r)
             break;
         }
 
-        if (rc != NGX_HTTP_NOT_FOUND || clcf->log_not_found) {
+        if (rc != NGX_HTTP_NOT_FOUND || clcf->log_not_found)
+        {
             ngx_log_error(level, log, of.err,
                           "%s \"%s\" failed", of.failed, path.data);
         }
@@ -144,31 +152,38 @@ ngx_http_static_handler(ngx_http_request_t *r)
 
     ngx_log_debug1(NGX_LOG_DEBUG_HTTP, log, 0, "http static fd: %d", of.fd);
 
-    if (of.is_dir) {
+    if (of.is_dir)
+    {
 
         ngx_log_debug0(NGX_LOG_DEBUG_HTTP, log, 0, "http dir");
 
         ngx_http_clear_location(r);
 
         r->headers_out.location = ngx_palloc(r->pool, sizeof(ngx_table_elt_t));
-        if (r->headers_out.location == NULL) {
+        if (r->headers_out.location == NULL)
+        {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
         }
 
         len = r->uri.len + 1;
 
-        if (!clcf->alias && clcf->root_lengths == NULL && r->args.len == 0) {
+        if (!clcf->alias && clcf->root_lengths == NULL && r->args.len == 0)
+        {
             location = path.data + clcf->root.len;
 
             *last = '/';
 
-        } else {
-            if (r->args.len) {
+        }
+        else
+        {
+            if (r->args.len)
+            {
                 len += r->args.len + 1;
             }
 
             location = ngx_pnalloc(r->pool, len);
-            if (location == NULL) {
+            if (location == NULL)
+            {
                 return NGX_HTTP_INTERNAL_SERVER_ERROR;
             }
 
@@ -176,7 +191,8 @@ ngx_http_static_handler(ngx_http_request_t *r)
 
             *last = '/';
 
-            if (r->args.len) {
+            if (r->args.len)
+            {
                 *++last = '?';
                 ngx_memcpy(++last, r->args.data, r->args.len);
             }
@@ -195,7 +211,8 @@ ngx_http_static_handler(ngx_http_request_t *r)
 
 #if !(NGX_WIN32) /* the not regular files are probably Unix specific */
 
-    if (!of.is_file) {
+    if (!of.is_file)
+    {
         ngx_log_error(NGX_LOG_CRIT, log, 0,
                       "\"%s\" is not a regular file", path.data);
 
@@ -204,13 +221,15 @@ ngx_http_static_handler(ngx_http_request_t *r)
 
 #endif
 
-    if (r->method == NGX_HTTP_POST) {
+    if (r->method == NGX_HTTP_POST)
+    {
         return NGX_HTTP_NOT_ALLOWED;
     }
 
     rc = ngx_http_discard_request_body(r);
 
-    if (rc != NGX_OK) {
+    if (rc != NGX_OK)
+    {
         return rc;
     }
 
@@ -220,15 +239,18 @@ ngx_http_static_handler(ngx_http_request_t *r)
     r->headers_out.content_length_n = of.size;
     r->headers_out.last_modified_time = of.mtime;
 
-    if (ngx_http_set_etag(r) != NGX_OK) {
+    if (ngx_http_set_etag(r) != NGX_OK)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    if (ngx_http_set_content_type(r) != NGX_OK) {
+    if (ngx_http_set_content_type(r) != NGX_OK)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    if (r != r->main && of.size == 0) {
+    if (r != r->main && of.size == 0)
+    {
         return ngx_http_send_header(r);
     }
 
@@ -237,26 +259,29 @@ ngx_http_static_handler(ngx_http_request_t *r)
     /* we need to allocate all before the header would be sent */
 
     b = ngx_pcalloc(r->pool, sizeof(ngx_buf_t));
-    if (b == NULL) {
+    if (b == NULL)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
     b->file = ngx_pcalloc(r->pool, sizeof(ngx_file_t));
-    if (b->file == NULL) {
+    if (b->file == NULL)
+    {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
     rc = ngx_http_send_header(r);
 
-    if (rc == NGX_ERROR || rc > NGX_OK || r->header_only) {
+    if (rc == NGX_ERROR || rc > NGX_OK || r->header_only)
+    {
         return rc;
     }
 
     b->file_pos = 0;
     b->file_last = of.size;
 
-    b->in_file = b->file_last ? 1: 0;
-    b->last_buf = (r == r->main) ? 1: 0;
+    b->in_file = b->file_last ? 1 : 0;
+    b->last_buf = (r == r->main) ? 1 : 0;
     b->last_in_chain = 1;
 
     b->file->fd = of.fd;
@@ -280,7 +305,8 @@ ngx_http_static_init(ngx_conf_t *cf)
     cmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
 
     h = ngx_array_push(&cmcf->phases[NGX_HTTP_CONTENT_PHASE].handlers);
-    if (h == NULL) {
+    if (h == NULL)
+    {
         return NGX_ERROR;
     }
 

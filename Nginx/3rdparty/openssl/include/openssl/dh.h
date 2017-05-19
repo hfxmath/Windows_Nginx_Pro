@@ -114,7 +114,8 @@ extern "C" {
 /* typedef struct dh_st DH; */
 /* typedef struct dh_method DH_METHOD; */
 
-struct dh_method {
+struct dh_method
+{
     const char *name;
     /* Methods here */
     int (*generate_key) (DH *dh);
@@ -132,7 +133,8 @@ struct dh_method {
                             BN_GENCB *cb);
 };
 
-struct dh_st {
+struct dh_st
+{
     /*
      * This first argument is used to pick up errors when a DH is passed
      * instead of a EVP_PKEY

@@ -81,17 +81,18 @@ void **
  * decoration right with Borland C. Otherwise it works
  * purely incidentally, as we pass no parameters.
  */
- __stdcall
+__stdcall
 # else
- __cdecl
+__cdecl
 # endif
 OPENSSL_Applink(void)
 {
     static int once = 1;
     static void *OPENSSL_ApplinkTable[APPLINK_MAX + 1] =
-        { (void *)APPLINK_MAX };
+    { (void *)APPLINK_MAX };
 
-    if (once) {
+    if (once)
+    {
         OPENSSL_ApplinkTable[APPLINK_STDIN] = app_stdin;
         OPENSSL_ApplinkTable[APPLINK_STDOUT] = app_stdout;
         OPENSSL_ApplinkTable[APPLINK_STDERR] = app_stderr;

@@ -82,7 +82,8 @@ extern "C" {
 /* typedef struct rsa_st RSA; */
 /* typedef struct rsa_meth_st RSA_METHOD; */
 
-struct rsa_meth_st {
+struct rsa_meth_st
+{
     const char *name;
     int (*rsa_pub_enc) (int flen, const unsigned char *from,
                         unsigned char *to, RSA *rsa, int padding);
@@ -129,7 +130,8 @@ struct rsa_meth_st {
     int (*rsa_keygen) (RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
 };
 
-struct rsa_st {
+struct rsa_st
+{
     /*
      * The first parameter is used to pickup errors where this is passed
      * instead of aEVP_PKEY, it is set to 0
@@ -300,14 +302,14 @@ int RSA_size(const RSA *rsa);
 /* Deprecated version */
 # ifndef OPENSSL_NO_DEPRECATED
 RSA *RSA_generate_key(int bits, unsigned long e, void
-                       (*callback) (int, int, void *), void *cb_arg);
+                      (*callback) (int, int, void *), void *cb_arg);
 # endif                         /* !defined(OPENSSL_NO_DEPRECATED) */
 
 /* New version */
 int RSA_generate_key_ex(RSA *rsa, int bits, BIGNUM *e, BN_GENCB *cb);
 
 int RSA_check_key(const RSA *);
-        /* next 4 return -1 on error */
+/* next 4 return -1 on error */
 int RSA_public_encrypt(int flen, const unsigned char *from,
                        unsigned char *to, RSA *rsa, int padding);
 int RSA_private_encrypt(int flen, const unsigned char *from,
@@ -338,7 +340,8 @@ const RSA_METHOD *RSA_null_method(void);
 DECLARE_ASN1_ENCODE_FUNCTIONS_const(RSA, RSAPublicKey)
 DECLARE_ASN1_ENCODE_FUNCTIONS_const(RSA, RSAPrivateKey)
 
-typedef struct rsa_pss_params_st {
+typedef struct rsa_pss_params_st
+{
     X509_ALGOR *hashAlgorithm;
     X509_ALGOR *maskGenAlgorithm;
     ASN1_INTEGER *saltLength;

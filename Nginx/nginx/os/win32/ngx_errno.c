@@ -15,14 +15,16 @@ ngx_strerror(ngx_err_t err, u_char *errstr, size_t size)
     u_int          len;
     static u_long  lang = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
 
-    if (size == 0) {
+    if (size == 0)
+    {
         return errstr;
     }
 
     len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
                         NULL, err, lang, (char *) errstr, size, NULL);
 
-    if (len == 0 && lang && GetLastError() == ERROR_RESOURCE_LANG_NOT_FOUND) {
+    if (len == 0 && lang && GetLastError() == ERROR_RESOURCE_LANG_NOT_FOUND)
+    {
 
         /*
          * Try to use English messages first and fallback to a language,
@@ -37,14 +39,15 @@ ngx_strerror(ngx_err_t err, u_char *errstr, size_t size)
                             NULL, err, lang, (char *) errstr, size, NULL);
     }
 
-    if (len == 0) {
+    if (len == 0)
+    {
         return ngx_snprintf(errstr, size,
                             "FormatMessage() error:(%d)", GetLastError());
     }
 
     /* remove ".\r\n\0" */
     while (errstr[len] == '\0' || errstr[len] == CR
-           || errstr[len] == LF || errstr[len] == '.')
+            || errstr[len] == LF || errstr[len] == '.')
     {
         --len;
     }

@@ -18,7 +18,8 @@ ngx_dlerror(void)
 
     err = (char *) dlerror();
 
-    if (err == NULL) {
+    if (err == NULL)
+    {
         return "";
     }
 

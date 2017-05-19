@@ -15,7 +15,8 @@
 
 typedef struct ngx_listening_s  ngx_listening_t;
 
-struct ngx_listening_s {
+struct ngx_listening_s
+{
     ngx_socket_t        fd;
 
     struct sockaddr    *sockaddr;
@@ -53,32 +54,32 @@ struct ngx_listening_s {
 
     ngx_uint_t          worker;
 
-    unsigned            open:1;
-    unsigned            remain:1;
-    unsigned            ignore:1;
+    unsigned            open: 1;
+    unsigned            remain: 1;
+    unsigned            ignore: 1;
 
-    unsigned            bound:1;       /* already bound */
-    unsigned            inherited:1;   /* inherited from previous process */
-    unsigned            nonblocking_accept:1;
-    unsigned            listen:1;
-    unsigned            nonblocking:1;
-    unsigned            shared:1;    /* shared between threads or processes */
-    unsigned            addr_ntop:1;
-    unsigned            wildcard:1;
+    unsigned            bound: 1;      /* already bound */
+    unsigned            inherited: 1;  /* inherited from previous process */
+    unsigned            nonblocking_accept: 1;
+    unsigned            listen: 1;
+    unsigned            nonblocking: 1;
+    unsigned            shared: 1;   /* shared between threads or processes */
+    unsigned            addr_ntop: 1;
+    unsigned            wildcard: 1;
 
 #if (NGX_HAVE_INET6 && defined IPV6_V6ONLY)
-    unsigned            ipv6only:1;
+    unsigned            ipv6only: 1;
 #endif
 #if (NGX_HAVE_REUSEPORT)
-    unsigned            reuseport:1;
-    unsigned            add_reuseport:1;
+    unsigned            reuseport: 1;
+    unsigned            add_reuseport: 1;
 #endif
-    unsigned            keepalive:2;
+    unsigned            keepalive: 2;
 
 #if (NGX_HAVE_DEFERRED_ACCEPT)
-    unsigned            deferred_accept:1;
-    unsigned            delete_deferred:1;
-    unsigned            add_deferred:1;
+    unsigned            deferred_accept: 1;
+    unsigned            delete_deferred: 1;
+    unsigned            add_deferred: 1;
 #ifdef SO_ACCEPTFILTER
     char               *accept_filter;
 #endif
@@ -94,7 +95,8 @@ struct ngx_listening_s {
 };
 
 
-typedef enum {
+typedef enum
+{
     NGX_ERROR_ALERT = 0,
     NGX_ERROR_ERR,
     NGX_ERROR_INFO,
@@ -103,14 +105,16 @@ typedef enum {
 } ngx_connection_log_error_e;
 
 
-typedef enum {
+typedef enum
+{
     NGX_TCP_NODELAY_UNSET = 0,
     NGX_TCP_NODELAY_SET,
     NGX_TCP_NODELAY_DISABLED
 } ngx_connection_tcp_nodelay_e;
 
 
-typedef enum {
+typedef enum
+{
     NGX_TCP_NOPUSH_UNSET = 0,
     NGX_TCP_NOPUSH_SET,
     NGX_TCP_NOPUSH_DISABLED
@@ -122,7 +126,8 @@ typedef enum {
 #define NGX_HTTP_V2_BUFFERED   0x02
 
 
-struct ngx_connection_s {
+struct ngx_connection_s
+{
     void               *data;
     ngx_event_t        *read;
     ngx_event_t        *write;
@@ -165,33 +170,33 @@ struct ngx_connection_s {
 
     ngx_uint_t          requests;
 
-    unsigned            buffered:8;
+    unsigned            buffered: 8;
 
-    unsigned            log_error:3;     /* ngx_connection_log_error_e */
+    unsigned            log_error: 3;    /* ngx_connection_log_error_e */
 
-    unsigned            unexpected_eof:1;
-    unsigned            timedout:1;
-    unsigned            error:1;
-    unsigned            destroyed:1;
+    unsigned            unexpected_eof: 1;
+    unsigned            timedout: 1;
+    unsigned            error: 1;
+    unsigned            destroyed: 1;
 
-    unsigned            idle:1;
-    unsigned            reusable:1;
-    unsigned            close:1;
-    unsigned            shared:1;
+    unsigned            idle: 1;
+    unsigned            reusable: 1;
+    unsigned            close: 1;
+    unsigned            shared: 1;
 
-    unsigned            sendfile:1;
-    unsigned            sndlowat:1;
-    unsigned            tcp_nodelay:2;   /* ngx_connection_tcp_nodelay_e */
-    unsigned            tcp_nopush:2;    /* ngx_connection_tcp_nopush_e */
+    unsigned            sendfile: 1;
+    unsigned            sndlowat: 1;
+    unsigned            tcp_nodelay: 2;  /* ngx_connection_tcp_nodelay_e */
+    unsigned            tcp_nopush: 2;   /* ngx_connection_tcp_nopush_e */
 
-    unsigned            need_last_buf:1;
+    unsigned            need_last_buf: 1;
 
 #if (NGX_HAVE_IOCP)
-    unsigned            accept_context_updated:1;
+    unsigned            accept_context_updated: 1;
 #endif
 
 #if (NGX_HAVE_AIO_SENDFILE)
-    unsigned            busy_count:2;
+    unsigned            busy_count: 2;
 #endif
 
 #if (NGX_THREADS)
@@ -212,7 +217,7 @@ struct ngx_connection_s {
 
 
 ngx_listening_t *ngx_create_listening(ngx_conf_t *cf, void *sockaddr,
-    socklen_t socklen);
+                                      socklen_t socklen);
 ngx_int_t ngx_clone_listening(ngx_conf_t *cf, ngx_listening_t *ls);
 ngx_int_t ngx_set_inherited_sockets(ngx_cycle_t *cycle);
 ngx_int_t ngx_open_listening_sockets(ngx_cycle_t *cycle);
@@ -221,7 +226,7 @@ void ngx_close_listening_sockets(ngx_cycle_t *cycle);
 void ngx_close_connection(ngx_connection_t *c);
 void ngx_close_idle_connections(ngx_cycle_t *cycle);
 ngx_int_t ngx_connection_local_sockaddr(ngx_connection_t *c, ngx_str_t *s,
-    ngx_uint_t port);
+                                        ngx_uint_t port);
 ngx_int_t ngx_connection_error(ngx_connection_t *c, ngx_err_t err, char *text);
 
 ngx_connection_t *ngx_get_connection(ngx_socket_t s, ngx_log_t *log);

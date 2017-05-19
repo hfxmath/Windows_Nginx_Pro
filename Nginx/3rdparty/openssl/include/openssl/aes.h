@@ -75,7 +75,8 @@ extern "C" {
 #endif
 
 /* This should be a hidden type, but EVP requires that the size be known */
-struct aes_key_st {
+struct aes_key_st
+{
 # ifdef AES_LONG
     unsigned long rd_key[4 * (AES_MAXNR + 1)];
 # else

@@ -981,7 +981,8 @@
 extern "C" {
 #endif
 
-typedef struct obj_name_st {
+typedef struct obj_name_st
+{
     int type;
     int alias;
     const char *name;

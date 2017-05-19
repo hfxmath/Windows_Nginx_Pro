@@ -30,27 +30,29 @@
 #define NGX_HTTP_CACHE_VERSION       3
 
 
-typedef struct {
+typedef struct
+{
     ngx_uint_t                       status;
     time_t                           valid;
 } ngx_http_cache_valid_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_rbtree_node_t                node;
     ngx_queue_t                      queue;
 
     u_char                           key[NGX_HTTP_CACHE_KEY_LEN
                                          - sizeof(ngx_rbtree_key_t)];
 
-    unsigned                         count:20;
-    unsigned                         uses:10;
-    unsigned                         valid_msec:10;
-    unsigned                         error:10;
-    unsigned                         exists:1;
-    unsigned                         updating:1;
-    unsigned                         deleting:1;
-                                     /* 11 unused bits */
+    unsigned                         count: 20;
+    unsigned                         uses: 10;
+    unsigned                         valid_msec: 10;
+    unsigned                         error: 10;
+    unsigned                         exists: 1;
+    unsigned                         updating: 1;
+    unsigned                         deleting: 1;
+    /* 11 unused bits */
 
     ngx_file_uniq_t                  uniq;
     time_t                           expire;
@@ -61,7 +63,8 @@ typedef struct {
 } ngx_http_file_cache_node_t;
 
 
-struct ngx_http_cache_s {
+struct ngx_http_cache_s
+{
     ngx_file_t                       file;
     ngx_array_t                      keys;
     uint32_t                         crc32;
@@ -102,19 +105,20 @@ struct ngx_http_cache_s {
 
     ngx_event_t                      wait_event;
 
-    unsigned                         lock:1;
-    unsigned                         waiting:1;
+    unsigned                         lock: 1;
+    unsigned                         waiting: 1;
 
-    unsigned                         updated:1;
-    unsigned                         updating:1;
-    unsigned                         exists:1;
-    unsigned                         temp_file:1;
-    unsigned                         reading:1;
-    unsigned                         secondary:1;
+    unsigned                         updated: 1;
+    unsigned                         updating: 1;
+    unsigned                         exists: 1;
+    unsigned                         temp_file: 1;
+    unsigned                         reading: 1;
+    unsigned                         secondary: 1;
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_uint_t                       version;
     time_t                           valid_sec;
     time_t                           last_modified;
@@ -131,7 +135,8 @@ typedef struct {
 } ngx_http_file_cache_header_t;
 
 
-typedef struct {
+typedef struct
+{
     ngx_rbtree_t                     rbtree;
     ngx_rbtree_node_t                sentinel;
     ngx_queue_t                      queue;
@@ -143,7 +148,8 @@ typedef struct {
 } ngx_http_file_cache_sh_t;
 
 
-struct ngx_http_file_cache_s {
+struct ngx_http_file_cache_s
+{
     ngx_http_file_cache_sh_t        *sh;
     ngx_slab_pool_t                 *shpool;
 
@@ -179,9 +185,9 @@ void ngx_http_file_cache_free(ngx_http_cache_t *c, ngx_temp_file_t *tf);
 time_t ngx_http_file_cache_valid(ngx_array_t *cache_valid, ngx_uint_t status);
 
 char *ngx_http_file_cache_set_slot(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                   void *conf);
 char *ngx_http_file_cache_valid_set_slot(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+        void *conf);
 
 
 extern ngx_str_t  ngx_http_cache_status[];

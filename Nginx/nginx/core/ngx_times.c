@@ -44,20 +44,21 @@ static ngx_int_t         cached_gmtoff;
 
 static ngx_time_t        cached_time[NGX_TIME_SLOTS];
 static u_char            cached_err_log_time[NGX_TIME_SLOTS]
-                                    [sizeof("1970/09/28 12:00:00")];
+[sizeof("1970/09/28 12:00:00")];
 static u_char            cached_http_time[NGX_TIME_SLOTS]
-                                    [sizeof("Mon, 28 Sep 1970 06:00:00 GMT")];
+[sizeof("Mon, 28 Sep 1970 06:00:00 GMT")];
 static u_char            cached_http_log_time[NGX_TIME_SLOTS]
-                                    [sizeof("28/Sep/1970:12:00:00 +0600")];
+[sizeof("28/Sep/1970:12:00:00 +0600")];
 static u_char            cached_http_log_iso8601[NGX_TIME_SLOTS]
-                                    [sizeof("1970-09-28T12:00:00+06:00")];
+[sizeof("1970-09-28T12:00:00+06:00")];
 static u_char            cached_syslog_time[NGX_TIME_SLOTS]
-                                    [sizeof("Sep 28 12:00:00")];
+[sizeof("Sep 28 12:00:00")];
 
 
 static char  *week[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 static char  *months[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+                           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                         };
 
 void
 ngx_time_init(void)
@@ -84,7 +85,8 @@ ngx_time_update(void)
     ngx_time_t      *tp;
     struct timeval   tv;
 
-    if (!ngx_trylock(&ngx_time_lock)) {
+    if (!ngx_trylock(&ngx_time_lock))
+    {
         return;
     }
 
@@ -97,15 +99,19 @@ ngx_time_update(void)
 
     tp = &cached_time[slot];
 
-    if (tp->sec == sec) {
+    if (tp->sec == sec)
+    {
         tp->msec = msec;
         ngx_unlock(&ngx_time_lock);
         return;
     }
 
-    if (slot == NGX_TIME_SLOTS - 1) {
+    if (slot == NGX_TIME_SLOTS - 1)
+    {
         slot = 0;
-    } else {
+    }
+    else
+    {
         slot++;
     }
 
@@ -200,7 +206,8 @@ ngx_time_sigsafe_update(void)
     ngx_time_t      *tp;
     struct timeval   tv;
 
-    if (!ngx_trylock(&ngx_time_lock)) {
+    if (!ngx_trylock(&ngx_time_lock))
+    {
         return;
     }
 
@@ -210,14 +217,18 @@ ngx_time_sigsafe_update(void)
 
     tp = &cached_time[slot];
 
-    if (tp->sec == sec) {
+    if (tp->sec == sec)
+    {
         ngx_unlock(&ngx_time_lock);
         return;
     }
 
-    if (slot == NGX_TIME_SLOTS - 1) {
+    if (slot == NGX_TIME_SLOTS - 1)
+    {
         slot = 0;
-    } else {
+    }
+    else
+    {
         slot++;
     }
 
@@ -283,13 +294,13 @@ ngx_http_cookie_time(u_char *buf, time_t t)
 
     return ngx_sprintf(buf,
                        (tm.ngx_tm_year > 2037) ?
-                                         "%s, %02d-%s-%d %02d:%02d:%02d GMT":
-                                         "%s, %02d-%s-%02d %02d:%02d:%02d GMT",
+                       "%s, %02d-%s-%d %02d:%02d:%02d GMT" :
+                       "%s, %02d-%s-%02d %02d:%02d:%02d GMT",
                        week[tm.ngx_tm_wday],
                        tm.ngx_tm_mday,
                        months[tm.ngx_tm_mon - 1],
-                       (tm.ngx_tm_year > 2037) ? tm.ngx_tm_year:
-                                                 tm.ngx_tm_year % 100,
+                       (tm.ngx_tm_year > 2037) ? tm.ngx_tm_year :
+                       tm.ngx_tm_year % 100,
                        tm.ngx_tm_hour,
                        tm.ngx_tm_min,
                        tm.ngx_tm_sec);
@@ -337,7 +348,8 @@ ngx_gmtime(time_t t, ngx_tm_t *tp)
 
     yday = days - (365 * year + year / 4 - year / 100 + year / 400);
 
-    if (yday < 0) {
+    if (yday < 0)
+    {
         leap = (year % 4 == 0) && (year % 100 || (year % 400 == 0));
         yday = 365 + leap + yday;
         year--;
@@ -357,7 +369,8 @@ ngx_gmtime(time_t t, ngx_tm_t *tp)
 
     mday = yday - (367 * mon / 12 - 30) + 1;
 
-    if (yday >= 306) {
+    if (yday >= 306)
+    {
 
         year++;
         mon -= 10;
@@ -368,7 +381,9 @@ ngx_gmtime(time_t t, ngx_tm_t *tp)
          * yday -= 306;
          */
 
-    } else {
+    }
+    else
+    {
 
         mon += 2;
 
@@ -406,11 +421,13 @@ ngx_next_time(time_t when)
 
     next = mktime(&tm);
 
-    if (next == -1) {
+    if (next == -1)
+    {
         return -1;
     }
 
-    if (next - now > 0) {
+    if (next - now > 0)
+    {
         return next;
     }
 
@@ -420,7 +437,8 @@ ngx_next_time(time_t when)
 
     next = mktime(&tm);
 
-    if (next != -1) {
+    if (next != -1)
+    {
         return next;
     }
 

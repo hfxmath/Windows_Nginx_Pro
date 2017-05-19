@@ -31,7 +31,8 @@ typedef void (*ngx_pool_cleanup_pt)(void *data);
 
 typedef struct ngx_pool_cleanup_s  ngx_pool_cleanup_t;
 
-struct ngx_pool_cleanup_s {
+struct ngx_pool_cleanup_s
+{
     ngx_pool_cleanup_pt   handler;
     void                 *data;
     ngx_pool_cleanup_t   *next;
@@ -40,13 +41,15 @@ struct ngx_pool_cleanup_s {
 
 typedef struct ngx_pool_large_s  ngx_pool_large_t;
 
-struct ngx_pool_large_s {
+struct ngx_pool_large_s
+{
     ngx_pool_large_t     *next;
     void                 *alloc;
 };
 
 
-typedef struct {
+typedef struct
+{
     u_char               *last;
     u_char               *end;
     ngx_pool_t           *next;
@@ -54,7 +57,8 @@ typedef struct {
 } ngx_pool_data_t;
 
 
-struct ngx_pool_s {
+struct ngx_pool_s
+{
     ngx_pool_data_t       d;
     size_t                max;
     ngx_pool_t           *current;
@@ -65,7 +69,8 @@ struct ngx_pool_s {
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_fd_t              fd;
     u_char               *name;
     ngx_log_t            *log;

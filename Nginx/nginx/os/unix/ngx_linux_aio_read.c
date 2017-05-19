@@ -30,7 +30,8 @@ ngx_file_aio_init(ngx_file_t *file, ngx_pool_t *pool)
     ngx_event_aio_t  *aio;
 
     aio = ngx_pcalloc(pool, sizeof(ngx_event_aio_t));
-    if (aio == NULL) {
+    if (aio == NULL)
+    {
         return NGX_ERROR;
     }
 
@@ -48,25 +49,28 @@ ngx_file_aio_init(ngx_file_t *file, ngx_pool_t *pool)
 
 ssize_t
 ngx_file_aio_read(ngx_file_t *file, u_char *buf, size_t size, off_t offset,
-    ngx_pool_t *pool)
+                  ngx_pool_t *pool)
 {
     ngx_err_t         err;
     struct iocb      *piocb[1];
     ngx_event_t      *ev;
     ngx_event_aio_t  *aio;
 
-    if (!ngx_file_aio) {
+    if (!ngx_file_aio)
+    {
         return ngx_read_file(file, buf, size, offset);
     }
 
-    if (file->aio == NULL && ngx_file_aio_init(file, pool) != NGX_OK) {
+    if (file->aio == NULL && ngx_file_aio_init(file, pool) != NGX_OK)
+    {
         return NGX_ERROR;
     }
 
     aio = file->aio;
     ev = &aio->event;
 
-    if (!ev->ready) {
+    if (!ev->ready)
+    {
         ngx_log_error(NGX_LOG_ALERT, file->log, 0,
                       "second aio post for \"%V\"", &file->name);
         return NGX_AGAIN;
@@ -76,11 +80,13 @@ ngx_file_aio_read(ngx_file_t *file, u_char *buf, size_t size, off_t offset,
                    "aio complete:%d @%O:%uz %V",
                    ev->complete, offset, size, &file->name);
 
-    if (ev->complete) {
+    if (ev->complete)
+    {
         ev->active = 0;
         ev->complete = 0;
 
-        if (aio->res >= 0) {
+        if (aio->res >= 0)
+        {
             ngx_set_errno(0);
             return aio->res;
         }
@@ -108,7 +114,8 @@ ngx_file_aio_read(ngx_file_t *file, u_char *buf, size_t size, off_t offset,
 
     piocb[0] = &aio->aiocb;
 
-    if (io_submit(ngx_aio_ctx, 1, piocb) == 1) {
+    if (io_submit(ngx_aio_ctx, 1, piocb) == 1)
+    {
         ev->active = 1;
         ev->ready = 0;
         ev->complete = 0;
@@ -118,14 +125,16 @@ ngx_file_aio_read(ngx_file_t *file, u_char *buf, size_t size, off_t offset,
 
     err = ngx_errno;
 
-    if (err == NGX_EAGAIN) {
+    if (err == NGX_EAGAIN)
+    {
         return ngx_read_file(file, buf, size, offset);
     }
 
     ngx_log_error(NGX_LOG_CRIT, file->log, err,
                   "io_submit(\"%V\") failed", &file->name);
 
-    if (err == NGX_ENOSYS) {
+    if (err == NGX_ENOSYS)
+    {
         ngx_file_aio = 0;
         return ngx_read_file(file, buf, size, offset);
     }

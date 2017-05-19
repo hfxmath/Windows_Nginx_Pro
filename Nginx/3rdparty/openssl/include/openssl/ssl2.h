@@ -137,7 +137,7 @@ extern "C" {
 #  define SSL2_MAX_RECORD_LENGTH_2_BYTE_HEADER    29998u
 # else
 #  define SSL2_MAX_RECORD_LENGTH_2_BYTE_HEADER    32767u
-                                                       /* 2^15-1 */
+/* 2^15-1 */
 # endif
 # define SSL2_MAX_RECORD_LENGTH_3_BYTE_HEADER    16383/* 2^14-1 */
 
@@ -160,7 +160,8 @@ extern "C" {
 
 # ifndef OPENSSL_NO_SSL_INTERN
 
-typedef struct ssl2_state_st {
+typedef struct ssl2_state_st
+{
     int three_byte_header;
     int clear_text;             /* clear text */
     int escape;                 /* not used in SSLv2 */
@@ -200,7 +201,8 @@ typedef struct ssl2_state_st {
     unsigned char key_material[SSL2_MAX_KEY_MATERIAL_LENGTH * 2];
     unsigned long read_sequence;
     unsigned long write_sequence;
-    struct {
+    struct
+    {
         unsigned int conn_id_length;
         unsigned int cert_type;
         unsigned int cert_length;

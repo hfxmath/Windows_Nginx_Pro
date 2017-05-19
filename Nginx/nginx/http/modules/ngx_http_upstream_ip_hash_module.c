@@ -10,7 +10,8 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     /* the round robin data must be first */
     ngx_http_upstream_rr_peer_data_t   rrp;
 
@@ -26,27 +27,31 @@ typedef struct {
 
 
 static ngx_int_t ngx_http_upstream_init_ip_hash_peer(ngx_http_request_t *r,
-    ngx_http_upstream_srv_conf_t *us);
+        ngx_http_upstream_srv_conf_t *us);
 static ngx_int_t ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc,
-    void *data);
+        void *data);
 static char *ngx_http_upstream_ip_hash(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                       void *conf);
 
 
-static ngx_command_t  ngx_http_upstream_ip_hash_commands[] = {
+static ngx_command_t  ngx_http_upstream_ip_hash_commands[] =
+{
 
-    { ngx_string("ip_hash"),
-      NGX_HTTP_UPS_CONF|NGX_CONF_NOARGS,
-      ngx_http_upstream_ip_hash,
-      0,
-      0,
-      NULL },
+    {
+        ngx_string("ip_hash"),
+        NGX_HTTP_UPS_CONF | NGX_CONF_NOARGS,
+        ngx_http_upstream_ip_hash,
+        0,
+        0,
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
-static ngx_http_module_t  ngx_http_upstream_ip_hash_module_ctx = {
+static ngx_http_module_t  ngx_http_upstream_ip_hash_module_ctx =
+{
     NULL,                                  /* preconfiguration */
     NULL,                                  /* postconfiguration */
 
@@ -61,7 +66,8 @@ static ngx_http_module_t  ngx_http_upstream_ip_hash_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_upstream_ip_hash_module = {
+ngx_module_t  ngx_http_upstream_ip_hash_module =
+{
     NGX_MODULE_V1,
     &ngx_http_upstream_ip_hash_module_ctx, /* module context */
     ngx_http_upstream_ip_hash_commands,    /* module directives */
@@ -83,7 +89,8 @@ static u_char ngx_http_upstream_ip_hash_pseudo_addr[3];
 static ngx_int_t
 ngx_http_upstream_init_ip_hash(ngx_conf_t *cf, ngx_http_upstream_srv_conf_t *us)
 {
-    if (ngx_http_upstream_init_round_robin(cf, us) != NGX_OK) {
+    if (ngx_http_upstream_init_round_robin(cf, us) != NGX_OK)
+    {
         return NGX_ERROR;
     }
 
@@ -95,7 +102,7 @@ ngx_http_upstream_init_ip_hash(ngx_conf_t *cf, ngx_http_upstream_srv_conf_t *us)
 
 static ngx_int_t
 ngx_http_upstream_init_ip_hash_peer(ngx_http_request_t *r,
-    ngx_http_upstream_srv_conf_t *us)
+                                    ngx_http_upstream_srv_conf_t *us)
 {
     struct sockaddr_in                     *sin;
 #if (NGX_HAVE_INET6)
@@ -104,19 +111,22 @@ ngx_http_upstream_init_ip_hash_peer(ngx_http_request_t *r,
     ngx_http_upstream_ip_hash_peer_data_t  *iphp;
 
     iphp = ngx_palloc(r->pool, sizeof(ngx_http_upstream_ip_hash_peer_data_t));
-    if (iphp == NULL) {
+    if (iphp == NULL)
+    {
         return NGX_ERROR;
     }
 
     r->upstream->peer.data = &iphp->rrp;
 
-    if (ngx_http_upstream_init_round_robin_peer(r, us) != NGX_OK) {
+    if (ngx_http_upstream_init_round_robin_peer(r, us) != NGX_OK)
+    {
         return NGX_ERROR;
     }
 
     r->upstream->peer.get = ngx_http_upstream_get_ip_hash_peer;
 
-    switch (r->connection->sockaddr->sa_family) {
+    switch (r->connection->sockaddr->sa_family)
+    {
 
     case AF_INET:
         sin = (struct sockaddr_in *) r->connection->sockaddr;
@@ -163,7 +173,8 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
 
     ngx_http_upstream_rr_peers_wlock(iphp->rrp.peers);
 
-    if (iphp->tries > 20 || iphp->rrp.peers->single) {
+    if (iphp->tries > 20 || iphp->rrp.peers->single)
+    {
         ngx_http_upstream_rr_peers_unlock(iphp->rrp.peers);
         return iphp->get_rr_peer(pc, &iphp->rrp);
     }
@@ -175,9 +186,11 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
 
     hash = iphp->hash;
 
-    for ( ;; ) {
+    for ( ;; )
+    {
 
-        for (i = 0; i < (ngx_uint_t) iphp->addrlen; i++) {
+        for (i = 0; i < (ngx_uint_t) iphp->addrlen; i++)
+        {
             hash = (hash * 113 + iphp->addr[i]) % 6271;
         }
 
@@ -185,7 +198,8 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
         peer = iphp->rrp.peers->peer;
         p = 0;
 
-        while (w >= peer->weight) {
+        while (w >= peer->weight)
+        {
             w -= peer->weight;
             peer = peer->next;
             p++;
@@ -194,29 +208,32 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
         n = p / (8 * sizeof(uintptr_t));
         m = (uintptr_t) 1 << p % (8 * sizeof(uintptr_t));
 
-        if (iphp->rrp.tried[n] & m) {
+        if (iphp->rrp.tried[n] & m)
+        {
             goto next;
         }
 
         ngx_log_debug2(NGX_LOG_DEBUG_HTTP, pc->log, 0,
                        "get ip hash peer, hash: %ui %04XL", p, (uint64_t) m);
 
-        if (peer->down) {
+        if (peer->down)
+        {
             goto next;
         }
 
         if (peer->max_fails
-            && peer->fails >= peer->max_fails
-            && now - peer->checked <= peer->fail_timeout)
+                && peer->fails >= peer->max_fails
+                && now - peer->checked <= peer->fail_timeout)
         {
             goto next;
         }
 
         break;
 
-    next:
+next:
 
-        if (++iphp->tries > 20) {
+        if (++iphp->tries > 20)
+        {
             ngx_http_upstream_rr_peers_unlock(iphp->rrp.peers);
             return iphp->get_rr_peer(pc, &iphp->rrp);
         }
@@ -230,7 +247,8 @@ ngx_http_upstream_get_ip_hash_peer(ngx_peer_connection_t *pc, void *data)
 
     peer->conns++;
 
-    if (now - peer->checked > peer->fail_timeout) {
+    if (now - peer->checked > peer->fail_timeout)
+    {
         peer->checked = now;
     }
 
@@ -250,7 +268,8 @@ ngx_http_upstream_ip_hash(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     uscf = ngx_http_conf_get_module_srv_conf(cf, ngx_http_upstream_module);
 
-    if (uscf->peer.init_upstream) {
+    if (uscf->peer.init_upstream)
+    {
         ngx_conf_log_error(NGX_LOG_WARN, cf, 0,
                            "load balancing method redefined");
     }
@@ -258,10 +277,10 @@ ngx_http_upstream_ip_hash(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     uscf->peer.init_upstream = ngx_http_upstream_init_ip_hash;
 
     uscf->flags = NGX_HTTP_UPSTREAM_CREATE
-                  |NGX_HTTP_UPSTREAM_WEIGHT
-                  |NGX_HTTP_UPSTREAM_MAX_FAILS
-                  |NGX_HTTP_UPSTREAM_FAIL_TIMEOUT
-                  |NGX_HTTP_UPSTREAM_DOWN;
+                  | NGX_HTTP_UPSTREAM_WEIGHT
+                  | NGX_HTTP_UPSTREAM_MAX_FAILS
+                  | NGX_HTTP_UPSTREAM_FAIL_TIMEOUT
+                  | NGX_HTTP_UPSTREAM_DOWN;
 
     return NGX_CONF_OK;
 }

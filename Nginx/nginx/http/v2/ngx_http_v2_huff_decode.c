@@ -10,7 +10,8 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     u_char  next;
     u_char  emit;
     u_char  sym;
@@ -19,7 +20,7 @@ typedef struct {
 
 
 static ngx_inline ngx_int_t ngx_http_v2_huff_decode_bits(u_char *state,
-    u_char *ending, ngx_uint_t bits, u_char **dst);
+        u_char *ending, ngx_uint_t bits, u_char **dst);
 
 
 static ngx_http_v2_huff_decode_code_t  ngx_http_v2_huff_decode_codes[256][16] =
@@ -2641,7 +2642,7 @@ static ngx_http_v2_huff_decode_code_t  ngx_http_v2_huff_decode_codes[256][16] =
 
 ngx_int_t
 ngx_http_v2_huff_decode(u_char *state, u_char *src, size_t len, u_char **dst,
-    ngx_uint_t last, ngx_log_t *log)
+                        ngx_uint_t last, ngx_log_t *log)
 {
     u_char  *end, ch, ending;
 
@@ -2650,11 +2651,12 @@ ngx_http_v2_huff_decode(u_char *state, u_char *src, size_t len, u_char **dst,
 
     end = src + len;
 
-    while (src != end) {
+    while (src != end)
+    {
         ch = *src++;
 
         if (ngx_http_v2_huff_decode_bits(state, &ending, ch >> 4, dst)
-            != NGX_OK)
+                != NGX_OK)
         {
             ngx_log_debug2(NGX_LOG_DEBUG_HTTP, log, 0,
                            "http2 huffman decoding error at state %d: "
@@ -2664,7 +2666,7 @@ ngx_http_v2_huff_decode(u_char *state, u_char *src, size_t len, u_char **dst,
         }
 
         if (ngx_http_v2_huff_decode_bits(state, &ending, ch & 0xf, dst)
-            != NGX_OK)
+                != NGX_OK)
         {
             ngx_log_debug2(NGX_LOG_DEBUG_HTTP, log, 0,
                            "http2 huffman decoding error at state %d: "
@@ -2674,8 +2676,10 @@ ngx_http_v2_huff_decode(u_char *state, u_char *src, size_t len, u_char **dst,
         }
     }
 
-    if (last) {
-        if (!ending) {
+    if (last)
+    {
+        if (!ending)
+        {
             ngx_log_debug1(NGX_LOG_DEBUG_HTTP, log, 0,
                            "http2 huffman decoding error: "
                            "incomplete code 0x%Xd", ch);
@@ -2693,17 +2697,19 @@ ngx_http_v2_huff_decode(u_char *state, u_char *src, size_t len, u_char **dst,
 
 static ngx_inline ngx_int_t
 ngx_http_v2_huff_decode_bits(u_char *state, u_char *ending, ngx_uint_t bits,
-    u_char **dst)
+                             u_char **dst)
 {
     ngx_http_v2_huff_decode_code_t  code;
 
     code = ngx_http_v2_huff_decode_codes[*state][bits];
 
-    if (code.next == *state) {
+    if (code.next == *state)
+    {
         return NGX_ERROR;
     }
 
-    if (code.emit) {
+    if (code.emit)
+    {
         *(*dst)++ = code.sym;
     }
 

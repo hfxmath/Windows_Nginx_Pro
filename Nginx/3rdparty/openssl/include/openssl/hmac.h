@@ -72,7 +72,8 @@
 extern "C" {
 #endif
 
-typedef struct hmac_ctx_st {
+typedef struct hmac_ctx_st
+{
     const EVP_MD *md;
     EVP_MD_CTX md_ctx;
     EVP_MD_CTX i_ctx;

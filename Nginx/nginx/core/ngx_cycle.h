@@ -26,7 +26,8 @@ typedef struct ngx_shm_zone_s  ngx_shm_zone_t;
 
 typedef ngx_int_t (*ngx_shm_zone_init_pt) (ngx_shm_zone_t *zone, void *data);
 
-struct ngx_shm_zone_s {
+struct ngx_shm_zone_s
+{
     void                     *data;
     ngx_shm_t                 shm;
     ngx_shm_zone_init_pt      init;
@@ -35,8 +36,9 @@ struct ngx_shm_zone_s {
 };
 
 
-struct ngx_cycle_s {
-    void                  ****conf_ctx;
+struct ngx_cycle_s
+{
+    void                  ** **conf_ctx;
     ngx_pool_t               *pool;
 
     ngx_log_t                *log;
@@ -78,7 +80,8 @@ struct ngx_cycle_s {
 };
 
 
-typedef struct {
+typedef struct
+{
     ngx_flag_t                daemon;
     ngx_flag_t                master;
 
@@ -123,7 +126,7 @@ char **ngx_set_environment(ngx_cycle_t *cycle, ngx_uint_t *last);
 ngx_pid_t ngx_exec_new_binary(ngx_cycle_t *cycle, char *const *argv);
 ngx_cpuset_t *ngx_get_cpu_affinity(ngx_uint_t n);
 ngx_shm_zone_t *ngx_shared_memory_add(ngx_conf_t *cf, ngx_str_t *name,
-    size_t size, void *tag);
+                                      size_t size, void *tag);
 
 
 extern volatile ngx_cycle_t  *ngx_cycle;

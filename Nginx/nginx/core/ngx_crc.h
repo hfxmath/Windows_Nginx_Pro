@@ -20,7 +20,8 @@ ngx_crc(u_char *data, size_t len)
 {
     uint32_t  sum;
 
-    for (sum = 0; len; len--) {
+    for (sum = 0; len; len--)
+    {
 
         /*
          * gcc 2.95.2 x86 and icc 7.1.006 compile

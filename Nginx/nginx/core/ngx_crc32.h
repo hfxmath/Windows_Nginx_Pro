@@ -25,7 +25,8 @@ ngx_crc32_short(u_char *p, size_t len)
 
     crc = 0xffffffff;
 
-    while (len--) {
+    while (len--)
+    {
         c = *p++;
         crc = ngx_crc32_table_short[(crc ^ (c & 0xf)) & 0xf] ^ (crc >> 4);
         crc = ngx_crc32_table_short[(crc ^ (c >> 4)) & 0xf] ^ (crc >> 4);
@@ -42,7 +43,8 @@ ngx_crc32_long(u_char *p, size_t len)
 
     crc = 0xffffffff;
 
-    while (len--) {
+    while (len--)
+    {
         crc = ngx_crc32_table256[(crc ^ *p++) & 0xff] ^ (crc >> 8);
     }
 
@@ -61,7 +63,8 @@ ngx_crc32_update(uint32_t *crc, u_char *p, size_t len)
 
     c = *crc;
 
-    while (len--) {
+    while (len--)
+    {
         c = ngx_crc32_table256[(c ^ *p++) & 0xff] ^ (c >> 8);
     }
 

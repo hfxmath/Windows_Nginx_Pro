@@ -40,25 +40,31 @@ ngx_init_setproctitle(ngx_log_t *log)
 
     size = 0;
 
-    for (i = 0; environ[i]; i++) {
+    for (i = 0; environ[i]; i++)
+    {
         size += ngx_strlen(environ[i]) + 1;
     }
 
     p = ngx_alloc(size, log);
-    if (p == NULL) {
+    if (p == NULL)
+    {
         return NGX_ERROR;
     }
 
     ngx_os_argv_last = ngx_os_argv[0];
 
-    for (i = 0; ngx_os_argv[i]; i++) {
-        if (ngx_os_argv_last == ngx_os_argv[i]) {
+    for (i = 0; ngx_os_argv[i]; i++)
+    {
+        if (ngx_os_argv_last == ngx_os_argv[i])
+        {
             ngx_os_argv_last = ngx_os_argv[i] + ngx_strlen(ngx_os_argv[i]) + 1;
         }
     }
 
-    for (i = 0; environ[i]; i++) {
-        if (ngx_os_argv_last == environ[i]) {
+    for (i = 0; environ[i]; i++)
+    {
+        if (ngx_os_argv_last == environ[i])
+        {
 
             size = ngx_strlen(environ[i]) + 1;
             ngx_os_argv_last = environ[i] + size;
@@ -98,11 +104,13 @@ ngx_setproctitle(char *title)
 
     size = 0;
 
-    for (i = 0; i < ngx_argc; i++) {
+    for (i = 0; i < ngx_argc; i++)
+    {
         size += ngx_strlen(ngx_argv[i]) + 1;
     }
 
-    if (size > (size_t) ((char *) p - ngx_os_argv[0])) {
+    if (size > (size_t) ((char *) p - ngx_os_argv[0]))
+    {
 
         /*
          * ngx_setproctitle() is too rare operation so we use
@@ -111,20 +119,23 @@ ngx_setproctitle(char *title)
 
         p = ngx_cpystrn(p, (u_char *) " (", ngx_os_argv_last - (char *) p);
 
-        for (i = 0; i < ngx_argc; i++) {
+        for (i = 0; i < ngx_argc; i++)
+        {
             p = ngx_cpystrn(p, (u_char *) ngx_argv[i],
                             ngx_os_argv_last - (char *) p);
             p = ngx_cpystrn(p, (u_char *) " ", ngx_os_argv_last - (char *) p);
         }
 
-        if (*(p - 1) == ' ') {
+        if (*(p - 1) == ' ')
+        {
             *(p - 1) = ')';
         }
     }
 
 #endif
 
-    if (ngx_os_argv_last - (char *) p) {
+    if (ngx_os_argv_last - (char *) p)
+    {
         ngx_memset(p, NGX_SETPROCTITLE_PAD, ngx_os_argv_last - (char *) p);
     }
 

@@ -13,7 +13,8 @@ int ngx_file_type(char *file, ngx_file_info_t *sb)
 {
     sb->dwFileAttributes = GetFileAttributes(file);
 
-    if (sb->dwFileAttributes == INVALID_FILE_ATTRIBUTES) {
+    if (sb->dwFileAttributes == INVALID_FILE_ATTRIBUTES)
+    {
         return -1;
     }
 

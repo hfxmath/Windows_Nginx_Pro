@@ -38,11 +38,13 @@ ngx_libc_crypt(ngx_pool_t *pool, u_char *key, u_char *salt, u_char **encrypted)
 
     value = crypt_r((char *) key, (char *) salt, &cd);
 
-    if (value) {
+    if (value)
+    {
         len = ngx_strlen(value) + 1;
 
         *encrypted = ngx_pnalloc(pool, len);
-        if (*encrypted == NULL) {
+        if (*encrypted == NULL)
+        {
             return NGX_ERROR;
         }
 
@@ -66,11 +68,13 @@ ngx_libc_crypt(ngx_pool_t *pool, u_char *key, u_char *salt, u_char **encrypted)
 
     value = crypt((char *) key, (char *) salt);
 
-    if (value) {
+    if (value)
+    {
         len = ngx_strlen(value) + 1;
 
         *encrypted = ngx_pnalloc(pool, len);
-        if (*encrypted == NULL) {
+        if (*encrypted == NULL)
+        {
             return NGX_ERROR;
         }
 

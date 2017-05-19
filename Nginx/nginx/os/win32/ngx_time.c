@@ -66,7 +66,8 @@ ngx_gettimezone(void)
 
     n = GetTimeZoneInformation(&tz);
 
-    switch (n) {
+    switch (n)
+    {
 
     case TIME_ZONE_ID_UNKNOWN:
         return -tz.Bias;

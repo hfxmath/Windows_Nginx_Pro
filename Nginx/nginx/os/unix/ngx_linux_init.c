@@ -13,7 +13,8 @@ u_char  ngx_linux_kern_ostype[50];
 u_char  ngx_linux_kern_osrelease[50];
 
 
-static ngx_os_io_t ngx_linux_io = {
+static ngx_os_io_t ngx_linux_io =
+{
     ngx_unix_recv,
     ngx_readv_chain,
     ngx_udp_unix_recv,
@@ -34,7 +35,8 @@ ngx_os_specific_init(ngx_log_t *log)
 {
     struct utsname  u;
 
-    if (uname(&u) == -1) {
+    if (uname(&u) == -1)
+    {
         ngx_log_error(NGX_LOG_ALERT, log, ngx_errno, "uname() failed");
         return NGX_ERROR;
     }

@@ -14,7 +14,8 @@
 #include <ngx_http.h>
 
 
-typedef struct {
+typedef struct
+{
     ngx_flag_t                      enable;
 
     ngx_ssl_t                       ssl;

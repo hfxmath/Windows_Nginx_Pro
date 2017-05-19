@@ -70,7 +70,8 @@
 extern "C" {
 #endif
 
-typedef struct rc4_key_st {
+typedef struct rc4_key_st
+{
     RC4_INT x, y;
     RC4_INT data[256];
 } RC4_KEY;

@@ -16,7 +16,7 @@
 #if !(NGX_HAVE_MD5)
 
 static const u_char *ngx_md5_body(ngx_md5_t *ctx, const u_char *data,
-    size_t size);
+                                  size_t size);
 
 
 void
@@ -39,10 +39,12 @@ ngx_md5_update(ngx_md5_t *ctx, const void *data, size_t size)
     used = (size_t) (ctx->bytes & 0x3f);
     ctx->bytes += size;
 
-    if (used) {
+    if (used)
+    {
         free = 64 - used;
 
-        if (size < free) {
+        if (size < free)
+        {
             ngx_memcpy(&ctx->buffer[used], data, size);
             return;
         }
@@ -53,7 +55,8 @@ ngx_md5_update(ngx_md5_t *ctx, const void *data, size_t size)
         (void) ngx_md5_body(ctx, ctx->buffer, 64);
     }
 
-    if (size >= 64) {
+    if (size >= 64)
+    {
         data = ngx_md5_body(ctx, data, size & ~(size_t) 0x3f);
         size &= 0x3f;
     }
@@ -73,7 +76,8 @@ ngx_md5_final(u_char result[16], ngx_md5_t *ctx)
 
     free = 64 - used;
 
-    if (free < 8) {
+    if (free < 8)
+    {
         ngx_memzero(&ctx->buffer[used], free);
         (void) ngx_md5_body(ctx, ctx->buffer, 64);
         used = 0;
@@ -187,7 +191,8 @@ ngx_md5_body(ngx_md5_t *ctx, const u_char *data, size_t size)
     c = ctx->c;
     d = ctx->d;
 
-    do {
+    do
+    {
         saved_a = a;
         saved_b = b;
         saved_c = c;
@@ -276,7 +281,8 @@ ngx_md5_body(ngx_md5_t *ctx, const u_char *data, size_t size)
 
         p += 64;
 
-    } while (size -= 64);
+    }
+    while (size -= 64);
 
     ctx->a = a;
     ctx->b = b;

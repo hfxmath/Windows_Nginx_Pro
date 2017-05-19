@@ -18,7 +18,8 @@ u_long  ngx_darwin_net_inet_tcp_sendspace;
 ngx_uint_t  ngx_debug_malloc;
 
 
-static ngx_os_io_t ngx_darwin_io = {
+static ngx_os_io_t ngx_darwin_io =
+{
     ngx_unix_recv,
     ngx_readv_chain,
     ngx_udp_unix_recv,
@@ -34,7 +35,8 @@ static ngx_os_io_t ngx_darwin_io = {
 };
 
 
-typedef struct {
+typedef struct
+{
     char        *name;
     void        *value;
     size_t       size;
@@ -42,18 +44,25 @@ typedef struct {
 } sysctl_t;
 
 
-sysctl_t sysctls[] = {
-    { "hw.ncpu",
-      &ngx_darwin_hw_ncpu,
-      sizeof(ngx_darwin_hw_ncpu), 0 },
+sysctl_t sysctls[] =
+{
+    {
+        "hw.ncpu",
+        &ngx_darwin_hw_ncpu,
+        sizeof(ngx_darwin_hw_ncpu), 0
+    },
 
-    { "net.inet.tcp.sendspace",
-      &ngx_darwin_net_inet_tcp_sendspace,
-      sizeof(ngx_darwin_net_inet_tcp_sendspace), 0 },
+    {
+        "net.inet.tcp.sendspace",
+        &ngx_darwin_net_inet_tcp_sendspace,
+        sizeof(ngx_darwin_net_inet_tcp_sendspace), 0
+    },
 
-    { "kern.ipc.somaxconn",
-      &ngx_darwin_kern_ipc_somaxconn,
-      sizeof(ngx_darwin_kern_ipc_somaxconn), 0 },
+    {
+        "kern.ipc.somaxconn",
+        &ngx_darwin_kern_ipc_somaxconn,
+        sizeof(ngx_darwin_kern_ipc_somaxconn), 0
+    },
 
     { NULL, NULL, 0, 0 }
 };
@@ -79,7 +88,8 @@ ngx_debug_init(void)
 
 #else
 
-    if (getenv("MallocScribble")) {
+    if (getenv("MallocScribble"))
+    {
         ngx_debug_malloc = 1;
     }
 
@@ -96,16 +106,18 @@ ngx_os_specific_init(ngx_log_t *log)
 
     size = sizeof(ngx_darwin_kern_ostype);
     if (sysctlbyname("kern.ostype", ngx_darwin_kern_ostype, &size, NULL, 0)
-        == -1)
+            == -1)
     {
         err = ngx_errno;
 
-        if (err != NGX_ENOENT) {
+        if (err != NGX_ENOENT)
+        {
 
             ngx_log_error(NGX_LOG_ALERT, log, err,
                           "sysctlbyname(kern.ostype) failed");
 
-            if (err != NGX_ENOMEM) {
+            if (err != NGX_ENOMEM)
+            {
                 return NGX_ERROR;
             }
 
@@ -116,16 +128,18 @@ ngx_os_specific_init(ngx_log_t *log)
     size = sizeof(ngx_darwin_kern_osrelease);
     if (sysctlbyname("kern.osrelease", ngx_darwin_kern_osrelease, &size,
                      NULL, 0)
-        == -1)
+            == -1)
     {
         err = ngx_errno;
 
-        if (err != NGX_ENOENT) {
+        if (err != NGX_ENOENT)
+        {
 
             ngx_log_error(NGX_LOG_ALERT, log, err,
                           "sysctlbyname(kern.osrelease) failed");
 
-            if (err != NGX_ENOMEM) {
+            if (err != NGX_ENOMEM)
+            {
                 return NGX_ERROR;
             }
 
@@ -133,11 +147,12 @@ ngx_os_specific_init(ngx_log_t *log)
         }
     }
 
-    for (i = 0; sysctls[i].name; i++) {
+    for (i = 0; sysctls[i].name; i++)
+    {
         size = sysctls[i].size;
 
         if (sysctlbyname(sysctls[i].name, sysctls[i].value, &size, NULL, 0)
-            == 0)
+                == 0)
         {
             sysctls[i].exists = 1;
             continue;
@@ -145,7 +160,8 @@ ngx_os_specific_init(ngx_log_t *log)
 
         err = ngx_errno;
 
-        if (err == NGX_ENOENT) {
+        if (err == NGX_ENOENT)
+        {
             continue;
         }
 
@@ -156,7 +172,8 @@ ngx_os_specific_init(ngx_log_t *log)
 
     ngx_ncpu = ngx_darwin_hw_ncpu;
 
-    if (ngx_darwin_kern_ipc_somaxconn > 32767) {
+    if (ngx_darwin_kern_ipc_somaxconn > 32767)
+    {
         ngx_log_error(NGX_LOG_ALERT, log, 0,
                       "sysctl kern.ipc.somaxconn must be less than 32768");
         return NGX_ERROR;
@@ -176,17 +193,23 @@ ngx_os_specific_status(ngx_log_t *log)
     u_long      value;
     ngx_uint_t  i;
 
-    if (ngx_darwin_kern_ostype[0]) {
+    if (ngx_darwin_kern_ostype[0])
+    {
         ngx_log_error(NGX_LOG_NOTICE, log, 0, "OS: %s %s",
                       ngx_darwin_kern_ostype, ngx_darwin_kern_osrelease);
     }
 
-    for (i = 0; sysctls[i].name; i++) {
-        if (sysctls[i].exists) {
-            if (sysctls[i].size == sizeof(long)) {
+    for (i = 0; sysctls[i].name; i++)
+    {
+        if (sysctls[i].exists)
+        {
+            if (sysctls[i].size == sizeof(long))
+            {
                 value = *(long *) sysctls[i].value;
 
-            } else {
+            }
+            else
+            {
                 value = *(int *) sysctls[i].value;
             }
 

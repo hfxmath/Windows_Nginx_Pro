@@ -10,50 +10,54 @@
 
 
 static char *ngx_http_empty_gif(ngx_conf_t *cf, ngx_command_t *cmd,
-    void *conf);
+                                void *conf);
 
-static ngx_command_t  ngx_http_empty_gif_commands[] = {
+static ngx_command_t  ngx_http_empty_gif_commands[] =
+{
 
-    { ngx_string("empty_gif"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_NOARGS,
-      ngx_http_empty_gif,
-      0,
-      0,
-      NULL },
+    {
+        ngx_string("empty_gif"),
+        NGX_HTTP_LOC_CONF | NGX_CONF_NOARGS,
+        ngx_http_empty_gif,
+        0,
+        0,
+        NULL
+    },
 
-      ngx_null_command
+    ngx_null_command
 };
 
 
 /* the minimal single pixel transparent GIF, 43 bytes */
 
-static u_char  ngx_empty_gif[] = {
+static u_char  ngx_empty_gif[] =
+{
 
     'G', 'I', 'F', '8', '9', 'a',  /* header                                 */
 
-                                   /* logical screen descriptor              */
+    /* logical screen descriptor              */
     0x01, 0x00,                    /* logical screen width                   */
     0x01, 0x00,                    /* logical screen height                  */
     0x80,                          /* global 1-bit color table               */
     0x01,                          /* background color #1                    */
     0x00,                          /* no aspect ratio                        */
 
-                                   /* global color table                     */
+    /* global color table                     */
     0x00, 0x00, 0x00,              /* #0: black                              */
     0xff, 0xff, 0xff,              /* #1: white                              */
 
-                                   /* graphic control extension              */
+    /* graphic control extension              */
     0x21,                          /* extension introducer                   */
     0xf9,                          /* graphic control label                  */
     0x04,                          /* block size                             */
     0x01,                          /* transparent color is given,            */
-                                   /*     no disposal specified,             */
-                                   /*     user input is not expected         */
+    /*     no disposal specified,             */
+    /*     user input is not expected         */
     0x00, 0x00,                    /* delay time                             */
     0x01,                          /* transparent color #1                   */
     0x00,                          /* block terminator                       */
 
-                                   /* image descriptor                       */
+    /* image descriptor                       */
     0x2c,                          /* image separator                        */
     0x00, 0x00,                    /* image left position                    */
     0x00, 0x00,                    /* image top position                     */
@@ -61,21 +65,22 @@ static u_char  ngx_empty_gif[] = {
     0x01, 0x00,                    /* image height                           */
     0x00,                          /* no local color table, no interlaced    */
 
-                                   /* table based image data                 */
+    /* table based image data                 */
     0x02,                          /* LZW minimum code size,                 */
-                                   /*     must be at least 2-bit             */
+    /*     must be at least 2-bit             */
     0x02,                          /* block size                             */
     0x4c, 0x01,                    /* compressed bytes 01_001_100, 0000000_1 */
-                                   /* 100: clear code                        */
-                                   /* 001: 1                                 */
-                                   /* 101: end of information code           */
+    /* 100: clear code                        */
+    /* 001: 1                                 */
+    /* 101: end of information code           */
     0x00,                          /* block terminator                       */
 
     0x3B                           /* trailer                                */
 };
 
 
-static ngx_http_module_t  ngx_http_empty_gif_module_ctx = {
+static ngx_http_module_t  ngx_http_empty_gif_module_ctx =
+{
     NULL,                          /* preconfiguration */
     NULL,                          /* postconfiguration */
 
@@ -90,7 +95,8 @@ static ngx_http_module_t  ngx_http_empty_gif_module_ctx = {
 };
 
 
-ngx_module_t  ngx_http_empty_gif_module = {
+ngx_module_t  ngx_http_empty_gif_module =
+{
     NGX_MODULE_V1,
     &ngx_http_empty_gif_module_ctx, /* module context */
     ngx_http_empty_gif_commands,   /* module directives */
@@ -114,7 +120,8 @@ ngx_http_empty_gif_handler(ngx_http_request_t *r)
 {
     ngx_http_complex_value_t  cv;
 
-    if (!(r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD))) {
+    if (!(r->method & (NGX_HTTP_GET | NGX_HTTP_HEAD)))
+    {
         return NGX_HTTP_NOT_ALLOWED;
     }
 
